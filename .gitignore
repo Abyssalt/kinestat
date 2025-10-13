@@ -1,0 +1,9 @@
+# Visual Studio
+.vs/
+*.vsidx
+
+# Build results
+[Oo]bj/
+[Bb]in/
+*.cache
+*.cache.json
