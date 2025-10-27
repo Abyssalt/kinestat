@@ -24,10 +24,10 @@ namespace KineStat.Models
 
         public override bool Validate()
         {
-            if (Answer == null || string.IsNullOrEmpty(Answer.Valeur))
+            if (Answer == null || string.IsNullOrEmpty(Answer.Value))
                 return false;
 
-            return ListeAnswers.Contains(Answer.Valeur);
+            return ListeAnswers.Contains(Answer.Value);
         }
     }
 }
