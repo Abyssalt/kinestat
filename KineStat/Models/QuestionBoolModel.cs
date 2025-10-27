@@ -14,24 +14,23 @@ namespace KineStat.Models
             Type = "Bool";
         }
 
-        public override bool Valider()
+        public override bool Validate()
         {
-            if (Answer == null || string.IsNullOrEmpty(Answer.Value))
+            if (answer == null || string.IsNullOrEmpty(answer.Value))
                 return false;
 
-            return Answer.Value.ToLower() == "oui" ||
-                   Answer.Value.ToLower() == "non" ||
-                   Answer.Value == "true" ||
-                   Answer.Value == "false";
+            return answer.Value.ToLower() == "oui" ||
+                   answer.Value.ToLower() == "non" ||
+                   answer.Value == "true" ||
+                   answer.Value == "false";
         }
 
-        // Helper pour obtenir la réponse booléenne
         public bool? GetAnswerBool()
         {
-            if (Answer == null || string.IsNullOrEmpty(Answer.Value))
+            if (answer == null || string.IsNullOrEmpty(answer.Value))
                 return null;
 
-            var Value = Answer.Value.ToLower();
+            var Value = answer.Value.ToLower();
             if (Value == "oui" || Value == "true")
                 return true;
             if (Value == "non" || Value == "false")

@@ -30,12 +30,12 @@ namespace KineStat.Models
 
             public virtual Answer answer { get; set; }
 
-            public abstract bool Valider();
+            public abstract bool Validate();
 
 
-            public bool EstRepondue()
+            public bool isAnswered()
             {
-                return Answer != null;
+                return answer != null;
             }
         }
 
