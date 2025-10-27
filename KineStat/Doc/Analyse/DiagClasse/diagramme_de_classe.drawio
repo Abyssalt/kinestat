@@ -129,7 +129,7 @@
         <mxCell id="dwzaiOCRPZEa-9_mcc-l-50" value="QuestionQCM" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="760" y="-440" width="140" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="dwzaiOCRPZEa-9_mcc-l-51" value="+ listeReponse&lt;div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dwzaiOCRPZEa-9_mcc-l-50">
+        <mxCell id="dwzaiOCRPZEa-9_mcc-l-51" value="+ listeAnswer&lt;div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dwzaiOCRPZEa-9_mcc-l-50">
           <mxGeometry y="26" width="140" height="24" as="geometry" />
         </mxCell>
         <mxCell id="dwzaiOCRPZEa-9_mcc-l-56" value="QuestionBool" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -150,10 +150,10 @@
             <mxPoint x="1360" y="-320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="dwzaiOCRPZEa-9_mcc-l-67" value="Reponse" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="dwzaiOCRPZEa-9_mcc-l-67" value="Answer" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="790" y="-210" width="140" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="dwzaiOCRPZEa-9_mcc-l-68" value="+ &amp;lt;T&amp;gt; Reponse" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dwzaiOCRPZEa-9_mcc-l-67">
+        <mxCell id="dwzaiOCRPZEa-9_mcc-l-68" value="+ &amp;lt;T&amp;gt; Answer" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dwzaiOCRPZEa-9_mcc-l-67">
           <mxGeometry y="26" width="140" height="54" as="geometry" />
         </mxCell>
         <mxCell id="dwzaiOCRPZEa-9_mcc-l-69" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1">
