@@ -19,9 +19,8 @@ namespace KineStat.Models
             if (answer == null || string.IsNullOrEmpty(answer.Value))
                 return false;
 
-            return answer.Value.ToLower() == "oui" ||
-                   answer.Value.ToLower() == "non" ||
-                   answer.Value == "true" ||
+            
+            return answer.Value == "true" ||
                    answer.Value == "false";
         }
 
