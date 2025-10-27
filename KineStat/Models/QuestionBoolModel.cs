@@ -7,9 +7,9 @@ namespace KineStat.Models
     /// Question de type Booléen (Oui/Non)
     /// </summary>
     [Table("QuestionBool")]
-    public class QuestionBool : Question
+    public class QuestionBoolModel : Question
     {
-        public QuestionBool()
+        public QuestionBoolModel()
         {
             Type = "Bool";
         }

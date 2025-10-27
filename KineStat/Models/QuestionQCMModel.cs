@@ -8,17 +8,17 @@ namespace KineStat.Models
     /// Question de type QCM (Questionnaire à Choix Multiples)
     /// </summary>
     [Table("QuestionQCM")]
-    public class QuestionQCM : Question
+    public class QuestionQCMModel : Question
     {
-        public QuestionQCM()
+        public QuestionQCMModel()
         {
             Type = "QCM";
-            ListeAnswers = new List<string>();
+            ListAnswers = new List<string>();
         }
 
         [Required]
         [NotMapped] 
-        public List<string> ListeAnswers { get; set; }
+        public List<string> ListAnswers { get; set; }
 
        
 
@@ -27,7 +27,7 @@ namespace KineStat.Models
             if (answer == null || string.IsNullOrEmpty(answer.Value))
                 return false;
 
-            return ListeAnswers.Contains(answer.Value);
+            return ListAnswers.Contains(answer.Value);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace KineStat.Models
 
             [Required(ErrorMessage = "L'intitulé est obligatoire")]
             [StringLength(500)]
-            public string Intitule { get; set; }
+            public string Title { get; set; }
 
             [Required(ErrorMessage = "Le type est obligatoire")]
             [StringLength(50)]

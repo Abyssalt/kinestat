@@ -24,15 +24,15 @@ namespace KineStat.Models
 
 
         [NotMapped]
-        public int? Valeur
+        public int? Value
         {
             get
             {
-                if (answer == null || string.IsNullOrEmpty(answer.Valeur))
+                if (answer == null || string.IsNullOrEmpty(answer.Value))
                     return null;
 
-                if (int.TryParse(answer.Valeur, out int valeur))
-                    return valeur;
+                if (int.TryParse(answer.Value, out int Value))
+                    return Value;
 
                 return null;
             }
@@ -41,20 +41,19 @@ namespace KineStat.Models
                 if (answer == null)
                     answer = new Answer { QuestionId = this.Id };
 
-                answer.Valeur = value?.ToString() ?? string.Empty;
+                answer.Value = value?.ToString() ?? string.Empty;
             }
         }
 
         public override bool Validate()
         {
-            if (answer == null || string.IsNullOrEmpty(answer.Valeur))
+            if (answer == null || string.IsNullOrEmpty(answer.Value))
                 return false;
 
-            if (!int.TryParse(answer.Valeur, out int valeur))
+            if (!int.TryParse(answer.Value, out int Value))
                 return false;
 
-            return valeur >= min && valeur <= max;
+            return Value >= min && Value <= max;
         }
     }
-}
-}
+}  
