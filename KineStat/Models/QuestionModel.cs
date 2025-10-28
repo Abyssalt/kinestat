@@ -23,10 +23,10 @@ namespace KineStat.Models
             public string Type { get; set; }
 
             [Display(Name = "RV+")]
-            public int RVPositif { get; set; } = 0;
+            public double RVPositif { get; set; } = 0;
 
             [Display(Name = "RV-")]
-            public int RVNegatif { get; set; } = 0;
+            public double RVNegatif { get; set; } = 0;
 
             public virtual Answer answer { get; set; }
 
