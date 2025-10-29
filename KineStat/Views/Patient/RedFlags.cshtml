@@ -1,0 +1,8 @@
+﻿@{
+    ViewData["Title"] = "Red Flags";
+    ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
+}
+
+<h2>Red Flags - Page en construction</h2>
+<a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>

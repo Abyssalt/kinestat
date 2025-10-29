@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Liste des patients";
+    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item active' aria-current='page'>Patients</li>";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Patients</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+            <i class="bi bi-plus-circle"></i> Nouveau patient
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un patient par nom ou prénom...">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover" id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Sexe</th>
+                            <th>Date de naissance</th>
+                            <th>Âge</th>
+                            <th>Téléphone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Melvyn</td>
+                            <td>Paul</td>
+                            <td>M</td>
+                            <td>05/07/2001</td>
+                            <td>24</td>
+                            <td>+33 07 78 05 37 98</td>
+                            <td>
+                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="1" class="btn btn-sm btn-info" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-sm btn-warning" title="Modifier" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-1" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sacha</td>
+                            <td>Meunier</td>
+                            <td>M</td>
+                            <td>22/07/2001</td>
+                            <td>24</td>
+                            <td>+32 476 98 76 54</td>
+                            <td>
+                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="2" class="btn btn-sm btn-info" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-sm btn-warning" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-2" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Joanna</td>
+                            <td>Imjalli</td>
+                            <td>F</td>
+                            <td>10/11/2001</td>
+                            <td>24</td>
+                            <td>+32 477 45 67 89</td>
+                            <td>
+                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="3" class="btn btn-sm btn-info" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-sm btn-warning" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-3" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nouveau patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Patients" asp-action="Create" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" class="form-control" name="Nom" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prénom *</label>
+                            <input type="text" class="form-control" name="Prenom" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sexe *</label>
+                            <select class="form-select" name="Sexe" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="M">Masculin</option>
+                                <option value="F">Féminin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date de naissance *</label>
+                            <input type="date" class="form-control" name="DateNaissance" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" name="Telephone">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adresse</label>
+                        <input type="text" class="form-control" name="Adresse">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prescripteur</label>
+                        <input type="text" class="form-control" name="Prescripteur">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal-1" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir supprimer le patient <strong>Melvyn Paul</strong> ?
+                <br><br>
+                <span class="text-danger">Cette action est irréversible et supprimera toutes les données associées.</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form asp-controller="Patients" asp-action="Delete" asp-route-id="1" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#patientsTable tbody tr');
+
+            tableRows.forEach(function(row) {
+                const nom = row.cells[0].textContent.toLowerCase();
+                const prenom = row.cells[1].textContent.toLowerCase();
+
+                if (nom.includes(searchValue) || prenom.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

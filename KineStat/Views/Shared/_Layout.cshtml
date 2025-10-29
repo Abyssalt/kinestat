@@ -60,6 +60,18 @@
             </div>
         </nav>
     </header>
+
+    <div class="container">
+        @if (ViewData["Breadcrumbs"] != null)
+        {
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    @Html.Raw(ViewData["Breadcrumbs"])
+                </ol>
+            </nav>
+        }
+    </div>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

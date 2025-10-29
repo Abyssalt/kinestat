@@ -1,0 +1,235 @@
+﻿@{
+    ViewData["Title"] = "Anamnèse";
+    ViewData["PatientId"] = "1";
+    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - Melvyn PAUL</li>";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Anamnèse - Melvyn PAUL</h2>
+        <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+
+    <form asp-controller="Patient" asp-action="SaveAnamnese" method="post">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-badge"></i> Informations administratives</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nom</label>
+                        <p class="form-control-plaintext">Paul</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Prénom</label>
+                        <p class="form-control-plaintext">Melvyn</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Sexe</label>
+                        <p class="form-control-plaintext">M</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Date de naissance</label>
+                        <p class="form-control-plaintext">05/07/2001</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Âge</label>
+                        <p class="form-control-plaintext">24 ans</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold">Date d'évaluation</label>
+                        <input type="date" class="form-control" name="DateEvaluation" value="2025-10-28">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Adresse</label>
+                        <p class="form-control-plaintext">Route D'orval 64, 08370 MARGUT'</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Téléphone</label>
+                        <p class="form-control-plaintext">+33 7 78 05 37 98</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Prescripteur</label>
+                        <p class="form-control-plaintext">Dr. Simon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-clipboard2-pulse"></i> Informations médicales</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Profession</label>
+                        <input type="text" class="form-control" name="Profession" placeholder="Développeur">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Activités physiques</label>
+                        <textarea class="form-control" name="ActivitesPhysiques" rows="3" placeholder="Je suis en informatique..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Antécédents médicaux</label>
+                        <textarea class="form-control" name="AntecedentsMedicaux" rows="4" placeholder="Grippe pendant les congés."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Médication actuelle</label>
+                        <textarea class="form-control" name="MedicationActuelle" rows="3" placeholder="J'en prends tellement, je sais plus !'"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-heart-pulse"></i> Douleur actuelle (SOCRATE)</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">S - Site</label>
+                        <input type="text" class="form-control" name="DouleurSite" placeholder="Partout">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">O - Origine</label>
+                        <textarea class="form-control" name="DouleurOrigine" rows="2" placeholder="Samedi"></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">C - Caractéristiques</label>
+                        <textarea class="form-control" name="DouleurCaracteristiques" rows="2" placeholder="Fatigue, courbatures, nez bouché, fièvre, ..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">R - Radiations</label>
+                        <input type="text" class="form-control" name="DouleurRadiations" placeholder="Je fais pas dans le nucléaire ....">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">A - Associations</label>
+                        <textarea class="form-control" name="DouleurAssociations" rows="2" placeholder="Je suis pas docteur"></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">T - Temporalité</label>
+                        <textarea class="form-control" name="DouleurTemporalite" rows="2" placeholder="Par moment ça va, puis en fait ... ça va pas."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">E - Empiré par</label>
+                        <textarea class="form-control" name="DouleurEmpire" rows="3" placeholder="JSP"></textarea>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Amélioré par</label>
+                        <textarea class="form-control" name="DouleurAmeliore" rows="3" placeholder="Médocs"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-clock-history"></i> Historique des bilans</h4>
+                    <button type="button" class="btn btn-light btn-sm">
+                        <i class="bi bi-plus-circle"></i> Nouveau bilan
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-file-text"></i> Bilan du 25/10/2024</h6>
+                            <small class="text-muted">Bilan complémentaire - Mathis P.</small>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-eye"></i> Voir
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </button>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-file-text"></i> Bilan du 15/09/2024</h6>
+                            <small class="text-muted">Bilan intermédiaire - Mathis P.</small>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-eye"></i> Voir
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </button>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-file-text"></i> Bilan du 03/08/2024</h6>
+                            <small class="text-muted">Bilan initial - Mathis P.</small>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-eye"></i> Voir
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-graph-up"></i> Profil clinique</h4>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-5">
+            <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Annuler
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-save"></i> Enregistrer l'anamnèse
+            </button>
+        </div>
+    </form>
+</div>
