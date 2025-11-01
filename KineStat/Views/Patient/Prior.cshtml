@@ -4,5 +4,47 @@
     ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Prior</li>";
 }
 
-<h2>Prior - Page en construction</h2>
-<a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>PriorL</h2>
+        <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+    
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class ="mb-0"> <i class ="bi bi-clipboard2-pulse"></i>Ajouter une pathologie </h4>
+        </div>
+        
+        <div class="card-body">
+            <form id="priorForm">
+                <div class="row align-items-end">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold"> Nom de la pathologie : </label>
+                        <input type="text" id="pathologyName" class "form-control" placeholder="ex : Lombalgie,Metastase vertebrale,.." required/>
+                    </div>
+                    
+                    <div class="col-md-3 md-3">
+                        <label class="form-label fw-bold"> Probabilité initiale (%)</label>
+                        <input type="number" id="priorValue" class="form-control" min="0" max="100" required/>
+                    </div>
+                    
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-success w-100" onclick="addPrior()">
+                            <i class ="bi bi-plus-circle"></i> Ajouter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    
+    
+    <div class="d-flex justify-content-end mb-5">
+        <button type="button" class="btn btn-primary btn-lg">
+            <i class="bi bi-save"></i> Enregistrer et continuer
+        </button>
+    </div>
+</div>
