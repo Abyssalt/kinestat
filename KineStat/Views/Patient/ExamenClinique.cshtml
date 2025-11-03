@@ -1,8 +1,139 @@
 ﻿@{
-    ViewData["Title"] = "Examen Clinique";
+    ViewData["Title"] = "Examen clinique";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
-    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Examen Clinique</li>";
+    var patientId = ViewData["PatientId"];
+    // ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
 }
 
-<h2>Examen Clinique - Page en construction</h2>
+<h2>Examen clinique </h2>
 <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>
+
+
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb" id="breadcrumbDIMENSIONS">
+        <li class="breadcrumb-item active" aria-current="page"><a href="#" onclick="loadQuestionnaire('Toutes')">Toutes</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Articulaire/structurel')">Articulaire/structurel</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Myofascial')">Myofascial</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Nociceptif')">Nociceptif</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Neuropathique')">Neuropathique</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Nociplastique')">Nociplastique</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Contrôle sensorimoteur')">Contrôle sensorimoteur</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Croyances et cognition')">Croyances et cognition</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Socio-environnemental')">Socio-environnemental</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Émotionnel/affectif')">Émotionnel/affectif</a></li>
+    </ol>
+</nav>
+<div id="baseContainer" class="container mt-4">
+    <div class="row">
+        <div id="questionnaireContainer" class="col-md-8"></div>
+        <div id="testsContainer" class="col-md-4">
+            <h4>Tests suggérés</h4>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de mobilité articulaire (amplitude active et passive)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de force musculaire (échelle MRC)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de sensibilité cutanée (tact, piqûre, température)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de réflexes ostéo-tendineux</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test d’équilibre et de coordination (Romberg / doigt-nez)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de contrôle moteur (stabilité lombo-pelvienne)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test palpatoire myofascial (points gâchettes, tonus musculaire)</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none">Test de douleur provoquée (pression, étirement, mouvement)</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+    const patientId = @patientId;
+
+    async function loadQuestionnaire(category) {
+        const response = await fetch(`/Patient/${patientId}/GetQuestionsClinique`);
+        const data = await response.json();
+        const container = document.getElementById('questionnaireContainer');
+        container.innerHTML = '';
+
+        for (const subCategory in data) {
+            if (category !== "Toutes" && subCategory !== category) continue;
+            const questions = data[subCategory];
+
+            const subCatDiv = document.createElement('div');
+            subCatDiv.classList.add('mb-4');
+
+            const title = document.createElement('h5');
+            title.textContent = subCategory;
+            subCatDiv.appendChild(title);
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('mb-3', 'border', 'p-3', 'rounded');
+
+                const questionText = document.createElement('p');
+                questionText.innerHTML = `${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                if (q.options && q.options.length > 0) {
+                    q.options.forEach(opt => {
+                        const div = document.createElement('div');
+                        div.classList.add('form-check');
+                        div.innerHTML = `
+                            <input class="form-check-input" type="radio" name="q_${index}" value="${opt}">
+                            <label class="form-check-label">${opt}</label>
+                        `;
+                        questionDiv.appendChild(div);
+                    });
+                }
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.type = 'button';
+                toggleBtn.classList.add('btn','btn-sm','btn-outline-secondary','mt-2');
+                toggleBtn.textContent = 'Ajouter une note';
+                questionDiv.appendChild(toggleBtn);
+
+                const notesContainer = document.createElement('div');
+                notesContainer.style.display = 'none';
+                notesContainer.classList.add('mt-2');
+
+                const notesLabel = document.createElement('label');
+                notesLabel.textContent = 'Notes :';
+                notesContainer.appendChild(notesLabel);
+
+                const textarea = document.createElement('textarea');
+                textarea.classList.add('form-control');
+                textarea.name = `notes_${index}`;
+                textarea.placeholder = 'Notes (optionnel)';
+                notesContainer.appendChild(textarea);
+
+                questionDiv.appendChild(notesContainer);
+
+                toggleBtn.addEventListener('click', () => {
+                    if (notesContainer.style.display === 'none') {
+                        notesContainer.style.display = 'block';
+                        toggleBtn.textContent = 'Masquer la note';
+                    } else {
+                        notesContainer.style.display = 'none';
+                        toggleBtn.textContent = 'Ajouter une note';
+                    }
+                });
+
+                subCatDiv.appendChild(questionDiv);
+            });
+
+            container.appendChild(subCatDiv);
+        }
+    }
+     document.addEventListener('DOMContentLoaded', loadQuestionnaire('Toutes'));
+</script>
