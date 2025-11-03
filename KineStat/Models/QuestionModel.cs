@@ -5,11 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
-    public class QuestionModel
+    public abstract class QuestionModel
     {
 
-        public abstract class Question
-        {
             [Key]
             [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
             public int Id { get; set; }
@@ -20,7 +18,7 @@ namespace KineStat.Models
 
             [Required(ErrorMessage = "Le type est obligatoire")]
             [StringLength(50)]
-            public string Type { get; set; }
+            public string Type { get; set; }f
 
             [Display(Name = "RV+")]
             public double RVPositif { get; set; } = 0;
@@ -28,7 +26,7 @@ namespace KineStat.Models
             [Display(Name = "RV-")]
             public double RVNegatif { get; set; } = 0;
 
-            public virtual Answer answer { get; set; }
+            public Answer answer { get; set; }
 
             public abstract bool Validate();
 
@@ -40,4 +38,4 @@ namespace KineStat.Models
         }
 
     }
-}
+
