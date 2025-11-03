@@ -10,14 +10,14 @@ namespace KineStat.Models
 
         public string Description { get; set; } = string.Empty;
 
-        public List<QuestionModel> questions { get; set; } = new List<QuestionModel>();
+        public List<Question> Questions { get; set; } = new List<Question>();
 
         /// <summary>
         /// Vérifie si le cluster est complet (tous les tests obligatoires effectués)
         /// </summary>
-        public bool EstComplet()
+        public bool isComplete()
         {
-            foreach (var test in questions)
+            foreach (var test in Questions)
             {
                 if (test.answer == null)
                     return false;
@@ -29,10 +29,10 @@ namespace KineStat.Models
         /// <summary>
         /// Obtient la liste des résultats
         /// </summary>
-        public List<Answer> GetResultats()
+        public List<Answer> GetResults()
         {
             var resultats = new List<Answer>();
-            foreach (var test in questions)
+            foreach (var test in Questions)
             {
                 if (test.answer != null)
                 {

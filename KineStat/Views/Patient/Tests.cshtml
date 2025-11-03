@@ -1,8 +1,473 @@
-﻿@{
-    ViewData["Title"] = "Tests";
-    ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
-    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Tests</li>";
+﻿@model IEnumerable<KineStat.Models.Cluster>
+
+@{
+    ViewData["Title"] = "Tests Cliniques";
+    ViewData["PatientId"] = "1";
+    ViewData["PatientNom"] = "PAUL Melvyn";
+    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item'><a href='/Patients/Anamnese/1'>Anamnèse</a></li><li class='breadcrumb-item active' aria-current='page'>Tests Cliniques</li>";
+    var scoreQuestionnaire = ViewBag.ScoreQuestionnaire ?? 0;
+    var clustersRecommandes = ViewBag.ClustersRecommandes as List<string> ?? new List<string>();
 }
 
-<h2>Tests - Page en construction</h2>
-<a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>
+<div class="container mt-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-clipboard-check"></i> Tests Cliniques - @ViewData["PatientNom"]</h2>
+            <p class="text-muted mb-0">
+                Score questionnaire: <span class="badge bg-primary">@scoreQuestionnaire points</span>
+            </p>
+        </div>
+        <a asp-controller="Patients" asp-action="Anamnese" asp-route-id="@ViewData["PatientId"]" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à l'anamnèse
+        </a>
+    </div>
+
+    <!-- Alerte clusters recommandés -->
+    @if (clustersRecommandes.Any())
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading">
+                <i class="bi bi-lightbulb"></i> Tests recommandés selon les réponses du questionnaire
+            </h5>
+            <p class="mb-0">
+                Les clusters de tests suivants sont recommandés :
+                <strong>@string.Join(", ", clustersRecommandes)</strong>
+            </p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-controller="Tests" asp-action="SaveTests" method="post" id="formTests">
+        <input type="hidden" name="PatientId" value="@ViewData["PatientId"]" />
+        <input type="hidden" name="DateEvaluation" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+        @if (Model != null && Model.Any())
+        {
+            int clusterIndex = 0;
+            foreach (var cluster in Model)
+            {
+                var isRecommande = clustersRecommandes.Contains(cluster.Nom);
+                var cardClass = isRecommande ? "border-primary" : "";
+                var headerClass = isRecommande ? "bg-primary text-white" : "bg-secondary text-white";
+
+                <div class="card mb-4 @cardClass" id="cluster-@cluster.Id">
+                    <div class="card-header @headerClass">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="bi bi-clipboard2-pulse"></i> @cluster.Nom
+                                @if (isRecommande)
+                                {
+                                    <span class="badge bg-warning text-dark ms-2">
+                                        <i class="bi bi-star-fill"></i> Recommandé
+                                    </span>
+                                }
+                            </h4>
+                            <div>
+                                <span class="badge bg-light text-dark">@cluster.Questions.Count test(s)</span>
+                                <button type="button" class="btn btn-sm btn-light ms-2" data-bs-toggle="collapse" data-bs-target="#collapse-cluster-@cluster.Id">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(cluster.Description))
+                        {
+                            <small class="d-block mt-2">@cluster.Description</small>
+                        }
+                    </div>
+
+                    <div class="collapse show" id="collapse-cluster-@cluster.Id">
+                        <div class="card-body">
+                            @if (cluster.Questions != null && cluster.Questions.Any())
+                            {
+                                int questionIndex = 0;
+                                foreach (var question in cluster.Questions)
+                                {
+                                    <div class="test-item border rounded p-3 mb-3 @(questionIndex == 0 ? "border-primary" : "")" id="question-@question.Id">
+                                        <!-- En-tête du test -->
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <h5 class="text-primary mb-1">
+                                                    <span class="badge bg-primary me-2">Test @(questionIndex + 1)</span>
+                                                    @question.Intitule
+                                                </h5>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox"
+                                                       id="effectue-@question.Id"
+                                                       name="Questions[@clusterIndex].[@questionIndex].Effectue"
+                                                       onchange="toggleTestDetails(this, 'details-@question.Id')">
+                                                <label class="form-check-label" for="effectue-@question.Id">
+                                                    <small>Test effectué</small>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Résultats du test (masqué par défaut) -->
+                                        <div class="test-details collapse" id="details-@question.Id">
+                                            <hr class="my-3">
+                                            <h6 class="text-secondary mb-3">
+                                                <i class="bi bi-clipboard-data"></i> Résultats
+                                            </h6>
+
+                                            <input type="hidden" name="Questions[@clusterIndex].[@questionIndex].QuestionId" value="@question.Id" />
+
+                                            <!-- Type de résultat selon le type de question -->
+                                            @if (question is KineStat.Models.QuestionBool)
+                                            {
+                                                <!-- Test Positif/Négatif -->
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-bold">Résultat</label>
+                                                        <div class="btn-group w-100" role="group">
+                                                            <input type="radio" class="btn-check"
+                                                                   name="Questions[@clusterIndex].[@questionIndex].Valeur"
+                                                                   id="positif-@question.Id"
+                                                                   value="Positif"
+                                                                   autocomplete="off">
+                                                            <label class="btn btn-outline-success" for="positif-@question.Id">
+                                                                <i class="bi bi-check-circle"></i> Positif
+                                                            </label>
+
+                                                            <input type="radio" class="btn-check"
+                                                                   name="Questions[@clusterIndex].[@questionIndex].Valeur"
+                                                                   id="negatif-@question.Id"
+                                                                   value="Négatif"
+                                                                   autocomplete="off">
+                                                            <label class="btn btn-outline-danger" for="negatif-@question.Id">
+                                                                <i class="bi bi-x-circle"></i> Négatif
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-bold">Côté</label>
+                                                        <select class="form-select" name="Questions[@clusterIndex].[@questionIndex].Cote">
+                                                            <option value="">Sélectionner...</option>
+                                                            <option value="Gauche">Gauche</option>
+                                                            <option value="Droit">Droit</option>
+                                                            <option value="Bilatéral">Bilatéral</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (question is KineStat.Models.QuestionLadder questionEchelle)
+                                            {
+                                                <!-- Test Numérique/Échelle -->
+                                                <div class="row mb-3">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-bold">Valeur mesurée</label>
+                                                        <div class="input-group">
+                                                            <input type="number"
+                                                                   class="form-control"
+                                                                   name="Questions[@clusterIndex].[@questionIndex].Valeur"
+                                                                   step="0.1"
+                                                                   placeholder="0">
+                                                            <span class="input-group-text">cm/°</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-bold">Côté</label>
+                                                        <select class="form-select" name="Questions[@clusterIndex].[@questionIndex].Cote">
+                                                            <option value="">Sélectionner...</option>
+                                                            <option value="Gauche">Gauche</option>
+                                                            <option value="Droit">Droit</option>
+                                                            <option value="Bilatéral">Bilatéral</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-bold">Valeur normale</label>
+                                                        <input type="text"
+                                                               class="form-control-plaintext"
+                                                               readonly
+                                                               value="@questionEchelle.Valeur">
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (question is KineStat.Models.QuestionQCM questionQCM)
+                                            {
+                                                <!-- Test avec choix multiples -->
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Résultat</label>
+                                                    <select class="form-select" name="Questions[@clusterIndex].[@questionIndex].Valeur">
+                                                        <option value="">Sélectionner...</option>
+                                                        @foreach (var answer in questionQCM.ListAnswers)
+                                                        {
+                                                            <option value="@answer.Valeur">@answer.Valeur</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            }
+
+                                            <!-- Observations communes -->
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label fw-bold">Observations complémentaires</label>
+                                                    <textarea class="form-control"
+                                              name="Questions[@clusterIndex].[@questionIndex].Observation"
+                                              rows="2"
+                                              placeholder="Remarques, douleur ressentie, compensations..."></textarea>
+                                                </div>
+                                            </div>
+
+                                            <!-- Upload de photos -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-bold">
+                                                        <i class="bi bi-camera"></i> Photos/Vidéos
+                                                    </label>
+                                                    <input class="form-control"
+                                                           type="file"
+                                                           name="Questions[@clusterIndex].[@questionIndex].Images"
+                                                           accept="image/*,video/*"
+                                                           multiple>
+                                                    <small class="form-text text-muted">Formats acceptés: JPG, PNG, MP4</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    questionIndex++;
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center py-3">Aucun test disponible dans ce cluster.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                clusterIndex++;
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> Aucun cluster de tests n'est disponible pour le moment.
+            </div>
+        }
+
+        <!-- Résumé et Red Flags -->
+        <div class="card mb-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Détection des Red Flags
+                </h4>
+            </div>
+            <div class="card-body">
+                <div id="redFlagsContainer">
+                    <p class="text-muted">Les red flags seront détectés automatiquement après la validation des tests.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusion clinique -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-journal-medical"></i> Conclusion clinique
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Synthèse des tests</label>
+                    <textarea class="form-control"
+                              name="Synthese"
+                              rows="4"
+                              placeholder="Résumé des principaux résultats et observations..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Hypothèses diagnostiques</label>
+                    <textarea class="form-control"
+                              name="Hypotheses"
+                              rows="3"
+                              placeholder="Hypothèses cliniques basées sur les tests effectués..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Plan de traitement proposé</label>
+                    <textarea class="form-control"
+                              name="PlanTraitement"
+                              rows="4"
+                              placeholder="Objectifs thérapeutiques, techniques envisagées, fréquence..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="d-flex justify-content-between mb-5">
+            <div>
+                <a asp-controller="Patients" asp-action="Anamnese" asp-route-id="@ViewData["PatientId"]" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                <button type="button" class="btn btn-outline-secondary ms-2" onclick="resetForm()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                </button>
+            </div>
+            <div>
+                <button type="button" class="btn btn-warning me-2" onclick="saveDraft()">
+                    <i class="bi bi-save"></i> Enregistrer brouillon
+                </button>
+                <button type="button" class="btn btn-info me-2" onclick="calculateRedFlags()">
+                    <i class="bi bi-calculator"></i> Calculer Red Flags
+                </button>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle"></i> Valider et Terminer
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle des détails du test
+        function toggleTestDetails(checkbox, detailsId) {
+            const detailsElement = document.getElementById(detailsId);
+            if (checkbox.checked) {
+                detailsElement.classList.add('show');
+            } else {
+                detailsElement.classList.remove('show');
+            }
+        }
+
+        // Réinitialiser le formulaire
+        function resetForm() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les tests ?')) {
+                document.getElementById('formTests').reset();
+                document.querySelectorAll('.test-details').forEach(el => {
+                    el.classList.remove('show');
+                });
+            }
+        }
+
+        // Enregistrer brouillon (AJAX)
+        function saveDraft() {
+            const formData = new FormData(document.getElementById('formTests'));
+            formData.append('IsDraft', 'true');
+
+            fetch('@Url.Action("SaveDraft", "Tests")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Brouillon enregistré avec succès !');
+                } else {
+                    alert('Erreur lors de l\'enregistrement du brouillon.');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'enregistrement.');
+            });
+        }
+
+        // Calculer les Red Flags
+        function calculateRedFlags() {
+            const formData = new FormData(document.getElementById('formTests'));
+
+            fetch('@Url.Action("CalculateRedFlags", "Tests")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayRedFlags(data.redFlags);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors du calcul des Red Flags.');
+            });
+        }
+
+        // Afficher les Red Flags
+        function displayRedFlags(redFlags) {
+            const container = document.getElementById('redFlagsContainer');
+
+            if (!redFlags || redFlags.length === 0) {
+                container.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> Aucun Red Flag détecté.</div>';
+                return;
+            }
+
+            let html = '<div class="alert alert-danger"><h5><i class="bi bi-exclamation-triangle-fill"></i> Attention : Red Flags Détectés</h5></div>';
+            html += '<div class="list-group">';
+
+            redFlags.forEach(rf => {
+                const badgeClass = rf.niveau === 'Urgence' || rf.niveau === 'Critique' ? 'bg-danger' :
+                                   rf.niveau === 'Eleve' ? 'bg-warning' : 'bg-info';
+
+                html += `
+                    <div class="list-group-item list-group-item-danger">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${rf.nom}</h6>
+                            <span class="badge ${badgeClass}">${rf.niveau}</span>
+                        </div>
+                        <p class="mb-1">${rf.description}</p>
+                        <small><strong>Action :</strong> ${rf.actionRecommandee}</small>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Validation du formulaire
+        document.getElementById('formTests').addEventListener('submit', function(e) {
+            const effectues = document.querySelectorAll('input[type="checkbox"][id^="effectue-"]:checked');
+            if (effectues.length === 0) {
+                e.preventDefault();
+                alert('Veuillez effectuer au moins un test avant de valider.');
+                return false;
+            }
+        });
+
+        // Auto-save toutes les 5 minutes
+        setInterval(function() {
+            saveDraft();
+        }, 300000);
+    </script>
+
+    <style>
+        .test-item {
+            transition: all 0.3s ease;
+        }
+
+            .test-item:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+            .test-item.border-primary {
+                border-width: 2px !important;
+            }
+
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+
+        .btn-check:checked + .btn-outline-success {
+            background-color: #198754;
+            border-color: #198754;
+            color: white;
+        }
+
+        .btn-check:checked + .btn-outline-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        @media print {
+            .btn, .form-check-input
+
+        {
+            display: none;
+        }
+
+        .test-details {
+            display: block !important;
+        }
+
+        }
+    </style>
+}

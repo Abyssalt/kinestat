@@ -1,23 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static KineStat.Models.QuestionModel;
+using static KineStat.Models.Question;
 
 namespace KineStat.Models
 {
     /// <summary>
     /// Question de type QCM (Questionnaire à Choix Multiples)
     /// </summary>
-    [Table("QuestionQCM")]
-    public class QuestionQCMModel : Question
+    public class QuestionQCM : Question
     {
-        public QuestionQCMModel()
+        public QuestionQCM()
         {
             Type = "QCM";
             ListAnswers = new List<string>();
         }
 
-        [Required]
-        [NotMapped] 
         public List<string> ListAnswers { get; set; }
 
        
