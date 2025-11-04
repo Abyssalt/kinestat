@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using static KineStat.Models.QuestionModel;
+using static KineStat.Models.Question;
 
 namespace KineStat.Models
 {
@@ -7,9 +7,9 @@ namespace KineStat.Models
     /// Question de type Booléen (Oui/Non)
     /// </summary>
     [Table("QuestionBool")]
-    public class QuestionBoolModel : Question
+    public class QuestionBool : Question
     {
-        public QuestionBoolModel()
+        public QuestionBool()
         {
             Type = "Bool";
         }
@@ -36,6 +36,11 @@ namespace KineStat.Models
                 return false;
 
             return null;
+        }
+
+        public bool? isPositive()
+        {
+            return GetAnswerBool();
         }
     }
 }

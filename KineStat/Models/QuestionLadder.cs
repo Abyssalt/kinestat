@@ -4,21 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace KineStat.Models
 {
     [Table("QuestionLadder")]
-    public class QuestionLadderModel : QuestionModel.Question
+    public class QuestionLadder : Question
     {
-        public QuestionLadderModel()
+        public QuestionLadder()
         {
             Type = "Echelle";
-            min = 0;
-            max = 10;
         }
 
-        [Required]
-        [Range(0, 100)]
         public int min { get; set; } = 0;
 
-        [Required]
-        [Range(0, 100)]
         public int max { get; set; } = 10;
 
 
@@ -39,7 +33,7 @@ namespace KineStat.Models
             set
             {
                 if (answer == null)
-                    answer = new Answer { QuestionId = this.Id };
+                    answer = new Answer { };
 
                 answer.Value = value?.ToString() ?? string.Empty;
             }
