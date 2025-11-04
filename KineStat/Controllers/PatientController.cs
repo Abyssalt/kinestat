@@ -137,5 +137,11 @@ namespace KineStat.Controllers
             ViewData["PatientId"] = id.ToString();
             return View();
         }
+
+        public IActionResult Resultat(int id)
+        {
+            ViewData["PatientId"] = id.ToString();
+            return View();
+        }
     }
 }

@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Resultat";
+    ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Résultat</h2>
+        <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Tests effectués</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item">Test Lasègue </a>
+                    <a class="list-group-item">Test Schober </a>
+                    <a class="list-group-item">Test Slump</a>
+                    <a class="list-group-item">Question 1</a>
+                    <a class="list-group-item">Question 2 </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-activity"></i> Analyse du risque</h5>
+                </div>
+
+                <div class="card-body text-center">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <span class="fw-bold">Neuro</span><br />
+                            <span class="fs-4">12%</span>
+                        </div>
+                        <div class="col">
+                            <span class="fw-bold">Onco</span><br />
+                            <span class="fs-4">26%</span>
+                        </div>
+                        <div class="col">
+                            <span class="fw-bold">Trauma</span><br />
+                            <span class="fs-4">8%</span>
+                        </div>
+                        <div class="col">
+                            <span class="fw-bold">Vasculaire</span><br />
+                            <span class="fs-4">32%</span>
+                        </div>
+                    </div>
+
+                    <div class="progress" style="height: 18px;">
+                        <div class="progress-bar bg-success" style="width: 25%"></div>
+                        <div class="progress-bar bg-warning" style="width: 25%"></div>
+                        <div class="progress-bar bg-danger" style="width: 50%"></div>
+                    </div>
+                    <small class="text-danger fw-bold">Risque élevé</small>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi"></i> Pathologies suspectées</h5>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Tumoral</strong> <span>26%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Infectieux</strong> <span>10%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Neurologique</strong> <span>12%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Traumatique</strong> <span>8%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Inflammatoire</strong> <span>7%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Vasculaire</strong> <span>32%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="card shadow-sm mb-5">
+            <div class="card-header bg-secondary text-white align-content-center">
+                <h5 class="mb-0"><i class="bi bi-pentagon"></i> Profil clinique</h5>
+            </div>
+            <div class="card-body text-center">
+                <img src="~/images/Diagramme en araignee 9.png" style="max-width: 500px;" />
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end mb-5">
+        <button type="button" class="btn btn-primary btn-lg">
+            <i class="bi bi-save"></i> Enregistrer
+        </button>
+    </div>
+</div>
