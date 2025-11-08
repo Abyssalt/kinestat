@@ -1,8 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
-    // il manque l'attribut genre 
+    public enum Gender
+    {
+        Homme,
+        Femme,
+        Autre
+    }
+
     public class Patient
     {
         [Key]
@@ -10,8 +17,9 @@ namespace KineStat.Models
 
         [Required]
         public string LastName { get; set; }
+
         [Required]
-        public string FisrtName { get; set; }
+        public string FirstName { get; set; }
 
         [Required]
         public string Email { get; set; }
@@ -20,14 +28,17 @@ namespace KineStat.Models
         public string PhoneNumber { get; set; }
 
         [Required, DataType(DataType.Date)]
-        public DateTime BirthDate{ get; set; }
+        public DateTime BirthDate { get; set; }
 
-        [Range(0,500)]
+        [Range(0, 500)]
         public double Weight { get; set; }
 
-        [Range(0,500)]
+        [Range(0, 500)]
         public double Height { get; set; }
+        
+        [Required]
+        public Gender Genre { get; set; }
 
-
+        public ICollection<Bilan> Bilans { get; set; } = new List<Bilan>();
     }
 }
