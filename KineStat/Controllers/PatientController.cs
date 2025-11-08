@@ -120,12 +120,6 @@ namespace KineStat.Controllers
 
         }
 
-        public IActionResult Prior(int id)
-        {
-            ViewData["PatientId"] = id.ToString();
-            return View();
-        }
-
         public IActionResult ExamenClinique(int id)
         {
             ViewData["PatientId"] = id.ToString();
