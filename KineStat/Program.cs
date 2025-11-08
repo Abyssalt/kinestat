@@ -1,4 +1,13 @@
+using KineStat.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+
 var builder = WebApplication.CreateBuilder(args);
+// Configuration of the DbContext
+
+builder.Services.AddDbContext<KineDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("KineDbContext")));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
