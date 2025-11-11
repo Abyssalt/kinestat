@@ -13,6 +13,8 @@ namespace KineStat.Models
 
         public int Score { get; set; } = 0;
 
+
+
         public int QuestionId { get; set; }
 
         public virtual Question Question { get; set; }

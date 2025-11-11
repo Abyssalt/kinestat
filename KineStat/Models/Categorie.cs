@@ -10,6 +10,8 @@ namespace KineStat.Models
         [Required]
         public string Nom { get; set; }
 
+        public double Prior { get; set; }
+
         public List<Question> listeQuestions { get; set; } = new List<Question>(); // Liste de questions reprises, c'est donc un cluster ? A voir si le nom convient, vu qu'on a déjà une classe Cluster, j'ai pris un autre nom.
 
         /// <summary>
