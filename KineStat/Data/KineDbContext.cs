@@ -16,8 +16,10 @@ namespace KineStat.Data
         public DbSet<QuestionBool> QuestionBool { get; set; }
         public DbSet<QuestionQCM> QuestionQCM { get; set; }
         public DbSet<QuestionLadder> QuestionLadder { get; set; }
+        public DbSet<AnswerBool> AnswerBool { get; set; }
+        public DbSet<AnswerQCM> AnswerQCM { get; set; }
+        public DbSet<AnswerLadder> AnswerLadder { get; set; }
         public DbSet<Redflag> Redflags { get; set; }
-        public DbSet<Answer> Answer { get; set; }
         public DbSet<Pathology> Pathology { get; set; }
         public DbSet<Category> Category { get; set; }
     }
