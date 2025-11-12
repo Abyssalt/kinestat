@@ -39,6 +39,8 @@ namespace KineStat.Models
         [Required]
         public Gender Genre { get; set; }
 
+        public int PhysioId { get; set; }
+
         public ICollection<Bilan> Bilans { get; set; } = new List<Bilan>();
     }
 }

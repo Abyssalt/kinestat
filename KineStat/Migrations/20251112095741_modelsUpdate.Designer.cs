@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112095741_modelsUpdate")]
+    partial class modelsUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,7 +250,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Physio");
+                    b.ToTable("Kine");
                 });
 
             modelBuilder.Entity("KineStat.Models.Question", b =>
