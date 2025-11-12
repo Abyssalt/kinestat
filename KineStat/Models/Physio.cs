@@ -2,7 +2,7 @@
 
 namespace KineStat.Models
 {
-    public class Kine
+    public class Physio
     {
         [Key]
         public int Id { get; set; }

@@ -16,15 +16,5 @@ namespace KineStat.Models
         }
 
         public List<string> ListAnswers { get; set; }
-
-       
-
-        public override bool Validate()
-        {
-            if (answer == null || string.IsNullOrEmpty(answer.Value))
-                return false;
-
-            return ListAnswers.Contains(answer.Value);
-        }
     }
 }

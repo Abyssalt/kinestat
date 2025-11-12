@@ -17,7 +17,6 @@
     {
         Id = 1,
         Name = "Tests Neurologiques",
-        Description = "Évaluation des atteintes neurologiques et sensitives du membre inférieur",
         Questions = new List<Question>
         {
             new QuestionBool
@@ -103,14 +102,6 @@
         </div>
     </div>
 
-    <!-- Description du cluster -->
-    @if (!string.IsNullOrEmpty(cluster.Description))
-    {
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            <strong>Objectif :</strong> @cluster.Description
-        </div>
-    }
 
     <!-- Barre de progression -->
     <div class="card mb-4">
