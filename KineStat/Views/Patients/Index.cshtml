@@ -1,6 +1,25 @@
-﻿@{
+﻿@model IEnumerable<KineStat.Models.Patient>
+
+@{
     ViewData["Title"] = "Liste des patients";
     ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item active' aria-current='page'>Patients</li>";
+}
+
+<!-- Success/error messages -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <div class="container mt-4">
@@ -17,84 +36,74 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un patient par nom ou prénom...">
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover" id="patientsTable">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Sexe</th>
-                            <th>Date de naissance</th>
-                            <th>Âge</th>
-                            <th>Téléphone</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Melvyn</td>
-                            <td>Paul</td>
-                            <td>M</td>
-                            <td>05/07/2001</td>
-                            <td>24</td>
-                            <td>+33 07 78 05 37 98</td>
-                            <td>
-                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="1" class="btn btn-sm btn-info" title="Voir">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <button class="btn btn-sm btn-warning" title="Modifier" data-bs-toggle="modal" data-bs-target="#editPatientModal">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-1" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Sacha</td>
-                            <td>Meunier</td>
-                            <td>M</td>
-                            <td>22/07/2001</td>
-                            <td>24</td>
-                            <td>+32 476 98 76 54</td>
-                            <td>
-                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="2" class="btn btn-sm btn-info" title="Voir">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <button class="btn btn-sm btn-warning" title="Modifier">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-2" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Joanna</td>
-                            <td>Imjalli</td>
-                            <td>F</td>
-                            <td>10/11/2001</td>
-                            <td>24</td>
-                            <td>+32 477 45 67 89</td>
-                            <td>
-                                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="3" class="btn btn-sm btn-info" title="Voir">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <button class="btn btn-sm btn-warning" title="Modifier">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-3" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover" id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Genre</th>
+                                <th>Date de naissance</th>
+                                <th>Téléphone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (Patient patient in Model)
+                            {
+                                <tr>
+                                    <td>@patient.LastName</td>
+                                    <td>@patient.FirstName</td>
+                                    <td>
+                                        @switch (patient.Genre)
+                                        {
+                                            case Gender.Homme:
+                                                <span class="badge bg-primary">H</span>
+                                                break;
+                                            case Gender.Femme:
+                                                <span class="badge bg-danger">F</span>
+                                                break;
+                                            case Gender.Autre:
+                                                <span class="badge bg-secondary">A</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@patient.BirthDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@patient.PhoneNumber</td>
+                                    <td>
+                                        <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@patient.Id" class="btn btn-sm btn-info" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-warning" title="Modifier"
+                                                onclick="editPatient(@patient.Id, '@patient.LastName', '@patient.FirstName', '@patient.Email', '@patient.PhoneNumber', @((int)patient.Genre), '@patient.BirthDate.ToString("yyyy-MM-dd")', @patient.PhysioId, @(patient.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @(patient.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"))">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer" onclick="return confirm('Supprimer ce patient ?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Aucun patient enregistré pour le moment. Cliquez sur "Nouveau patient" pour ajouter votre premier patient.
+                </div>
+            }
         </div>
     </div>
 </div>
 
+<!-- Add a patient modal -->
 <div class="modal fade" id="addPatientModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -104,41 +113,64 @@
             </div>
             <div class="modal-body">
                 <form asp-controller="Patients" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nom *</label>
-                            <input type="text" class="form-control" name="Nom" required>
+                            <input type="text" class="form-control" name="LastName" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
-                            <input type="text" class="form-control" name="Prenom" required>
+                            <input type="text" class="form-control" name="FirstName" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="Email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone *</label>
+                            <input type="tel" class="form-control" name="PhoneNumber" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Sexe *</label>
-                            <select class="form-select" name="Sexe" required>
+                            <label class="form-label">Genre *</label>
+                            <select class="form-select" name="Genre" required>
                                 <option value="">-- Sélectionner --</option>
-                                <option value="M">Masculin</option>
-                                <option value="F">Féminin</option>
+                                <option value="0">Homme</option>
+                                <option value="1">Femme</option>
+                                <option value="2">Autre</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Date de naissance *</label>
-                            <input type="date" class="form-control" name="DateNaissance" required>
+                            <input type="date" class="form-control" name="BirthDate" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Téléphone</label>
-                            <input type="tel" class="form-control" name="Telephone">
+                            <label class="form-label">Kinésithérapeute *</label>
+                            <select class="form-select" name="PhysioId" required>
+                                <option value="">-- Sélectionner un kiné --</option>
+                                @if (ViewBag.Physios != null)
+                                {
+                                    @foreach (var physio in ViewBag.Physios)
+                                    {
+                                        <option value="@physio.Id">@physio.FirstName @physio.LastName (INAMI: @physio.INAMINumber)</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Adresse</label>
-                        <input type="text" class="form-control" name="Adresse">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Prescripteur</label>
-                        <input type="text" class="form-control" name="Prescripteur">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Poids (kg)</label>
+                            <input type="number" step="0.1" class="form-control" name="Weight" placeholder="Ex: 70.5">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Taille (cm)</label>
+                            <input type="number" step="0.1" class="form-control" name="Height" placeholder="Ex: 175">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -150,27 +182,86 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteModal-1" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Edit patient modal -->
+<div class="modal fade" id="editPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmer la suppression</h5>
+                <h5 class="modal-title">Modifier patient</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Êtes-vous sûr de vouloir supprimer le patient <strong>Melvyn Paul</strong> ?
-                <br><br>
-                <span class="text-danger">Cette action est irréversible et supprimera toutes les données associées.</span>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <form asp-controller="Patients" asp-action="Delete" asp-route-id="1" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                <form id="editPatientForm" asp-controller="Patients" asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="edit_Id" name="Id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" class="form-control" id="edit_LastName" name="LastName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prénom *</label>
+                            <input type="text" class="form-control" id="edit_FirstName" name="FirstName" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="edit_Email" name="Email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone *</label>
+                            <input type="tel" class="form-control" id="edit_PhoneNumber" name="PhoneNumber" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Genre *</label>
+                            <select class="form-select" id="edit_Genre" name="Genre" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="0">Homme</option>
+                                <option value="1">Femme</option>
+                                <option value="2">Autre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date de naissance *</label>
+                            <input type="date" class="form-control" id="edit_BirthDate" name="BirthDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Kinésithérapeute *</label>
+                            <select class="form-select" id="edit_PhysioId" name="PhysioId" required>
+                                <option value="">-- Sélectionner un kiné --</option>
+                                @if (ViewBag.Physios != null)
+                                {
+                                    @foreach (var physio in ViewBag.Physios)
+                                    {
+                                        <option value="@physio.Id">@physio.FirstName @physio.LastName (INAMI: @physio.INAMINumber)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Poids (kg)</label>
+                            <input type="number" step="0.1" class="form-control" id="edit_Weight" name="Weight" placeholder="Ex: 70.5">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Taille (cm)</label>
+                            <input type="number" step="0.1" class="form-control" id="edit_Height" name="Height" placeholder="Ex: 175">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>
@@ -189,5 +280,31 @@
                 }
             });
         });
+
+        function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, physioId, weight, height) {
+            document.getElementById('edit_Id').value = id;
+            document.getElementById('edit_LastName').value = lastName;
+            document.getElementById('edit_FirstName').value = firstName;
+            document.getElementById('edit_Email').value = email;
+            document.getElementById('edit_PhoneNumber').value = phoneNumber;
+            document.getElementById('edit_Genre').value = genre;
+            document.getElementById('edit_BirthDate').value = birthDate;
+            document.getElementById('edit_PhysioId').value = physioId;
+
+            if (weight !== null && weight !== 'null') {
+                document.getElementById('edit_Weight').value = weight;
+            } else {
+                document.getElementById('edit_Weight').value = '';
+            }
+
+            if (height !== null && height !== 'null') {
+                document.getElementById('edit_Height').value = height;
+            } else {
+                document.getElementById('edit_Height').value = '';
+            }
+
+            const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+            editModal.show();
+        }
     </script>
 }

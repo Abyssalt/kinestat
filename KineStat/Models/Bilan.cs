@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
@@ -7,7 +8,8 @@ namespace KineStat.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, DataType(DataType.Date)]
+        [Required, DataType(DataType.Date), Column(TypeName = "date")]
+        
         public DateTime Date { get; set; } = DateTime.Today;
 
         [Required]
