@@ -88,6 +88,9 @@ namespace KineStat.Controllers
                     existingPatient.PhysioId = patient.PhysioId;
                     existingPatient.Weight = patient.Weight;
                     existingPatient.Height = patient.Height;
+                    existingPatient.DoctorName = patient.DoctorName;
+                    existingPatient.DoctorINAMI = patient.DoctorINAMI;
+                    existingPatient.Address = patient.Address;
 
                     _context.Update(existingPatient);
                     await _context.SaveChangesAsync();

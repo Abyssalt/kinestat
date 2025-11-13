@@ -1,14 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using KineStat.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace KineStat.Controllers
 {
     public class PatientController : Controller
     {
+        private readonly KineDbContext _context;
+
+        public PatientController(KineDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Anamnese(int id)
         {
-            ViewData["PatientId"] = id.ToString();
-            return View();
+            var patient = _context.Patients.Find(id);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+            return View(patient);
         }
 
         [HttpPost]
