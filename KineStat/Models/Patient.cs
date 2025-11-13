@@ -27,7 +27,7 @@ namespace KineStat.Models
         [Required]
         public string PhoneNumber { get; set; }
 
-        [Required, DataType(DataType.Date)]
+        [Required, DataType(DataType.Date),Column(TypeName = "date")]
         public DateTime BirthDate { get; set; }
 
         [Range(0, 500)]
@@ -39,7 +39,10 @@ namespace KineStat.Models
         [Required]
         public Gender Genre { get; set; }
 
+        [Required]
         public int PhysioId { get; set; }
+
+        public Physio? Physio { get; set; }  
 
         public ICollection<Bilan> Bilans { get; set; } = new List<Bilan>();
     }

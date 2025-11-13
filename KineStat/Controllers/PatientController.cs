@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace KineStat.Controllers
 {
-    [Route("Patient/{id}/{action}")]
     public class PatientController : Controller
     {
         public IActionResult Anamnese(int id)
