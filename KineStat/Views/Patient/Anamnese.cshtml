@@ -1,12 +1,14 @@
-﻿@{
+﻿@model KineStat.Models.Patient
+
+@{
     ViewData["Title"] = "Anamnèse";
-    ViewData["PatientId"] = "1";
-    ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - Melvyn PAUL</li>";
+    ViewData["PatientId"] = Model.Id.ToString();
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - {Model.FirstName} {Model.LastName}</li>";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Anamnèse - Melvyn PAUL</h2>
+        <h2>Anamnèse - @Model.FirstName @Model.LastName</h2>
         <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Retour à la liste
         </a>
@@ -22,55 +24,57 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Nom</label>
-                            <p class="form-control-plaintext">Paul</p>
+                            <p class="form-control-plaintext">@Model.LastName</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Prénom</label>
-                            <p class="form-control-plaintext">Melvyn</p>
+                            <p class="form-control-plaintext">@Model.FirstName</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Sexe</label>
-                            <p class="form-control-plaintext">M</p>
+                            <p class="form-control-plaintext">
+                                @(Model.Genre == KineStat.Models.Gender.Homme ? "M" : Model.Genre == KineStat.Models.Gender.Femme ? "F" : "A")
+                            </p>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Date de naissance</label>
-                            <p class="form-control-plaintext">05/07/2001</p>
+                            <p class="form-control-plaintext">@Model.BirthDate.ToString("dd/MM/yyyy")</p>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Âge</label>
-                            <p class="form-control-plaintext">24 ans</p>
+                            <p class="form-control-plaintext">@((DateTime.Now.Year - Model.BirthDate.Year - (DateTime.Now.DayOfYear < Model.BirthDate.DayOfYear ? 1 : 0))) ans</p>
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Date de première évaluation</label>
-                            <p class="form-control-plaintext">28/10/2025</p>
+                            <p class="form-control-plaintext">@DateTime.Now.ToString("dd/MM/yyyy")</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Adresse</label>
-                            <p class="form-control-plaintext">Route D'orval 64, 08370 MARGUT'</p>
+                            <p class="form-control-plaintext">@(Model.Address ?? "Non renseignée")</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Téléphone</label>
-                            <p class="form-control-plaintext">+33 7 78 05 37 98</p>
+                            <p class="form-control-plaintext">@Model.PhoneNumber</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">N° INAMI du patient</label>
-                            <p class="form-control-plaintext">12345679801</p>
+                            <label class="form-label fw-bold">Email</label>
+                            <p class="form-control-plaintext">@Model.Email</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Médecin traitant</label>
-                            <p class="form-control-plaintext">Dr. Dupont</p>
+                            <p class="form-control-plaintext">@(Model.DoctorName ?? "Non renseigné")</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">N° INAMI du médecin</label>
-                            <p class="form-control-plaintext">98765432190</p>
+                            <p class="form-control-plaintext">@(Model.DoctorINAMI ?? "Non renseigné")</p>
                         </div>
                     </div>
                 </div>
