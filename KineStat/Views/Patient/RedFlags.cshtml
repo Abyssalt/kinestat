@@ -46,6 +46,7 @@
 </div>
 
 <script>
+
     //Load dynamically questions by their categoryId , it calls the controller but return datas in a partial view
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
@@ -53,6 +54,8 @@
         const html = await response.text();
         document.getElementById("questionnaireContainer").innerHTML = html;
         attachNoteToggleEvents();
+        attachAnswerListeners();
+        updateCategoryProgress();
     }
     //Add by default questions of first red flags  category when view is loaded for the first time
     document.addEventListener("DOMContentLoaded", () => {
@@ -75,6 +78,53 @@
             target.addEventListener('hidden.bs.collapse', () => {
                 btn.textContent = "Ajouter une note";
             });
+        });
+    }
+
+    /*
+    This function update the progression bar displayed for each Category of questions. 
+        It calculates the percentage of completion (completed answers) and update the bar accordingly
+        It also udpates the displayed text inside the bar X / y where x and y are the number of question answered on number
+        of question unanswered yet.
+    */
+     function updateCategoryProgress() {
+        const questions = document.querySelectorAll("#questionnaireContainer [name='question']");
+        if (!questions.length) return;
+
+        let answeredCount = 0;
+        const totalCount = questions.length;
+
+        questions.forEach(q => {
+            if (q.querySelector(".form-check-input:checked")) answeredCount++;
+        });
+
+        const progress = Math.round((answeredCount / questions.length) * 100);
+        const bar = document.getElementById("categoryProgressBar");
+        const text = document.getElementById("categoryProgressText");
+
+        if (bar) {
+            bar.style.width = progress + "%";
+            bar.textContent = `${answeredCount} / ${totalCount}`;
+        }
+        
+    }
+    /**
+        *  Attaches 'change' event listeners to every radio input belonging to a question 
+        * 
+        * This ensures that whenever a user selects an answer, the category progress bar
+        * is automatically updated.
+        *
+        * To avoid assigning multiple listeners to the same element (which would cause
+        * duplicated or repeated updates), each radio input receives a dataset flag
+        * (`listenerAdded`) after the listener is attached
+     */
+     function attachAnswerListeners() {
+        const radios = document.querySelectorAll("#questionnaireContainer [name='question'] input[type='radio']");
+        radios.forEach(radio => {
+            if (!radio.dataset.listenerAdded) {
+                radio.addEventListener("change", updateCategoryProgress);
+                radio.dataset.listenerAdded = "true";
+            }
         });
     }
 
