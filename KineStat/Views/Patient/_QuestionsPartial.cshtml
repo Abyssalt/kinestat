@@ -3,7 +3,10 @@
 @foreach (var question in Model)
 {
     <div class="mb-3 border p-3 rounded">
-        <p>@question.Title</p>
+        <p>@question.Title
+            <i class="bi bi-question-circle ms-2 text-primary"
+               title="RV+ : @question.RVPositif&#10;RV- : @question.RVNegatif"> </i>
+        </p>
 
         @if (question is QuestionBool qb)
         {
@@ -17,7 +20,7 @@
             </div>
         }
 
-        <button type="button" id="notes_button" class="btn btn-sm btn-outline-secondary mt-2"
+        <button type="button" id="notes_button_@question.Id" class="btn btn-sm btn-outline-secondary mt-2"
                 data-bs-toggle="collapse" data-bs-target="#notesContainer_@question.Id">
             Ajouter une note
         </button>
