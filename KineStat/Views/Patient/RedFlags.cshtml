@@ -46,29 +46,36 @@
 </div>
 
 <script>
-    document.querySelectorAll("[data-bs-toggle='collapse']").forEach(btn => {
-        const targetSelector = btn.getAttribute("data-bs-target");
-        const target = document.querySelector(targetSelector);
-
-        target.addEventListener('shown.bs.collapse', () => {
-            btn.textContent = "Masquer la note";
-        });
-
-        target.addEventListener('hidden.bs.collapse', () => {
-            btn.textContent = "Ajouter une note";
-        });
-    });
-    
     //Load dynamically questions by their categoryId , it calls the controller but return datas in a partial view
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
         const response = await fetch(`/Patient/${patientId}/GetRedFlagsQuestions?patientId=${patientId}&categoryId=${categoryId}`);
         const html = await response.text();
         document.getElementById("questionnaireContainer").innerHTML = html;
+        attachNoteToggleEvents();
     }
     //Add by default questions of first red flags  category when view is loaded for the first time
     document.addEventListener("DOMContentLoaded", () => {
         loadQuestionsByCategory(1);
     });
+
+     function attachNoteToggleEvents() {
+        document.querySelectorAll("[data-bs-toggle='collapse']").forEach(btn => {
+            if (btn.dataset.listenersAdded === "true") return;
+            btn.dataset.listenersAdded = "true";
+            const targetSelector = btn.getAttribute("data-bs-target");
+            const target = document.querySelector(targetSelector);
+
+            if (!target) return;
+
+            target.addEventListener('shown.bs.collapse', () => {
+                btn.textContent = "Masquer la note";
+            });
+
+            target.addEventListener('hidden.bs.collapse', () => {
+                btn.textContent = "Ajouter une note";
+            });
+        });
+    }
 
     </script>
