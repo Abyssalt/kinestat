@@ -9,6 +9,21 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/KineStat.styles.css" asp-append-version="true" />
     <script src="~/js/anamnese.js"></script>
+    <style>
+        .floating-info-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1030;
+        }
+        .floating-info-panel {
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 320px;
+            max-width: calc(100vw - 40px);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -78,6 +93,39 @@
             @RenderBody()
         </main>
     </div>
+
+    @if (ViewData["PatientId"] != null)
+    {
+        <div class="floating-info-container">
+            <div class="collapse floating-info-panel" id="floatingInfoPanel">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">
+                                <i class="bi bi-bar-chart-line text-warning"></i> Graphiques
+                            </h6>
+                            <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#floatingInfoPanel" aria-label="Close"></button>
+                        </div>
+                        <hr class="my-2">
+                        <div class="floating-info-content" style="max-height: 300px; overflow-y: auto;">
+                            <p class="small mb-2"><strong>Contenu à venir</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary rounded-circle shadow"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#floatingInfoPanel"
+                    aria-expanded="false"
+                    aria-controls="floatingInfoPanel"
+                    style="width: 50px; height: 50px;">
+                <i class="bi bi-eye-fill fs-5"></i>
+            </button>
+        </div>
+    }
+
     <footer class="border-top footer text-muted">
         <div class="container">
             <div class="text-center py-1">
