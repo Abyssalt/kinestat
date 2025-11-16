@@ -93,7 +93,7 @@
     });
 
      function attachNoteToggleEvents() {
-        document.querySelectorAll("[data-bs-toggle='collapse']").forEach(btn => {
+        document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
             if (btn.dataset.listenersAdded === "true") return;
             btn.dataset.listenersAdded = "true";
             const targetSelector = btn.getAttribute("data-bs-target");
