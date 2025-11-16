@@ -1,7 +1,9 @@
-﻿@{
+﻿@model IEnumerable<Question> 
+@{
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
+    
    // ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
 }
 
@@ -11,19 +13,21 @@
 
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
     <ol class="breadcrumb" id="breadcrumbTINTIV">
-        <li class="breadcrumb-item active" aria-current="page"><a href="#" onclick="loadQuestionnaire('Toutes')">Toutes</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Tumeur / Métastase')">Tumeur / Métastase</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Infection')">Infection</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Neurologique')">Neurologique</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Traumatisme / Fracture')">Traumatisme / Fracture</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Inflammatoire')">Inflammatoire</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Vasculaire / Circulatoire')">Vasculaire / Circulatoire</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(1)">Tumeur / Métastase</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(2)">Infection</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(3)">Neurologique</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(4)">Traumatisme / Fracture</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(5)">Inflammatoire</a></li>
+        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(6)">Vasculaire / Circulatoire</a></li>
 
     </ol>
 </nav>
+
+
 <div id="baseContainer" class="container mt-4">
     <div class="row">
-        <div id="questionnaireContainer" class="col-md-8"></div>
+        <div id="questionnaireContainer" class="col-md-8">
+        </div>
         <div id="testsContainer" class="col-md-4">
             <h4>Tests suggérés</h4>
             <ul class="list-group">
@@ -40,84 +44,127 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="redFlagCriticalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger shadow-lg">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Alerte Red Flag Critique</h5>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                    Un seuil de redflags grave a été detecté. Souhaitez vous continuer le bilan ? 
+                </p>
+                <p class="text-muted">
+                    Vous pouvez poursuivre le questionnaire ou passer immédiatement aux résultats.
+                </p>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Continuer
+                </button>
+
+                <a id="redirectToSummaryBtn"
+                   class="btn btn-danger text-white">
+                    Arrêter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    const patientId = @patientId;
 
-    async function loadQuestionnaire(category) {
-        const response = await fetch(`/Patient/${patientId}/GetQuestions`);
-        const data = await response.json();
-        const container = document.getElementById('questionnaireContainer');
-        container.innerHTML = '';
+    //Load dynamically questions by their categoryId , it calls the controller but return datas in a partial view
+    async function loadQuestionsByCategory(categoryId) {
+        const patientId = @patientId;
+        const response = await fetch(`/Patient/${patientId}/GetRedFlagsQuestions?patientId=${patientId}&categoryId=${categoryId}`);
+        const html = await response.text();
+        document.getElementById("questionnaireContainer").innerHTML = html;
+        attachNoteToggleEvents();
+        attachAnswerListeners();
+        updateCategoryProgress();
+    }
+    //Add by default questions of first red flags  category when view is loaded for the first time
+    document.addEventListener("DOMContentLoaded", () => {
+        loadQuestionsByCategory(1);
+    });
 
-        for (const subCategory in data) {
-            if (category !== "Toutes" && subCategory !== category) continue;
-            const questions = data[subCategory];
+     function attachNoteToggleEvents() {
+        document.querySelectorAll("[data-bs-toggle='collapse']").forEach(btn => {
+            if (btn.dataset.listenersAdded === "true") return;
+            btn.dataset.listenersAdded = "true";
+            const targetSelector = btn.getAttribute("data-bs-target");
+            const target = document.querySelector(targetSelector);
 
-            const subCatDiv = document.createElement('div');
-            subCatDiv.classList.add('mb-4');
+            if (!target) return;
 
-            const title = document.createElement('h5');
-            title.textContent = subCategory;
-            subCatDiv.appendChild(title);
-
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.classList.add('mb-3', 'border', 'p-3', 'rounded');
-
-                const questionText = document.createElement('p');
-                questionText.innerHTML = `${q.question}`;
-                questionDiv.appendChild(questionText);
-
-                if (q.options && q.options.length > 0) {
-                    q.options.forEach(opt => {
-                        const div = document.createElement('div');
-                        div.classList.add('form-check');
-                        div.innerHTML = `
-                            <input class="form-check-input" type="radio" name="q_${index}" value="${opt}">
-                            <label class="form-check-label">${opt}</label>
-                        `;
-                        questionDiv.appendChild(div);
-                    });
-                }
-
-                // Bouton notes dépliables
-                const toggleBtn = document.createElement('button');
-                toggleBtn.type = 'button';
-                toggleBtn.classList.add('btn','btn-sm','btn-outline-secondary','mt-2');
-                toggleBtn.textContent = 'Ajouter une note';
-                questionDiv.appendChild(toggleBtn);
-
-                const notesContainer = document.createElement('div');
-                notesContainer.style.display = 'none';
-                notesContainer.classList.add('mt-2');
-
-                const notesLabel = document.createElement('label');
-                notesLabel.textContent = 'Notes :';
-                notesContainer.appendChild(notesLabel);
-
-                const textarea = document.createElement('textarea');
-                textarea.classList.add('form-control');
-                textarea.name = `notes_${index}`;
-                textarea.placeholder = 'Notes (optionnel)';
-                notesContainer.appendChild(textarea);
-
-                questionDiv.appendChild(notesContainer);
-
-                toggleBtn.addEventListener('click', () => {
-                    if (notesContainer.style.display === 'none') {
-                        notesContainer.style.display = 'block';
-                        toggleBtn.textContent = 'Masquer la note';
-                    } else {
-                        notesContainer.style.display = 'none';
-                        toggleBtn.textContent = 'Ajouter une note';
-                    }
-                });
-
-                subCatDiv.appendChild(questionDiv);
+            target.addEventListener('shown.bs.collapse', () => {
+                btn.textContent = "Masquer la note";
             });
 
-            container.appendChild(subCatDiv);
-        }
+            target.addEventListener('hidden.bs.collapse', () => {
+                btn.textContent = "Ajouter une note";
+            });
+        });
     }
-     document.addEventListener('DOMContentLoaded', loadQuestionnaire('Toutes'));
-</script>
+
+    /*
+    This function update the progression bar displayed for each Category of questions. 
+        It calculates the percentage of completion (completed answers) and update the bar accordingly
+        It also udpates the displayed text inside the bar X / y where x and y are the number of question answered on number
+        of question unanswered yet.
+    */
+     function updateCategoryProgress() {
+        const questions = document.querySelectorAll("#questionnaireContainer [name='question']");
+        if (!questions.length) return;
+
+        let answeredCount = 0;
+        const totalCount = questions.length;
+
+        questions.forEach(q => {
+            if (q.querySelector(".form-check-input:checked")) answeredCount++;
+        });
+
+        const progress = Math.round((answeredCount / questions.length) * 100);
+        const bar = document.getElementById("categoryProgressBar");
+        const text = document.getElementById("categoryProgressText");
+
+        if (bar) {
+            bar.style.width = progress + "%";
+            bar.textContent = `${answeredCount} / ${totalCount}`;
+        }
+       
+        
+    }
+    /**
+        *  Attaches 'change' event listeners to every radio input belonging to a question 
+        * 
+        * This ensures that whenever a user selects an answer, the category progress bar
+        * is automatically updated.
+        *
+        * To avoid assigning multiple listeners to the same element (which would cause
+        * duplicated or repeated updates), each radio input receives a dataset flag
+        * (`listenerAdded`) after the listener is attached
+     */
+     function attachAnswerListeners() {
+        const radios = document.querySelectorAll("#questionnaireContainer [name='question'] input[type='radio']");
+        radios.forEach(radio => {
+            if (!radio.dataset.listenerAdded) {
+                radio.addEventListener("change", updateCategoryProgress);
+                radio.dataset.listenerAdded = "true";
+            }
+        });
+    }
+
+    function showCriticalRedFlagModal(patientId) {
+        const btn = document.getElementById("redirectToSummaryBtn");
+        btn.href = `/Patient/${patientId}/Resultat`;
+
+        const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
+        modal.show();
+         }
+
+    </script>

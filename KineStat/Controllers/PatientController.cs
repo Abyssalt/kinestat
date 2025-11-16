@@ -1,13 +1,16 @@
-﻿using KineStat.Data;
+﻿using KineStat.Models;
+using KineStat.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace KineStat.Controllers
 {
+    [Route("Patient/{id}/{action}")]
     public class PatientController : Controller
     {
         private readonly KineDbContext _context;
-
+        
+    
         public PatientController(KineDbContext context)
         {
             _context = context;
@@ -32,51 +35,56 @@ namespace KineStat.Controllers
         public IActionResult RedFlags(int id)
         {
             ViewData["PatientId"] = id.ToString();
-            return View();
+            return View(GetSimulatedQuestions());
+        }
+
+        //Private method used to get simulated 
+        private List<QuestionBool> GetSimulatedQuestions()
+        {
+            int idCounter = 0;
+            var questions = new List<QuestionBool>
+            {
+                 // Tumeur / Métastase : Type = 1
+                 new QuestionBool { Id = idCounter++, Title = "Antécédent personnel de cancer (localisation/année)", RVPositif = 14.7, RVNegatif = 0, Type = "1" },
+                 new QuestionBool { Id = idCounter++, Title = "Perte de poids inexpliquée (>5% en 3–6 mois)", RVPositif = 9.2, RVNegatif = 0, Type = "1" },
+                 new QuestionBool { Id = idCounter++, Title = "Douleur nocturne sévère, réveillant le patient", RVPositif = 33.25, RVNegatif = 0, Type = "1" },
+                 new QuestionBool { Id = idCounter++, Title = "Douleur progressive sans amélioration malgré traitement (>4 semaines)", RVPositif = 3.1, RVNegatif = 0.8, Type = "1" },
+
+                 // Infection  :Type = 2
+                 new QuestionBool { Id = idCounter++, Title = "Fièvre ≥ 38 °C ou frissons récents", RVPositif = 68.8, RVNegatif = 0, Type = "2" },
+                 new QuestionBool {Id = idCounter++, Title = "Signes systémiques d’infection (sueurs nocturnes, fatigue importante)", RVPositif = 1.8, RVNegatif = 1, Type = "2" },
+                 new QuestionBool { Id = idCounter++, Title = "Antécédent récent d’infection ou chirurgie/épisiotomie", RVPositif = 4, RVNegatif = 0.6, Type = "2" },
+                 new QuestionBool { Id = idCounter++, Title = "Immunodépression documentée (corticothérapie chronique)", RVPositif = 48.5, RVNegatif = 0.8, Type = "2" },
+
+                 // Neurologique :  Type = 3
+                 new QuestionBool { Id = idCounter++, Title = "Anesthésie en selle / hypoesthésie périnéale", RVPositif = 1.7, RVNegatif = 0.7, Type = "3" },
+                 new QuestionBool {Id = idCounter++,  Title = "Rétention urinaire récente ou incontinence fécale / urinaire.", RVPositif = 5.85, RVNegatif = 0.6, Type = "3" }, // moyenne 2 à 8,7
+                 new QuestionBool { Id = idCounter++, Title = "Faiblesse motrice aiguë ou progressive des membres inférieurs (MRC ≤ 3) ou chute récente", RVPositif = 9.4, RVNegatif = 0.1, Type = "3" },
+                 new QuestionBool { Id = idCounter++, Title = "Troubles de la marche rapides ou signes pyramidaux / trouble coordination", RVPositif = 3, RVNegatif = 0.4, Type = "3" }
+             };
+
+            return questions;
         }
 
         [HttpGet]
-        public IActionResult GetQuestions(int patientId/* ,int categoryId*/)
+        public IActionResult GetRedFlagsQuestions(int patientId, int? categoryId)
         {
-            //TODO : recuperer les questions via leur categorie TINTIV via ADO puis les convertir en JSON (il existe fonction Json pour faire ça)
+            ViewData["redflagsPercentage"] = 0.0;
+            List<QuestionBool> questions = GetSimulatedQuestions();
+            if (categoryId != null)
+            {
+                List<QuestionBool> filtredQuestions = new List<QuestionBool>();
+                String category = categoryId.ToString();
+                if (questions != null)
+                {
+                    filtredQuestions = questions
+                        .Where(q => q.Type == category)
+                        .ToList();
+                    return PartialView("_QuestionsPartial", filtredQuestions);
+                }
 
-            // Données simulées 
-            var data = new List<dynamic>
-        {
-            new { Category = "Tumeur / Métastase", Question="Antécédent personnel de cancer (localisation/année)", ExpectedData="Oui / Non", RvPlus="14,7", RvMinus=(string)null },
-            new { Category = "Tumeur / Métastase", Question="Perte de poids inexpliquée (>5% en 3–6 mois)", ExpectedData="Oui / Non", RvPlus="9,2", RvMinus=(string)null },
-            new { Category = "Tumeur / Métastase", Question="Douleur nocturne sévère, réveillant le patient", ExpectedData="Oui / Non", RvPlus="33,25", RvMinus=(string)null },
-            new { Category = "Tumeur / Métastase", Question="Douleur progressive sans amélioration malgré traitement (>4 semaines)", ExpectedData="Oui / Non", RvPlus="3,1", RvMinus="0,8" },
-
-            new { Category = "Infection", Question="Fièvre ≥ 38 °C ou frissons récents", ExpectedData="Oui / Non", RvPlus="68,8", RvMinus=(string)null },
-            new { Category = "Infection", Question="Signes systémiques d’infection (sueurs nocturnes, fatigue importante)", ExpectedData="Oui / Non", RvPlus="1,8", RvMinus="1" },
-            new { Category = "Infection", Question="Antécédent récent d’infection ou chirurgie/épisiotomie", ExpectedData="Oui / Non", RvPlus="4", RvMinus="0,6" },
-            new { Category = "Infection", Question="Immunodépression documentée (corticothérapie chronique)", ExpectedData="Oui / Non", RvPlus="48,5", RvMinus="0,8" },
-
-            new { Category = "Neurologique", Question="Anesthésie en selle / hypoesthésie périnéale", ExpectedData="Oui / Non", RvPlus="1,7", RvMinus="0,7" },
-            new { Category = "Neurologique", Question="Rétention urinaire récente ou incontinence fécale / urinaire.", ExpectedData="Oui / Non", RvPlus="2 à 8,7", RvMinus="0,6" },
-            new { Category = "Neurologique", Question="Faiblesse motrice aiguë ou progressive des membres inférieurs (MRC ≤ 3) ou chute récente", ExpectedData="Oui / Non", RvPlus="9,4", RvMinus="0,1" },
-            new { Category = "Neurologique", Question="Troubles de la marche rapides ou signes pyramidaux / trouble coordination", ExpectedData="Oui / Non", RvPlus="3", RvMinus="0,4" }
-        };
-
-            // Transformation en JSON structure en categorie directement
-            var result = data
-                .GroupBy(d => d.Category)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(q => new {
-                        q.Question,
-                        Type = q.Category,
-                        q.ExpectedData,
-                        Options = q.ExpectedData?.Split(" / ") ?? new string[0],
-                        q.RvPlus,
-                        q.RvMinus,
-                        Notes = (string)null
-                    }).ToList()
-                );
-
-            return Json(result);
-
+            }
+            return PartialView("_QuestionsPartial", questions);
         }
 
         public IActionResult GetQuestionsClinique(int patientId/* ,int categoryId*/)
