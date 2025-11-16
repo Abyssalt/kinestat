@@ -44,6 +44,36 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="redFlagCriticalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger shadow-lg">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Alerte Red Flag Critique</h5>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                    Un seuil de redflags grave a été detecté. Souhaitez vous continuer le bilan ? 
+                </p>
+                <p class="text-muted">
+                    Vous pouvez poursuivre le questionnaire ou passer immédiatement aux résultats.
+                </p>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Continuer
+                </button>
+
+                <a id="redirectToSummaryBtn"
+                   class="btn btn-danger text-white">
+                    Arrêter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 
@@ -106,6 +136,7 @@
             bar.style.width = progress + "%";
             bar.textContent = `${answeredCount} / ${totalCount}`;
         }
+       
         
     }
     /**
@@ -127,5 +158,13 @@
             }
         });
     }
+
+    function showCriticalRedFlagModal(patientId) {
+        const btn = document.getElementById("redirectToSummaryBtn");
+        btn.href = `/Patient/${patientId}/Resultat`;
+
+        const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
+        modal.show();
+         }
 
     </script>
