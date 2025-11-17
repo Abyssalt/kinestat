@@ -8,11 +8,8 @@ namespace KineStat.Models {
         public string Name { get; set; }
         public double Prior { get; set; }
 
-        public int? CategorieId { get; set; }
-        public virtual Category? Category { get; set; }
 
-        public int? RedFlagId { get; set; }
-        public virtual Redflag? RedFlag { get; set; }
+        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
     }
 
 }
