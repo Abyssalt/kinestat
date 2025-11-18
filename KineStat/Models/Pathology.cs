@@ -8,8 +8,10 @@ namespace KineStat.Models {
         public string Name { get; set; }
         public double Prior { get; set; }
 
+        public virtual List<Question> Questions { get; set; } 
 
-        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+        public int? RedFlagId { get; set; }
+        public virtual Redflag? RedFlag { get; set; }
     }
 
 }

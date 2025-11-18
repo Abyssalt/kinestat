@@ -11,10 +11,6 @@ namespace KineStat.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Pathology_Category_CategoryId",
-                table: "Pathology");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_Pathology_Redflag_RedFlagId",
                 table: "Pathology");
 
@@ -22,17 +18,6 @@ namespace KineStat.Migrations
                 name: "FK_Redflag_Category_CategoryId",
                 table: "Redflag");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Pathology_CategoryId",
-                table: "Pathology");
-
-            migrationBuilder.DropColumn(
-                name: "CategorieId",
-                table: "Pathology");
-
-            migrationBuilder.DropColumn(
-                name: "CategoryId",
-                table: "Pathology");
 
             migrationBuilder.RenameColumn(
                 name: "RedFlagId",
