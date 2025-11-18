@@ -99,14 +99,120 @@
             <div class="card-header bg-secondary text-white align-content-center">
                 <h5 class="mb-0"><i class="bi bi-pentagon"></i> Profil clinique</h5>
             </div>
-            <div class="card-body text-center">
-                <img src="~/images/Diagramme en araignee 9.png" style="max-width: 500px;" />
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-6 mb-4">
+                        <h6 class="fw-bold">Profil clinique (9 catégories)</h6>
+                        <div style="height: 350px;">
+                            <canvas id="radarChart9" height="350"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <h6 class="fw-bold">TINTIV (6 catégories)</h6>
+                        <div style="height: 350px;">
+                            <canvas id="radarChart6" height="350"></canvas>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
+
     <div class="d-flex justify-content-end mb-5">
         <button type="button" class="btn btn-primary btn-lg">
             <i class="bi bi-save"></i> Enregistrer
         </button>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const defaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+                line: { tension: 0.3 },
+                point: { radius: 5, hoverRadius: 7 }
+            },
+            scales: {
+                r: {
+                    min: 0,
+                    grid: {
+                        color: "rgba(0,0,0,0.1)"
+                    },
+                    angleLines: {
+                        color: "rgba(0,0,0,0.2)"
+                    },
+                    ticks: {
+                        backdropColor: "transparent",
+                        showLabelBackdrop: false
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        };
+
+        new Chart(document.getElementById("radarChart9"), {
+            type: 'radar',
+            data: {
+                labels: [
+                    "Articulaire/structurel",
+                    "Myofascial",
+                    "Nociceptif",
+                    "Neuropathique",
+                    "Nociplastique",
+                    "Contrôle sensorimoteur",
+                    "Croyance & cognition",
+                    "Socio-environnemental",
+                    "Émotionnel/Affectif"
+                ],
+                datasets: [{
+                    label: "Profil clinique",
+                    data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
+                    backgroundColor: "rgba(13,110,253,0.25)",
+                    borderColor: "rgb(13,110,253)",
+                    borderWidth: 3,
+                    pointBackgroundColor: "rgb(13,110,253)",
+                    pointBorderColor: "#fff"
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 10, ticks: { stepSize: 10, backdropColor: "transparent" } } }, plugins: { legend: { display: false } }
+            }
+        });
+
+        new Chart(document.getElementById("radarChart6"), {
+            type: 'radar',
+            data: {
+                labels: [
+                    "Tumeur",
+                    "Infection",
+                    "Neurologique",
+                    "Traumatisme",
+                    "Inflammatoire",
+                    "Vasculaire"
+                ],
+                datasets: [{
+                    label: "Profil TINTIV",
+                    data: [3, 10, 2, 8, 7, 1],
+                    backgroundColor: "rgba(255,99,132,0.25)",
+                    borderColor: "rgb(255,99,132)",
+                    borderWidth: 3,
+                    pointBackgroundColor: "rgb(255,99,132)",
+                    pointBorderColor: "#fff"
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 10, ticks: { stepSize: 10, backdropColor: "transparent" } } }, plugins: { legend: { display: false } }
+            }
+        });
+
+    });
+</script>
+
+

@@ -93,7 +93,21 @@
             @RenderBody()
         </main>
     </div>
+<style>
+    .floating-info-panel {
+        position: absolute;
+        bottom: 60px;
+        right: 0;
+        width: 650px !important;
+        height: 650px !important;
+        max-width: 90vw;
+        max-height: 90vh;
+    }
 
+    .floating-info-content {
+        height: 580px !important;
+    }
+</style>
     @if (ViewData["PatientId"] != null)
     {
         <div class="floating-info-container">
@@ -107,8 +121,9 @@
                             <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#floatingInfoPanel" aria-label="Close"></button>
                         </div>
                         <hr class="my-2">
-                        <div class="floating-info-content" style="max-height: 300px; overflow-y: auto;">
-                            <p class="small mb-2"><strong>Contenu à venir</strong></p>
+                        <div class="floating-info-content" style="max-height: 80%; overflow-y: auto;">
+                            <canvas id="radarChart9" width="80%" height="80%"></canvas>
+
                         </div>
                     </div>
                 </div>
@@ -136,6 +151,85 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const canvas = document.getElementById("radarChart9");
+
+            if (!canvas) {
+                console.error("Canvas radarChart9 introuvable !");
+                return;
+            }
+
+            new Chart(canvas, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        "Articulaire/structurel",
+                        "Myofascial",
+                        "Nociceptif",
+                        "Neuropathique",
+                        "Nociplastique",
+                        "Contrôle sensorimoteur",
+                        "Croyance & cognition",
+                        "Socio-environnemental",
+                        "Émotionnel/Affectif"
+                    ],
+                    datasets: [{
+                        label: "Profil du patient",
+                        data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
+
+                        backgroundColor: "rgba(54,162,235,0.25)",
+                        borderColor: "rgb(54,162,235)",
+                        borderWidth: 3,
+
+                        pointBackgroundColor: "rgb(54,162,235)",
+                        pointBorderColor: "#fff",
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2,
+                                backdropColor: "transparent",
+                                color: "#666",
+                                font: { size: 12 }
+                            },
+                            grid: {
+                                color: "rgba(0,0,0,0.1)"
+                            },
+                            angleLines: {
+                                color: "rgba(0,0,0,0.15)"
+                            },
+                            pointLabels: {
+                                color: "#333",
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251114101939_FixTableNames")]
+    partial class FixTableNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,7 +132,7 @@ namespace KineStat.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
@@ -157,6 +160,9 @@ namespace KineStat.Migrations
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("Prior")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
@@ -193,6 +199,9 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CategorieId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("CategoryId")
                         .HasColumnType("integer");
 
@@ -223,17 +232,8 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("BirthDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("DoctorINAMI")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DoctorName")
-                        .HasColumnType("text");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -325,9 +325,6 @@ namespace KineStat.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("character varying(21)");
 
-                    b.Property<int?>("PathologyId")
-                        .HasColumnType("integer");
-
                     b.Property<double>("RVNegatif")
                         .HasColumnType("double precision");
 
@@ -351,8 +348,6 @@ namespace KineStat.Migrations
 
                     b.HasIndex("ClusterId");
 
-                    b.HasIndex("PathologyId");
-
                     b.HasIndex("RedflagId");
 
                     b.ToTable("Question");
@@ -373,7 +368,7 @@ namespace KineStat.Migrations
                     b.Property<int?>("BilanId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -487,26 +482,26 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Pathology", b =>
                 {
-                    b.HasOne("KineStat.Models.Category", null)
-                        .WithMany("Pathologies")
+                    b.HasOne("KineStat.Models.Category", "Category")
+                        .WithMany()
                         .HasForeignKey("CategoryId");
 
                     b.HasOne("KineStat.Models.Redflag", "RedFlag")
-                        .WithMany("Pathologies")
+                        .WithMany()
                         .HasForeignKey("RedFlagId");
+
+                    b.Navigation("Category");
 
                     b.Navigation("RedFlag");
                 });
 
             modelBuilder.Entity("KineStat.Models.Patient", b =>
                 {
-                    b.HasOne("KineStat.Models.Physio", "Physio")
+                    b.HasOne("KineStat.Models.Physio", null)
                         .WithMany("Patients")
                         .HasForeignKey("PhysioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Physio");
                 });
 
             modelBuilder.Entity("KineStat.Models.Question", b =>
@@ -520,10 +515,6 @@ namespace KineStat.Migrations
                     b.HasOne("KineStat.Models.Cluster", "Cluster")
                         .WithMany("Questions")
                         .HasForeignKey("ClusterId");
-
-                    b.HasOne("KineStat.Models.Pathology", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("PathologyId");
 
                     b.HasOne("KineStat.Models.Redflag", "Redflag")
                         .WithMany("Questions")
@@ -542,7 +533,9 @@ namespace KineStat.Migrations
 
                     b.HasOne("KineStat.Models.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Category");
                 });
@@ -557,16 +550,9 @@ namespace KineStat.Migrations
             modelBuilder.Entity("KineStat.Models.Category", b =>
                 {
                     b.Navigation("Clusters");
-
-                    b.Navigation("Pathologies");
                 });
 
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
-                {
-                    b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("KineStat.Models.Pathology", b =>
                 {
                     b.Navigation("Questions");
                 });
@@ -585,8 +571,6 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Redflag", b =>
                 {
-                    b.Navigation("Pathologies");
-
                     b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618

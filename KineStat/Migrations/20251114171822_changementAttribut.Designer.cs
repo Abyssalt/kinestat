@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251114171822_changementAttribut")]
+    partial class changementAttribut
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,6 +25,21 @@ namespace KineStat.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CategoryPathology", b =>
+                {
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PathologiesId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CategoriesId", "PathologiesId");
+
+                    b.HasIndex("PathologiesId");
+
+                    b.ToTable("CategoryPathology");
+                });
 
             modelBuilder.Entity("KineStat.Models.AnswerBool", b =>
                 {
@@ -129,7 +147,7 @@ namespace KineStat.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("date");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
@@ -193,9 +211,6 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -203,14 +218,12 @@ namespace KineStat.Migrations
                     b.Property<double>("Prior")
                         .HasColumnType("double precision");
 
-                    b.Property<int?>("RedFlagId")
+                    b.Property<int?>("RedflagId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("RedFlagId");
+                    b.HasIndex("RedflagId");
 
                     b.ToTable("Pathology");
                 });
@@ -223,17 +236,8 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("BirthDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("DoctorINAMI")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DoctorName")
-                        .HasColumnType("text");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -325,9 +329,6 @@ namespace KineStat.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("character varying(21)");
 
-                    b.Property<int?>("PathologyId")
-                        .HasColumnType("integer");
-
                     b.Property<double>("RVNegatif")
                         .HasColumnType("double precision");
 
@@ -350,8 +351,6 @@ namespace KineStat.Migrations
                     b.HasIndex("BilanID");
 
                     b.HasIndex("ClusterId");
-
-                    b.HasIndex("PathologyId");
 
                     b.HasIndex("RedflagId");
 
@@ -426,6 +425,21 @@ namespace KineStat.Migrations
                     b.HasDiscriminator().HasValue("QuestionQCM");
                 });
 
+            modelBuilder.Entity("CategoryPathology", b =>
+                {
+                    b.HasOne("KineStat.Models.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Pathology", null)
+                        .WithMany()
+                        .HasForeignKey("PathologiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("KineStat.Models.AnswerBool", b =>
                 {
                     b.HasOne("KineStat.Models.Question", "Question")
@@ -487,26 +501,18 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Pathology", b =>
                 {
-                    b.HasOne("KineStat.Models.Category", null)
+                    b.HasOne("KineStat.Models.Redflag", null)
                         .WithMany("Pathologies")
-                        .HasForeignKey("CategoryId");
-
-                    b.HasOne("KineStat.Models.Redflag", "RedFlag")
-                        .WithMany("Pathologies")
-                        .HasForeignKey("RedFlagId");
-
-                    b.Navigation("RedFlag");
+                        .HasForeignKey("RedflagId");
                 });
 
             modelBuilder.Entity("KineStat.Models.Patient", b =>
                 {
-                    b.HasOne("KineStat.Models.Physio", "Physio")
+                    b.HasOne("KineStat.Models.Physio", null)
                         .WithMany("Patients")
                         .HasForeignKey("PhysioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Physio");
                 });
 
             modelBuilder.Entity("KineStat.Models.Question", b =>
@@ -520,10 +526,6 @@ namespace KineStat.Migrations
                     b.HasOne("KineStat.Models.Cluster", "Cluster")
                         .WithMany("Questions")
                         .HasForeignKey("ClusterId");
-
-                    b.HasOne("KineStat.Models.Pathology", null)
-                        .WithMany("Questions")
-                        .HasForeignKey("PathologyId");
 
                     b.HasOne("KineStat.Models.Redflag", "Redflag")
                         .WithMany("Questions")
@@ -557,16 +559,9 @@ namespace KineStat.Migrations
             modelBuilder.Entity("KineStat.Models.Category", b =>
                 {
                     b.Navigation("Clusters");
-
-                    b.Navigation("Pathologies");
                 });
 
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
-                {
-                    b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("KineStat.Models.Pathology", b =>
                 {
                     b.Navigation("Questions");
                 });

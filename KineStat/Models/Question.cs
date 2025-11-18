@@ -17,15 +17,16 @@ namespace KineStat.Models
 
 
         public double RVPositif { get; set; } = 0;
-
-
         public double RVNegatif { get; set; } = 0;
 
         public int? ClusterId { get; set; }
-
-        public virtual Cluster Cluster { get; set; }
+        public virtual Cluster? Cluster { get; set; }
 
         public int BilanID { get; set; }
+
+        public int? RedflagId { get; set; }
+        public virtual Redflag Redflag { get; set; }
+
     }
 
 }
