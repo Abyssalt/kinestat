@@ -77,7 +77,7 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-warning" title="Modifier"
-                                                onclick="editPatient(@patient.Id, '@patient.LastName', '@patient.FirstName', '@patient.Email', '@patient.PhoneNumber', @((int)patient.Genre), '@patient.BirthDate.ToString("yyyy-MM-dd")', @patient.PhysioId, @(patient.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @(patient.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), '@(patient.DoctorName ?? "")', '@(patient.DoctorINAMI ?? "")', '@(patient.Address ?? "")')">
+                                                onclick="editPatient(@patient.Id, '@patient.LastName', '@patient.FirstName', '@patient.Email', '@patient.PhoneNumber', @((int)patient.Genre), '@patient.BirthDate.ToString("yyyy-MM-dd")', @patient.SocialSecurityNumber, @patient.PhysioId, @(patient.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), @(patient.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), '@(patient.DoctorName ?? "")', '@(patient.DoctorINAMI ?? "")', '@(patient.Address ?? "")')">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id" method="post" style="display:inline;">
@@ -112,36 +112,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form asp-controller="Patients" asp-action="Create" method="post">
+                <form id="addPatientForm">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" id="add_PatientId" value="">
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nom *</label>
-                            <input type="text" class="form-control" name="LastName" required>
+                            <input type="text" class="form-control auto-save-field" name="LastName" data-field="LastName" data-validation="text" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
-                            <input type="text" class="form-control" name="FirstName" required>
+                            <input type="text" class="form-control auto-save-field" name="FirstName" data-field="FirstName" data-validation="text" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email *</label>
-                            <input type="email" class="form-control" name="Email" required>
+                            <input type="email" class="form-control auto-save-field" name="Email" data-field="Email" data-validation="email" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Téléphone *</label>
-                            <input type="tel" class="form-control" name="PhoneNumber" required>
+                            <input type="tel" class="form-control auto-save-field" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Adresse du patient</label>
-                        <textarea class="form-control" name="Address" rows="2" placeholder="Ex: Rue de la Paix 123, 1000 Bruxelles"></textarea>
+                        <textarea class="form-control auto-save-field" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Genre *</label>
-                            <select class="form-select" name="Genre" required>
+                            <select class="form-select auto-save-field" name="Genre" data-field="Genre" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -150,11 +152,17 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Date de naissance *</label>
-                            <input type="date" class="form-control" name="BirthDate" required>
+                            <input type="date" class="form-control auto-save-field" name="BirthDate" data-field="BirthDate" data-validation="date" required>
                         </div>
                         <div class="col-md-4 mb-3">
+                            <label class="form-label">N° Sécurité sociale *</label>
+                            <input type="number" class="form-control auto-save-field" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Kinésithérapeute *</label>
-                            <select class="form-select" name="PhysioId" required>
+                            <select class="form-select auto-save-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
                                 <option value="">-- Sélectionner un kiné --</option>
                                 @if (ViewBag.Physios != null)
                                 {
@@ -169,28 +177,31 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Poids (kg)</label>
-                            <input type="number" step="0.1" class="form-control" name="Weight" placeholder="Ex: 70.5">
+                            <input type="number" step="0.1" class="form-control auto-save-field" name="Weight" data-field="Weight" data-validation="decimal">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Taille (cm)</label>
-                            <input type="number" step="0.1" class="form-control" name="Height" placeholder="Ex: 175">
+                            <input type="number" step="0.1" class="form-control auto-save-field" name="Height" data-field="Height" data-validation="decimal">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Médecin traitant</label>
-                            <input type="text" class="form-control" name="DoctorName" placeholder="Ex: Dr. Dupont">
+                            <input type="text" class="form-control auto-save-field" name="DoctorName" data-field="DoctorName" data-validation="text">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">N° INAMI du médecin</label>
-                            <input type="text" class="form-control" name="DoctorINAMI" placeholder="Ex: 1-12345-67-890">
+                            <input type="text" class="form-control auto-save-field" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Créer</button>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Les champs se sauvegardent automatiquement. Le patient sera créé quand tous les champs obligatoires (*) sont correctement remplis.
                     </div>
+                    <div id="saveStatus" class="alert" style="display: none;"></div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
@@ -205,37 +216,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="editPatientForm" asp-controller="Patients" asp-action="Edit" method="post">
+                <form id="editPatientForm">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="edit_Id" name="Id">
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nom *</label>
-                            <input type="text" class="form-control" id="edit_LastName" name="LastName" required>
+                            <input type="text" class="form-control auto-save-edit-field" id="edit_LastName" name="LastName" data-field="LastName" data-validation="text" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
-                            <input type="text" class="form-control" id="edit_FirstName" name="FirstName" required>
+                            <input type="text" class="form-control auto-save-edit-field" id="edit_FirstName" name="FirstName" data-field="FirstName" data-validation="text" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="edit_Email" name="Email" required>
+                            <input type="email" class="form-control auto-save-edit-field" id="edit_Email" name="Email" data-field="Email" data-validation="email" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Téléphone *</label>
-                            <input type="tel" class="form-control" id="edit_PhoneNumber" name="PhoneNumber" required>
+                            <input type="tel" class="form-control auto-save-edit-field" id="edit_PhoneNumber" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Adresse du patient</label>
-                        <textarea class="form-control" id="edit_Address" name="Address" rows="2" placeholder="Ex: Rue de la Paix 123, 1000 Bruxelles"></textarea>
+                        <textarea class="form-control auto-save-edit-field" id="edit_Address" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Genre *</label>
-                            <select class="form-select" id="edit_Genre" name="Genre" required>
+                            <select class="form-select auto-save-edit-field" id="edit_Genre" name="Genre" data-field="Genre" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -244,11 +256,17 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Date de naissance *</label>
-                            <input type="date" class="form-control" id="edit_BirthDate" name="BirthDate" required>
+                            <input type="date" class="form-control auto-save-edit-field" id="edit_BirthDate" name="BirthDate" data-field="BirthDate" data-validation="date" required>
                         </div>
                         <div class="col-md-4 mb-3">
+                            <label class="form-label">N° Sécurité sociale *</label>
+                            <input type="number" class="form-control auto-save-edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label">Kinésithérapeute *</label>
-                            <select class="form-select" id="edit_PhysioId" name="PhysioId" required>
+                            <select class="form-select auto-save-edit-field" id="edit_PhysioId" name="PhysioId" data-field="PhysioId" data-validation="select" required>
                                 <option value="">-- Sélectionner un kiné --</option>
                                 @if (ViewBag.Physios != null)
                                 {
@@ -263,36 +281,339 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Poids (kg)</label>
-                            <input type="number" step="0.1" class="form-control" id="edit_Weight" name="Weight" placeholder="Ex: 70.5">
+                            <input type="number" step="0.1" class="form-control auto-save-edit-field" id="edit_Weight" name="Weight" data-field="Weight" data-validation="decimal">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Taille (cm)</label>
-                            <input type="number" step="0.1" class="form-control" id="edit_Height" name="Height" placeholder="Ex: 175">
+                            <input type="number" step="0.1" class="form-control auto-save-edit-field" id="edit_Height" name="Height" data-field="Height" data-validation="decimal">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Médecin traitant</label>
-                            <input type="text" class="form-control" id="edit_DoctorName" name="DoctorName" placeholder="Ex: Dr. Dupont">
+                            <input type="text" class="form-control auto-save-edit-field" id="edit_DoctorName" name="DoctorName" data-field="DoctorName" data-validation="text">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">N° INAMI du médecin</label>
-                            <input type="text" class="form-control" id="edit_DoctorINAMI" name="DoctorINAMI" placeholder="Ex: 1-12345-67-890">
+                            <input type="text" class="form-control auto-save-edit-field" id="edit_DoctorINAMI" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Les modifications se sauvegardent automatiquement à chaque changement de champ.
                     </div>
+                    <div id="editSaveStatus" class="alert" style="display: none;"></div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .is-valid-custom {
+        border-color: #28a745 !important;
+        background-color: #f0fff4 !important;
+    }
+    
+    .is-invalid-custom {
+        border-color: #dc3545 !important;
+        background-color: #fff5f5 !important;
+    }
+</style>
 
 @section Scripts {
     <script>
+        const STORAGE_KEY = 'patient_form_data';
+        let currentPatientId = null;
+        let formData = {};
+        let isSaving = false;
+
+        function validateField(input) {
+            const validationType = input.dataset.validation;
+            const value = input.value.trim();
+            const isRequired = input.hasAttribute('required');
+
+            if (!isRequired && !value) {
+                return true;
+            }
+
+            if (isRequired && !value) {
+                return false;
+            }
+
+            switch (validationType) {
+                case 'text':
+                    return value.length >= 2;
+                
+                
+                case 'phone':
+                    const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+                    const digitsOnly = value.replace(/[\s\+\-\(\)]/g, '');
+                    return phoneRegex.test(value) && digitsOnly.length >= 9;
+                
+                case 'number':
+                    const num = parseInt(value);
+                    return !isNaN(num) && num > 0;
+                
+                case 'decimal':
+                    if (!value) return true; 
+                    const dec = parseFloat(value);
+                    return !isNaN(dec) && dec > 0;
+                
+                case 'date':
+                    if (!value) return false;
+                    const date = new Date(value);
+                    const now = new Date();
+                    return date < now; 
+                
+                case 'select':
+                    return value !== '';
+                
+                default:
+                    return value.length > 0;
+            }
+        }
+
+        function updateFieldVisualState(input) {
+            const isValid = validateField(input);
+            
+            input.classList.remove('is-valid-custom', 'is-invalid-custom');
+            
+            if (input.value.trim()) {
+                if (isValid) {
+                    input.classList.add('is-valid-custom');
+                } else {
+                    input.classList.add('is-invalid-custom');
+                }
+            }
+            
+            return isValid;
+        }
+
+        function loadFromStorage() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                formData = JSON.parse(stored);
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        }
+
+        function clearStorage() {
+            localStorage.removeItem(STORAGE_KEY);
+            formData = {};
+        }
+
+        function showStatus(message, isError = false, isEditForm = false) {
+            const statusDiv = isEditForm ? document.getElementById('editSaveStatus') : document.getElementById('saveStatus');
+            statusDiv.className = isError ? 'alert alert-danger' : 'alert alert-success';
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function areRequiredFieldsFilled() {
+            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber', 'PhysioId'];
+            for (let field of required) {
+                const value = formData[field];
+                
+                if (!value || value === '' || value === 'undefined' || value === 'null') {
+                    return false;
+                }
+                
+                if (field === 'PhysioId' || field === 'SocialSecurityNumber') {
+                    const numValue = parseInt(value);
+                    if (isNaN(numValue) || numValue === 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        async function trySavePatient() {
+            if (!areRequiredFieldsFilled() || currentPatientId || isSaving) {
+                return;
+            }
+
+            isSaving = true;
+
+            try {
+                const payload = {
+                    lastName: formData.LastName,
+                    firstName: formData.FirstName,
+                    email: formData.Email,
+                    phoneNumber: formData.PhoneNumber,
+                    address: formData.Address || '',
+                    genre: parseInt(formData.Genre) || 0,
+                    birthDate: formData.BirthDate,
+                    socialSecurityNumber: parseInt(formData.SocialSecurityNumber) || 0,
+                    physioId: parseInt(formData.PhysioId) || 0,
+                    weight: parseFloat(formData.Weight) || 0,
+                    height: parseFloat(formData.Height) || 0,
+                    doctorName: formData.DoctorName || '',
+                    doctorINAMI: formData.DoctorINAMI || ''
+                };
+
+                const response = await fetch('/Patients/AutoSavePatient', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success && result.isComplete) {
+                    currentPatientId = result.patientId;
+                    document.getElementById('add_PatientId').value = currentPatientId;
+                    showStatus(`Patient créé avec succès`);
+                    clearStorage();
+                }
+            } catch (error) {
+                showStatus(`Erreur: ${error.message}`, true);
+            } finally {
+                isSaving = false;
+            }
+        }
+
+        async function autoSaveField(input) {
+            const isValid = updateFieldVisualState(input);
+            
+            if (!isValid) {
+                return;
+            }
+
+            const fieldName = input.dataset.field;
+            const fieldValue = input.value;
+
+            formData[fieldName] = fieldValue;
+            saveToStorage();
+
+            await trySavePatient();
+        }
+
+        async function autoSaveEditField(input) {
+            const isValid = updateFieldVisualState(input);
+            
+            if (!isValid || isSaving) {
+                return;
+            }
+
+            const patientId = document.getElementById('edit_Id').value;
+            const fieldName = input.dataset.field;
+            const fieldValue = input.value;
+
+            if (input.hasAttribute('required') && !fieldValue) {
+                return;
+            }
+
+            isSaving = true;
+
+            try {
+                const response = await fetch('/Patients/AutoSaveField', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patientId: parseInt(patientId),
+                        fieldName: fieldName,
+                        fieldValue: fieldValue
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`${fieldName} modifié`, false, true);
+                } else {
+                    showStatus(`Erreur: ${result.message}`, true, true);
+                }
+            } catch (error) {
+                showStatus(`Erreur: ${error.message}`, true, true);
+            } finally {
+                isSaving = false;
+            }
+        }
+
+        function restoreFormData() {
+            if (Object.keys(formData).length > 0) {
+                for (let [field, value] of Object.entries(formData)) {
+                    const input = document.querySelector(`.auto-save-field[data-field="${field}"]`);
+                    if (input && value) {
+                        input.value = value;
+                        updateFieldVisualState(input);
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            
+            document.querySelectorAll('.auto-save-field').forEach(input => {
+                input.addEventListener('blur', function() {
+                    autoSaveField(this);
+                });
+
+                input.addEventListener('change', function() {
+                    autoSaveField(this);
+                });
+
+                input.addEventListener('input', function() {
+                    updateFieldVisualState(this);
+                });
+            });
+
+            document.querySelectorAll('.auto-save-edit-field').forEach(input => {
+                input.addEventListener('blur', function() {
+                    autoSaveEditField(this);
+                });
+
+                input.addEventListener('change', function() {
+                    autoSaveEditField(this);
+                });
+
+                input.addEventListener('input', function() {
+                    updateFieldVisualState(this);
+                });
+            });
+        });
+
+        document.getElementById('addPatientModal').addEventListener('shown.bs.modal', function() {
+            restoreFormData();
+        });
+
+        document.getElementById('addPatientModal').addEventListener('hidden.bs.modal', function() {
+            const hadPatientId = currentPatientId !== null;
+            
+            if (hadPatientId) {
+                currentPatientId = null;
+                clearStorage();
+                document.getElementById('addPatientForm').reset();
+                document.getElementById('add_PatientId').value = '';
+                location.reload();
+            }
+        });
+
+        document.getElementById('editPatientModal').addEventListener('hidden.bs.modal', function() {
+            location.reload();
+        });
+
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const searchValue = this.value.toLowerCase();
             const tableRows = document.querySelectorAll('#patientsTable tbody tr');
@@ -309,7 +630,7 @@
             });
         });
 
-        function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, physioId, weight, height, doctorName, doctorINAMI, address) {
+        function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, socialSecurityNumber, physioId, weight, height, doctorName, doctorINAMI, address) {
             document.getElementById('edit_Id').value = id;
             document.getElementById('edit_LastName').value = lastName;
             document.getElementById('edit_FirstName').value = firstName;
@@ -318,20 +639,10 @@
             document.getElementById('edit_Address').value = address || '';
             document.getElementById('edit_Genre').value = genre;
             document.getElementById('edit_BirthDate').value = birthDate;
+            document.getElementById('edit_SocialSecurityNumber').value = socialSecurityNumber;
             document.getElementById('edit_PhysioId').value = physioId;
-
-            if (weight !== null && weight !== 'null') {
-                document.getElementById('edit_Weight').value = weight;
-            } else {
-                document.getElementById('edit_Weight').value = '';
-            }
-
-            if (height !== null && height !== 'null') {
-                document.getElementById('edit_Height').value = height;
-            } else {
-                document.getElementById('edit_Height').value = '';
-            }
-
+            document.getElementById('edit_Weight').value = weight;
+            document.getElementById('edit_Height').value = height;
             document.getElementById('edit_DoctorName').value = doctorName || '';
             document.getElementById('edit_DoctorINAMI').value = doctorINAMI || '';
 
