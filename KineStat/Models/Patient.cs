@@ -39,6 +39,9 @@ namespace KineStat.Models
         [Required]
         public Gender Genre { get; set; }
 
+        [Required] 
+        public int SocialSecurityNumber { get; set; }
+
         public string? DoctorName { get; set; }
 
         public string? DoctorINAMI { get; set; }

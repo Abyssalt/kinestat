@@ -260,6 +260,9 @@ namespace KineStat.Migrations
                     b.Property<int>("PhysioId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("SocialSecurityNumber")
+                        .HasColumnType("integer");
+
                     b.Property<double>("Weight")
                         .HasColumnType("double precision");
 
