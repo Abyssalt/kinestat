@@ -21,7 +21,8 @@ namespace KineStat.Controllers
                 .Include(p => p.Physio)
                 .ToListAsync();
 
-            ViewBag.Physios = await _context.Physio
+            // Charger la liste des kinés pour le formulaire de création
+            ViewBag.Physios = await _context.Physios
                 .OrderBy(p => p.LastName)
                 .ToListAsync();
 
@@ -81,7 +82,7 @@ namespace KineStat.Controllers
                     existingPatient.LastName = patient.LastName;
                     existingPatient.Email = patient.Email;
                     existingPatient.PhoneNumber = patient.PhoneNumber;
-                    existingPatient.Genre = patient.Genre;
+                    existingPatient.Gender = patient.Gender;
                     existingPatient.BirthDate = patient.BirthDate;
                     existingPatient.SocialSecurityNumber = patient.SocialSecurityNumber;
                     existingPatient.PhysioId = patient.PhysioId;

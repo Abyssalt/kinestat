@@ -7,7 +7,7 @@ namespace KineStat.Controllers
     {
         private static List<Question> _questions = new List<Question>() // Temporary list of question while waiting for the DB, replace it with the DbContext
         {
-            new QuestionBool { Id = 1, Title = "Test", Type = "Bool", BilanID = 1 } // Test question, used to test GetQuestions (at https://localhost:7133/Question/GetQuestions)
+            new QuestionBool { Id = 1, Title = "Test", CategoryId = 1 } // Test question, used to test GetQuestions (at https://localhost:7133/Question/GetQuestions)
         };
 
         public IActionResult Index()
@@ -29,26 +29,26 @@ namespace KineStat.Controllers
                 "Bool" => new QuestionBool
                 {
                     Title = title,
-                    RVPositif = rvPositif,
-                    RVNegatif = rvNegatif,
+                    RVPositive = rvPositif,
+                    RVNegative = rvNegatif,
                     ClusterId = clusterId,
-                    BilanID = bilanId
+                    CategoryId = bilanId
                 },
                 "Ladder" => new QuestionLadder
                 {
                     Title = title,
-                    RVPositif = rvPositif,
-                    RVNegatif = rvNegatif,
+                    RVPositive = rvPositif,
+                    RVNegative = rvNegatif,
                     ClusterId = clusterId,
-                    BilanID = bilanId
+                    CategoryId = bilanId
                 },
                 "QCM" => new QuestionQCM
                 {
                     Title = title,
-                    RVPositif = rvPositif,
-                    RVNegatif = rvNegatif,
+                    RVPositive = rvPositif,
+                    RVNegative = rvNegatif,
                     ClusterId = clusterId,
-                    BilanID = bilanId
+                    CategoryId = bilanId
                 },
                 _ => null
             };
@@ -91,10 +91,10 @@ namespace KineStat.Controllers
             }
 
             question.Title = title;
-            question.RVPositif = rvPositif;
-            question.RVNegatif = rvNegatif;
+            question.RVPositive = rvPositif;
+            question.RVNegative = rvNegatif;
             question.ClusterId = clusterId;
-            question.BilanID = bilanId;
+            question.CategoryId = bilanId;
 
             return RedirectToAction("Index");
         }
@@ -135,7 +135,7 @@ namespace KineStat.Controllers
         public IActionResult GetQuestions(int? bilanId) // I based this on the same thing in PatientController.cs, don't know if it's useful
         {
             var questions = bilanId.HasValue
-                ? _questions.Where(q => q.BilanID == bilanId.Value).ToList()
+                ? _questions.Where(q => q.CategoryId == bilanId.Value).ToList()
                 : _questions;
 
             return Json(questions);

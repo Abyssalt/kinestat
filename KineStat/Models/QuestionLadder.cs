@@ -5,13 +5,8 @@ namespace KineStat.Models
 {
     public class QuestionLadder : Question
     {
-        public QuestionLadder()
-        {
-            Type = "Ladder";
-        }
+        public int Min { get; set; } = 0;
 
-        public int min { get; set; } = 0;
-
-        public int max { get; set; } = 10;
+        public int Max { get; set; } = 10;
     }
 }  

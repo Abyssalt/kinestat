@@ -9,12 +9,6 @@ namespace KineStat.Models
     /// </summary>
     public class QuestionQCM : Question
     {
-        public QuestionQCM()
-        {
-            Type = "QCM";
-            ListAnswers = new List<string>();
-        }
-
-        public List<string> ListAnswers { get; set; }
+        public virtual List<Answer> Choices { get; set; }
     }
 }

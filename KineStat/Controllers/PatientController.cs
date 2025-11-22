@@ -45,22 +45,22 @@ namespace KineStat.Controllers
             var questions = new List<QuestionBool>
             {
                  // Tumeur / Métastase : Type = 1
-                 new QuestionBool { Id = idCounter++, Title = "Antécédent personnel de cancer (localisation/année)", RVPositif = 14.7, RVNegatif = 0, Type = "1" },
-                 new QuestionBool { Id = idCounter++, Title = "Perte de poids inexpliquée (>5% en 3–6 mois)", RVPositif = 9.2, RVNegatif = 0, Type = "1" },
-                 new QuestionBool { Id = idCounter++, Title = "Douleur nocturne sévère, réveillant le patient", RVPositif = 33.25, RVNegatif = 0, Type = "1" },
-                 new QuestionBool { Id = idCounter++, Title = "Douleur progressive sans amélioration malgré traitement (>4 semaines)", RVPositif = 3.1, RVNegatif = 0.8, Type = "1" },
+                 new QuestionBool { Id = idCounter++, Title = "Antécédent personnel de cancer (localisation/année)", RVPositive = 14.7, RVNegative = 0, CategoryId = 1 },
+                 new QuestionBool { Id = idCounter++, Title = "Perte de poids inexpliquée (>5% en 3–6 mois)", RVPositive = 9.2, RVNegative = 0, CategoryId = 1 },
+                 new QuestionBool { Id = idCounter++, Title = "Douleur nocturne sévère, réveillant le patient", RVPositive = 33.25, RVNegative = 0, CategoryId = 1 },
+                 new QuestionBool { Id = idCounter++, Title = "Douleur progressive sans amélioration malgré traitement (>4 semaines)", RVPositive = 3.1, RVNegative = 0.8, CategoryId = 1 },
 
-                 // Infection  :Type = 2
-                 new QuestionBool { Id = idCounter++, Title = "Fièvre ≥ 38 °C ou frissons récents", RVPositif = 68.8, RVNegatif = 0, Type = "2" },
-                 new QuestionBool {Id = idCounter++, Title = "Signes systémiques d’infection (sueurs nocturnes, fatigue importante)", RVPositif = 1.8, RVNegatif = 1, Type = "2" },
-                 new QuestionBool { Id = idCounter++, Title = "Antécédent récent d’infection ou chirurgie/épisiotomie", RVPositif = 4, RVNegatif = 0.6, Type = "2" },
-                 new QuestionBool { Id = idCounter++, Title = "Immunodépression documentée (corticothérapie chronique)", RVPositif = 48.5, RVNegatif = 0.8, Type = "2" },
+                 // Infection  :CategoryId = 2
+                 new QuestionBool { Id = idCounter++, Title = "Fièvre ≥ 38 °C ou frissons récents", RVPositive = 68.8, RVNegative = 0, CategoryId = 2 },
+                 new QuestionBool {Id = idCounter++, Title = "Signes systémiques d’infection (sueurs nocturnes, fatigue importante)", RVPositive = 1.8, RVNegative = 1, CategoryId = 2 },
+                 new QuestionBool { Id = idCounter++, Title = "Antécédent récent d’infection ou chirurgie/épisiotomie", RVPositive = 4, RVNegative = 0.6, CategoryId = 2 },
+                 new QuestionBool { Id = idCounter++, Title = "Immunodépression documentée (corticothérapie chronique)", RVPositive = 48.5, RVNegative = 0.8, CategoryId = 2 },
 
-                 // Neurologique :  Type = 3
-                 new QuestionBool { Id = idCounter++, Title = "Anesthésie en selle / hypoesthésie périnéale", RVPositif = 1.7, RVNegatif = 0.7, Type = "3" },
-                 new QuestionBool {Id = idCounter++,  Title = "Rétention urinaire récente ou incontinence fécale / urinaire.", RVPositif = 5.85, RVNegatif = 0.6, Type = "3" }, // moyenne 2 à 8,7
-                 new QuestionBool { Id = idCounter++, Title = "Faiblesse motrice aiguë ou progressive des membres inférieurs (MRC ≤ 3) ou chute récente", RVPositif = 9.4, RVNegatif = 0.1, Type = "3" },
-                 new QuestionBool { Id = idCounter++, Title = "Troubles de la marche rapides ou signes pyramidaux / trouble coordination", RVPositif = 3, RVNegatif = 0.4, Type = "3" }
+                 // Neurologique :  CategoryId = 3
+                 new QuestionBool { Id = idCounter++, Title = "Anesthésie en selle / hypoesthésie périnéale", RVPositive = 1.7, RVNegative = 0.7, CategoryId = 3 },
+                 new QuestionBool {Id = idCounter++,  Title = "Rétention urinaire récente ou incontinence fécale / urinaire.", RVPositive = 5.85, RVNegative = 0.6, CategoryId = 3 }, // moyenne 2 à 8,7
+                 new QuestionBool { Id = idCounter++, Title = "Faiblesse motrice aiguë ou progressive des membres inférieurs (MRC ≤ 3) ou chute récente", RVPositive = 9.4, RVNegative = 0.1, CategoryId = 3 },
+                 new QuestionBool { Id = idCounter++, Title = "Troubles de la marche rapides ou signes pyramidaux / trouble coordination", RVPositive = 3, RVNegative = 0.4, CategoryId = 3 }
              };
 
             return questions;
@@ -74,11 +74,11 @@ namespace KineStat.Controllers
             if (categoryId != null)
             {
                 List<QuestionBool> filtredQuestions = new List<QuestionBool>();
-                String category = categoryId.ToString();
+                
                 if (questions != null)
                 {
                     filtredQuestions = questions
-                        .Where(q => q.Type == category)
+                        .Where(q => q.CategoryId == categoryId)
                         .ToList();
                     return PartialView("_QuestionsPartial", filtredQuestions);
                 }
