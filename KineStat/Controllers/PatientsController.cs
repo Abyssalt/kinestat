@@ -17,7 +17,6 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // Récupérer tous les patients avec leur kiné
             var patients = await _context.Patients
                 .Include(p => p.Physio)
                 .ToListAsync();
@@ -85,6 +84,7 @@ namespace KineStat.Controllers
                     existingPatient.PhoneNumber = patient.PhoneNumber;
                     existingPatient.Gender = patient.Gender;
                     existingPatient.BirthDate = patient.BirthDate;
+                    existingPatient.SocialSecurityNumber = patient.SocialSecurityNumber;
                     existingPatient.PhysioId = patient.PhysioId;
                     existingPatient.Weight = patient.Weight;
                     existingPatient.Height = patient.Height;
