@@ -21,6 +21,5 @@ namespace KineStat.Models
         public int INAMINumber { get; set; }
 
         public List<Patient> Patients { get; set; } = new List<Patient>();
-        public List<Bilan> Bilans { get; set; } = new List<Bilan>();
     }
 }
