@@ -17,12 +17,10 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // Récupérer tous les patients avec leur kiné
             var patients = await _context.Patients
                 .Include(p => p.Physio)
                 .ToListAsync();
 
-            // Charger la liste des kinés pour le formulaire de création
             ViewBag.Physios = await _context.Physio
                 .OrderBy(p => p.LastName)
                 .ToListAsync();
@@ -85,6 +83,7 @@ namespace KineStat.Controllers
                     existingPatient.PhoneNumber = patient.PhoneNumber;
                     existingPatient.Genre = patient.Genre;
                     existingPatient.BirthDate = patient.BirthDate;
+                    existingPatient.SocialSecurityNumber = patient.SocialSecurityNumber;
                     existingPatient.PhysioId = patient.PhysioId;
                     existingPatient.Weight = patient.Weight;
                     existingPatient.Height = patient.Height;
