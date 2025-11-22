@@ -1,17 +1,18 @@
-﻿namespace KineStat.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KineStat.Models
 {
     public class Redflag
     {
+        [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
 
-        public int? CategoryId { get; set; }
-        public Category Category { get; set; }
+        public int CategoryId { get; set; }
+        public int PatientId { get; set; }
+        public double Value {  get; set; }
+        public int AssessmentId;
 
-        public int SeverityLevel { get; set; } 
-
-        public virtual ICollection<Pathology> Pathologies { get; set; }
-
-        public virtual ICollection<Question> Questions { get; set; }
+        public virtual Patient Patient { get; set; }
+        public virtual Category Category { get; set; }
     }
 }
