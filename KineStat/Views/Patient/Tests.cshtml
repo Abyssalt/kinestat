@@ -23,46 +23,46 @@
             {
                 Id = 101,
                 Title = "Test de Lasègue",
-                RVPositif = 8,
-                RVNegatif = 0
+                RVPositive = 8,
+                RVNegative = 0
             },
             new QuestionBool
             {
                 Id = 102,
                 Title = "Test de sensibilité périnéale (anesthésie en selle)",
-                RVPositif = 10,
-                RVNegatif = 0
+                RVPositive = 10,
+                RVNegative = 0
             },
             new QuestionBool
             {
                 Id = 103,
                 Title = "Réflexe rotulien",
-                RVPositif = 5,
-                RVNegatif = 0
+                RVPositive = 5,
+                RVNegative = 0
             },
             new QuestionBool
             {
                 Id = 104,
                 Title = "Réflexe achilléen",
-                RVPositif = 5,
-                RVNegatif = 0
+                RVPositive = 5,
+                RVNegative = 0
             },
             new QuestionLadder
             {
                 Id = 105,
                 Title = "Force musculaire - Extension du genou (échelle 0-5)",
-                RVPositif = 6,
-                RVNegatif = 0,
-                min = 0,
-                max = 5
+                RVPositive = 6,
+                RVNegative = 0,
+                Min = 0,
+                Max = 5
             },
             new QuestionQCM
             {
                 Id = 106,
                 Title = "Évaluation de la démarche",
-                RVPositif = 7,
-                RVNegatif = 0,
-                ListAnswers = new List<string>
+                RVPositive = 7,
+                RVNegative = 0,
+               /* ListAnswers = new List<string>
                 {
                     "Démarche normale",
                     "Boiterie légère",
@@ -70,6 +70,7 @@
                     "Démarche antalgique sévère",
                     "Impossibilité de marcher"
                 }
+                */
             }
         }
     };
@@ -194,7 +195,7 @@
                                     @question.Title
                                 </h5>
                                 <small class="text-muted">
-                                    RV+ : <span class="badge bg-danger">@question.RVPositif</span>
+                                    RV+ : <span class="badge bg-danger">@question.RVPositive</span>
                                 </small>
                             </div>
                             <div class="d-flex gap-2 align-items-center">
@@ -278,13 +279,13 @@
                             <!-- Test Échelle - Slider -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">
-                                    Valeur mesurée (@ladder.min - @ladder.max)
+                                    Valeur mesurée (@ladder.Min - @ladder.Max)
                                 </label>
                                 <input type="number"
                                        class="form-control form-control-lg mb-3"
                                        name="test-@question.Id-value"
-                                       min="@ladder.min"
-                                       max="@ladder.max"
+                                       min="@ladder.Min"
+                                       max="@ladder.Max"
                                        placeholder="Entrez la valeur"
                                        onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
                                        id="input-@question.Id">
@@ -293,15 +294,15 @@
                                 <input type="range"
                                        class="form-range"
                                        id="range-@question.Id"
-                                       min="@ladder.min"
-                                       max="@ladder.max"
-                                       value="@ladder.min"
-                                       step="1"
+                                       min="@ladder.Min"
+                                       max="@ladder.Max"
+                                       value="@ladder.Min"
+                                       step="2""
                                        oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id')">
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <small class="text-muted fw-semibold">@ladder.min</small>
-                                    <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.min</span>
-                                    <small class="text-muted fw-semibold">@ladder.max</small>
+                                    <small class="text-muted fw-semibold">@ladder.Min</small>
+                                    <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.Min</span>
+                                    <small class="text-muted fw-semibold">@ladder.Max</small>
                                 </div>
                             </div>
 
@@ -336,10 +337,11 @@
                                         name="test-@question.Id-value"
                                         onchange="markAsAnswered(@question.Id)">
                                     <option value="">-- Sélectionnez une observation --</option>
-                                    @foreach (var choix in qcm.ListAnswers)
+                                  @* @foreach (var choix in qcm.ListAnswers)
                                     {
                                         <option value="@choix">@choix</option>
                                     }
+                                  *@
                                 </select>
                             </div>
 
@@ -713,10 +715,10 @@
                             }
 
                             if (isPositive) {
-                                scoreTotal += @q.RVPositif;
+                                scoreTotal += @q.RVPositive;
                                 testsEffectues.push({
                                     title: '@q.Title',
-                                    score: @q.RVPositif,
+                                    score: @q.RVPositive,
                                     value: value
                                 });
                             }

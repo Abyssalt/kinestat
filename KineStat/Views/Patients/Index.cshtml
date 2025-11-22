@@ -57,7 +57,7 @@
                                     <td>@patient.LastName</td>
                                     <td>@patient.FirstName</td>
                                     <td>
-                                        @switch (patient.Genre)
+                                        @switch (patient.Gender)
                                         {
                                             case Gender.Homme:
                                                 <span class="badge bg-primary">H</span>
@@ -77,7 +77,7 @@
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-warning" title="Modifier"
-                                                onclick="editPatient(@patient.Id, '@patient.LastName', '@patient.FirstName', '@patient.Email', '@patient.PhoneNumber', @((int)patient.Genre), '@patient.BirthDate.ToString("yyyy-MM-dd")', @patient.PhysioId, @(patient.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @(patient.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), '@(patient.DoctorName ?? "")', '@(patient.DoctorINAMI ?? "")', '@(patient.Address ?? "")')">
+                                                onclick="editPatient(@patient.Id, '@patient.LastName', '@patient.FirstName', '@patient.Email', '@patient.PhoneNumber', @((int)patient.Gender), '@patient.BirthDate.ToString("yyyy-MM-dd")', @patient.PhysioId, @(patient.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @(patient.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "null"), '@(patient.DoctorName ?? "")', '@(patient.DoctorINAMI ?? "")', '@(patient.Address ?? "")')">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id" method="post" style="display:inline;">
