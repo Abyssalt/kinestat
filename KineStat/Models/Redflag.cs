@@ -10,7 +10,7 @@ namespace KineStat.Models
         public int CategoryId { get; set; }
         public int PatientId { get; set; }
         public double Value {  get; set; }
-        public int AssessmentId;
+        public int AssessmentId { get; set; }
 
         public virtual Patient Patient { get; set; }
         public virtual Category Category { get; set; }
