@@ -9,9 +9,9 @@ namespace KineStat.Models
 
         public double Value { get; set; } = 0;
 
-        public int CategoryId;
+        public int CategoryId { get; set; }
 
-        public int MedicalContextId;
+        public int MedicalContextId { get; set; }
 
         public virtual MedicalContext MedicalContext { get; set; }
         public virtual Category Category { get; set; }
