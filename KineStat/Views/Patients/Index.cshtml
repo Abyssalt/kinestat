@@ -105,45 +105,44 @@
 
 <!-- Add a patient modal -->
 <div class="modal fade" id="addPatientModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Nouveau patient</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="addPatientForm">
+                <form id="addPatientForm" asp-controller="Patients" asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" id="add_PatientId" value="">
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nom *</label>
-                            <input type="text" class="form-control auto-save-field" name="LastName" data-field="LastName" data-validation="text" required>
+                            <input type="text" class="form-control cache-field" name="LastName" data-field="LastName" data-validation="text" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
-                            <input type="text" class="form-control auto-save-field" name="FirstName" data-field="FirstName" data-validation="text" required>
+                            <input type="text" class="form-control cache-field" name="FirstName" data-field="FirstName" data-validation="text" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email *</label>
-                            <input type="email" class="form-control auto-save-field" name="Email" data-field="Email" data-validation="email" required>
+                            <input type="email" class="form-control cache-field" name="Email" data-field="Email" data-validation="email" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Téléphone *</label>
-                            <input type="tel" class="form-control auto-save-field" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
+                            <input type="tel" class="form-control cache-field" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Adresse du patient</label>
-                        <textarea class="form-control auto-save-field" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
+                        <textarea class="form-control cache-field" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Genre *</label>
-                            <select class="form-select auto-save-field" name="Genre" data-field="Genre" data-validation="select" required>
+                            <select class="form-select cache-field" name="Genre" data-field="Genre" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -152,17 +151,17 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Date de naissance *</label>
-                            <input type="date" class="form-control auto-save-field" name="BirthDate" data-field="BirthDate" data-validation="date" required>
+                            <input type="date" class="form-control cache-field" name="BirthDate" data-field="BirthDate" data-validation="date" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">N° Sécurité sociale *</label>
-                            <input type="number" class="form-control auto-save-field" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
+                            <input type="number" class="form-control cache-field" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Kinésithérapeute *</label>
-                            <select class="form-select auto-save-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
+                            <select class="form-select cache-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
                                 <option value="">-- Sélectionner un kiné --</option>
                                 @if (ViewBag.Physios != null)
                                 {
@@ -177,31 +176,31 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Poids (kg)</label>
-                            <input type="number" step="0.1" class="form-control auto-save-field" name="Weight" data-field="Weight" data-validation="decimal">
+                            <input type="number" step="0.1" class="form-control cache-field" name="Weight" data-field="Weight" data-validation="decimal">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Taille (cm)</label>
-                            <input type="number" step="0.1" class="form-control auto-save-field" name="Height" data-field="Height" data-validation="decimal">
+                            <input type="number" step="0.1" class="form-control cache-field" name="Height" data-field="Height" data-validation="decimal">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Médecin traitant</label>
-                            <input type="text" class="form-control auto-save-field" name="DoctorName" data-field="DoctorName" data-validation="text">
+                            <input type="text" class="form-control cache-field" name="DoctorName" data-field="DoctorName" data-validation="text">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">N° INAMI du médecin</label>
-                            <input type="text" class="form-control auto-save-field" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
+                            <input type="text" class="form-control cache-field" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
                         </div>
-                    </div>
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Les champs se sauvegardent automatiquement. Le patient sera créé quand tous les champs obligatoires (*) sont correctement remplis.
                     </div>
                     <div id="saveStatus" class="alert" style="display: none;"></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="createPatientBtn" class="btn btn-primary" disabled>
+                    <i class="bi bi-save"></i> Créer le patient
+                </button>
             </div>
         </div>
     </div>
@@ -209,45 +208,45 @@
 
 <!-- Edit patient modal -->
 <div class="modal fade" id="editPatientModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Modifier patient</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="editPatientForm">
+                <form id="editPatientForm" asp-controller="Patients" asp-action="Edit" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="edit_Id" name="Id">
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nom *</label>
-                            <input type="text" class="form-control auto-save-edit-field" id="edit_LastName" name="LastName" data-field="LastName" data-validation="text" required>
+                            <input type="text" class="form-control cache-edit-field" id="edit_LastName" name="LastName" data-field="LastName" data-validation="text" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
-                            <input type="text" class="form-control auto-save-edit-field" id="edit_FirstName" name="FirstName" data-field="FirstName" data-validation="text" required>
+                            <input type="text" class="form-control cache-edit-field" id="edit_FirstName" name="FirstName" data-field="FirstName" data-validation="text" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email *</label>
-                            <input type="email" class="form-control auto-save-edit-field" id="edit_Email" name="Email" data-field="Email" data-validation="email" required>
+                            <input type="email" class="form-control cache-edit-field" id="edit_Email" name="Email" data-field="Email" data-validation="email" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Téléphone *</label>
-                            <input type="tel" class="form-control auto-save-edit-field" id="edit_PhoneNumber" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
+                            <input type="tel" class="form-control cache-edit-field" id="edit_PhoneNumber" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Adresse du patient</label>
-                        <textarea class="form-control auto-save-edit-field" id="edit_Address" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
+                        <textarea class="form-control cache-edit-field" id="edit_Address" name="Address" data-field="Address" data-validation="text" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Genre *</label>
-                            <select class="form-select auto-save-edit-field" id="edit_Genre" name="Genre" data-field="Genre" data-validation="select" required>
+                            <select class="form-select cache-edit-field" id="edit_Genre" name="Genre" data-field="Genre" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -256,17 +255,17 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Date de naissance *</label>
-                            <input type="date" class="form-control auto-save-edit-field" id="edit_BirthDate" name="BirthDate" data-field="BirthDate" data-validation="date" required>
+                            <input type="date" class="form-control cache-edit-field" id="edit_BirthDate" name="BirthDate" data-field="BirthDate" data-validation="date" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">N° Sécurité sociale *</label>
-                            <input type="number" class="form-control auto-save-edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
+                            <input type="number" class="form-control cache-edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="number" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Kinésithérapeute *</label>
-                            <select class="form-select auto-save-edit-field" id="edit_PhysioId" name="PhysioId" data-field="PhysioId" data-validation="select" required>
+                            <select class="form-select cache-edit-field" id="edit_PhysioId" name="PhysioId" data-field="PhysioId" data-validation="select" required>
                                 <option value="">-- Sélectionner un kiné --</option>
                                 @if (ViewBag.Physios != null)
                                 {
@@ -281,31 +280,31 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Poids (kg)</label>
-                            <input type="number" step="0.1" class="form-control auto-save-edit-field" id="edit_Weight" name="Weight" data-field="Weight" data-validation="decimal">
+                            <input type="number" step="0.1" class="form-control cache-edit-field" id="edit_Weight" name="Weight" data-field="Weight" data-validation="decimal">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Taille (cm)</label>
-                            <input type="number" step="0.1" class="form-control auto-save-edit-field" id="edit_Height" name="Height" data-field="Height" data-validation="decimal">
+                            <input type="number" step="0.1" class="form-control cache-edit-field" id="edit_Height" name="Height" data-field="Height" data-validation="decimal">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Médecin traitant</label>
-                            <input type="text" class="form-control auto-save-edit-field" id="edit_DoctorName" name="DoctorName" data-field="DoctorName" data-validation="text">
+                            <input type="text" class="form-control cache-edit-field" id="edit_DoctorName" name="DoctorName" data-field="DoctorName" data-validation="text">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">N° INAMI du médecin</label>
-                            <input type="text" class="form-control auto-save-edit-field" id="edit_DoctorINAMI" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
+                            <input type="text" class="form-control cache-edit-field" id="edit_DoctorINAMI" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="text">
                         </div>
-                    </div>
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Les modifications se sauvegardent automatiquement à chaque changement de champ.
                     </div>
                     <div id="editSaveStatus" class="alert" style="display: none;"></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="saveEditBtn" class="btn btn-warning" disabled>
+                    <i class="bi bi-save"></i> Enregistrer les modifications
+                </button>
             </div>
         </div>
     </div>
@@ -316,7 +315,7 @@
         border-color: #28a745 !important;
         background-color: #f0fff4 !important;
     }
-    
+
     .is-invalid-custom {
         border-color: #dc3545 !important;
         background-color: #fff5f5 !important;
@@ -325,11 +324,12 @@
 
 @section Scripts {
     <script>
-        const STORAGE_KEY = 'patient_form_data';
-        let currentPatientId = null;
-        let formData = {};
-        let isSaving = false;
+        const ADD_STORAGE_KEY = 'patient_add_form_data';
+        const EDIT_STORAGE_KEY = 'patient_edit_form_data';
+        let addFormData = {};
+        let editFormData = {};
 
+        // ========== VALIDATION ==========
         function validateField(input) {
             const validationType = input.dataset.validation;
             const value = input.value.trim();
@@ -345,32 +345,35 @@
 
             switch (validationType) {
                 case 'text':
-                    return value.length >= 2;
-                
-                
+                    return value.length >= 1;
+
+                case 'email':
+                    const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                    return emailRegex.test(value);
+
                 case 'phone':
                     const phoneRegex = /^[\d\s\+\-\(\)]+$/;
                     const digitsOnly = value.replace(/[\s\+\-\(\)]/g, '');
                     return phoneRegex.test(value) && digitsOnly.length >= 9;
-                
+
                 case 'number':
                     const num = parseInt(value);
                     return !isNaN(num) && num > 0;
-                
+
                 case 'decimal':
-                    if (!value) return true; 
+                    if (!value) return true;
                     const dec = parseFloat(value);
                     return !isNaN(dec) && dec > 0;
-                
+
                 case 'date':
                     if (!value) return false;
                     const date = new Date(value);
                     const now = new Date();
-                    return date < now; 
-                
+                    return date < now;
+
                 case 'select':
                     return value !== '';
-                
+
                 default:
                     return value.length > 0;
             }
@@ -378,9 +381,9 @@
 
         function updateFieldVisualState(input) {
             const isValid = validateField(input);
-            
+
             input.classList.remove('is-valid-custom', 'is-invalid-custom');
-            
+
             if (input.value.trim()) {
                 if (isValid) {
                     input.classList.add('is-valid-custom');
@@ -388,46 +391,37 @@
                     input.classList.add('is-invalid-custom');
                 }
             }
-            
+
             return isValid;
         }
 
-        function loadFromStorage() {
-            const stored = localStorage.getItem(STORAGE_KEY);
+        // ========== CACHE MANAGEMENT ==========
+        function loadFromStorage(storageKey) {
+            const stored = localStorage.getItem(storageKey);
             if (stored) {
-                formData = JSON.parse(stored);
+                return JSON.parse(stored);
             }
+            return {};
         }
 
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        function saveToStorage(storageKey, data) {
+            localStorage.setItem(storageKey, JSON.stringify(data));
         }
 
-        function clearStorage() {
-            localStorage.removeItem(STORAGE_KEY);
-            formData = {};
+        function clearStorage(storageKey) {
+            localStorage.removeItem(storageKey);
         }
 
-        function showStatus(message, isError = false, isEditForm = false) {
-            const statusDiv = isEditForm ? document.getElementById('editSaveStatus') : document.getElementById('saveStatus');
-            statusDiv.className = isError ? 'alert alert-danger' : 'alert alert-success';
-            statusDiv.textContent = message;
-            statusDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        function areRequiredFieldsFilled() {
+        // ========== ADD FORM ==========
+        function areAddRequiredFieldsFilled() {
             const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber', 'PhysioId'];
             for (let field of required) {
-                const value = formData[field];
-                
+                const value = addFormData[field];
+
                 if (!value || value === '' || value === 'undefined' || value === 'null') {
                     return false;
                 }
-                
+
                 if (field === 'PhysioId' || field === 'SocialSecurityNumber') {
                     const numValue = parseInt(value);
                     if (isNaN(numValue) || numValue === 0) {
@@ -438,140 +432,112 @@
             return true;
         }
 
-        async function trySavePatient() {
-            if (!areRequiredFieldsFilled() || currentPatientId || isSaving) {
-                return;
-            }
-
-            isSaving = true;
-
-            try {
-                const payload = {
-                    lastName: formData.LastName,
-                    firstName: formData.FirstName,
-                    email: formData.Email,
-                    phoneNumber: formData.PhoneNumber,
-                    address: formData.Address || '',
-                    genre: parseInt(formData.Genre) || 0,
-                    birthDate: formData.BirthDate,
-                    socialSecurityNumber: parseInt(formData.SocialSecurityNumber) || 0,
-                    physioId: parseInt(formData.PhysioId) || 0,
-                    weight: parseFloat(formData.Weight) || 0,
-                    height: parseFloat(formData.Height) || 0,
-                    doctorName: formData.DoctorName || '',
-                    doctorINAMI: formData.DoctorINAMI || ''
-                };
-
-                const response = await fetch('/Patients/AutoSavePatient', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                if (result.success && result.isComplete) {
-                    currentPatientId = result.patientId;
-                    document.getElementById('add_PatientId').value = currentPatientId;
-                    showStatus(`Patient créé avec succès`);
-                    clearStorage();
-                }
-            } catch (error) {
-                showStatus(`Erreur: ${error.message}`, true);
-            } finally {
-                isSaving = false;
+        function updateCreateButton() {
+            const btn = document.getElementById('createPatientBtn');
+            if (areAddRequiredFieldsFilled()) {
+                btn.disabled = false;
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
             }
         }
 
-        async function autoSaveField(input) {
+        function saveAddField(input) {
             const isValid = updateFieldVisualState(input);
-            
-            if (!isValid) {
-                return;
-            }
-
             const fieldName = input.dataset.field;
             const fieldValue = input.value;
 
-            formData[fieldName] = fieldValue;
-            saveToStorage();
+            addFormData[fieldName] = fieldValue;
+            saveToStorage(ADD_STORAGE_KEY, addFormData);
 
-            await trySavePatient();
+            updateCreateButton();
         }
 
-        async function autoSaveEditField(input) {
-            const isValid = updateFieldVisualState(input);
-            
-            if (!isValid || isSaving) {
-                return;
-            }
-
-            const patientId = document.getElementById('edit_Id').value;
-            const fieldName = input.dataset.field;
-            const fieldValue = input.value;
-
-            if (input.hasAttribute('required') && !fieldValue) {
-                return;
-            }
-
-            isSaving = true;
-
-            try {
-                const response = await fetch('/Patients/AutoSaveField', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        patientId: parseInt(patientId),
-                        fieldName: fieldName,
-                        fieldValue: fieldValue
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus(`${fieldName} modifié`, false, true);
-                } else {
-                    showStatus(`Erreur: ${result.message}`, true, true);
-                }
-            } catch (error) {
-                showStatus(`Erreur: ${error.message}`, true, true);
-            } finally {
-                isSaving = false;
-            }
-        }
-
-        function restoreFormData() {
-            if (Object.keys(formData).length > 0) {
-                for (let [field, value] of Object.entries(formData)) {
-                    const input = document.querySelector(`.auto-save-field[data-field="${field}"]`);
+        function restoreAddFormData() {
+            addFormData = loadFromStorage(ADD_STORAGE_KEY);
+            if (Object.keys(addFormData).length > 0) {
+                for (let [field, value] of Object.entries(addFormData)) {
+                    const input = document.querySelector(`.cache-field[data-field="${field}"]`);
                     if (input && value) {
                         input.value = value;
                         updateFieldVisualState(input);
                     }
                 }
             }
+            updateCreateButton();
         }
 
+        // ========== EDIT FORM ==========
+        function areEditRequiredFieldsFilled() {
+            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber', 'PhysioId'];
+            for (let field of required) {
+                const value = editFormData[field];
+
+                if (!value || value === '' || value === 'undefined' || value === 'null') {
+                    return false;
+                }
+
+                if (field === 'PhysioId' || field === 'SocialSecurityNumber') {
+                    const numValue = parseInt(value);
+                    if (isNaN(numValue) || numValue === 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function updateEditButton() {
+            const btn = document.getElementById('saveEditBtn');
+            if (areEditRequiredFieldsFilled()) {
+                btn.disabled = false;
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-warning');
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-secondary');
+            }
+        }
+
+        function saveEditField(input) {
+            const isValid = updateFieldVisualState(input);
+            const fieldName = input.dataset.field;
+            const fieldValue = input.value;
+
+            editFormData[fieldName] = fieldValue;
+            saveToStorage(EDIT_STORAGE_KEY, editFormData);
+
+            updateEditButton();
+        }
+
+        function restoreEditFormData() {
+            editFormData = loadFromStorage(EDIT_STORAGE_KEY);
+            if (Object.keys(editFormData).length > 0) {
+                for (let [field, value] of Object.entries(editFormData)) {
+                    const input = document.querySelector(`.cache-edit-field[data-field="${field}"]`);
+                    if (input && value) {
+                        input.value = value;
+                        updateFieldVisualState(input);
+                    }
+                }
+            }
+            updateEditButton();
+        }
+
+        // ========== EVENT LISTENERS ==========
         document.addEventListener('DOMContentLoaded', function() {
-            loadFromStorage();
-            
-            document.querySelectorAll('.auto-save-field').forEach(input => {
+            // Add form fields
+            document.querySelectorAll('.cache-field').forEach(input => {
                 input.addEventListener('blur', function() {
-                    autoSaveField(this);
+                    saveAddField(this);
                 });
 
                 input.addEventListener('change', function() {
-                    autoSaveField(this);
+                    saveAddField(this);
                 });
 
                 input.addEventListener('input', function() {
@@ -579,50 +545,78 @@
                 });
             });
 
-            document.querySelectorAll('.auto-save-edit-field').forEach(input => {
+            // Edit form fields
+            document.querySelectorAll('.cache-edit-field').forEach(input => {
                 input.addEventListener('blur', function() {
-                    autoSaveEditField(this);
+                    saveEditField(this);
                 });
 
                 input.addEventListener('change', function() {
-                    autoSaveEditField(this);
+                    saveEditField(this);
                 });
 
                 input.addEventListener('input', function() {
                     updateFieldVisualState(this);
                 });
+            });
+
+            // Create patient button
+            document.getElementById('createPatientBtn').addEventListener('click', function() {
+                if (areAddRequiredFieldsFilled()) {
+                    clearStorage(ADD_STORAGE_KEY);
+                    addFormData = {};
+                    document.getElementById('addPatientForm').submit();
+                }
+            });
+
+            // Save edit button
+            document.getElementById('saveEditBtn').addEventListener('click', function() {
+                if (areEditRequiredFieldsFilled()) {
+                    clearStorage(EDIT_STORAGE_KEY);
+                    editFormData = {};
+                    document.getElementById('editPatientForm').submit();
+                }
             });
         });
 
+        // ========== MODAL EVENTS ==========
         document.getElementById('addPatientModal').addEventListener('shown.bs.modal', function() {
-            restoreFormData();
+            restoreAddFormData();
         });
 
         document.getElementById('addPatientModal').addEventListener('hidden.bs.modal', function() {
-            const hadPatientId = currentPatientId !== null;
-            
-            if (hadPatientId) {
-                currentPatientId = null;
-                clearStorage();
-                document.getElementById('addPatientForm').reset();
-                document.getElementById('add_PatientId').value = '';
-                location.reload();
-            }
+            // Clear form and cache when closing modal
+            addFormData = {};
+            clearStorage(ADD_STORAGE_KEY);
+            document.getElementById('addPatientForm').reset();
+            updateCreateButton();
+        });
+
+        document.getElementById('editPatientModal').addEventListener('shown.bs.modal', function() {
+            // Load current form values into cache
+            document.querySelectorAll('.cache-edit-field').forEach(input => {
+                const fieldName = input.dataset.field;
+                editFormData[fieldName] = input.value;
+            });
+            saveToStorage(EDIT_STORAGE_KEY, editFormData);
+            updateEditButton();
         });
 
         document.getElementById('editPatientModal').addEventListener('hidden.bs.modal', function() {
-            location.reload();
+            // Clear edit cache when closing
+            editFormData = {};
+            clearStorage(EDIT_STORAGE_KEY);
         });
 
-        document.getElementById('searchInput').addEventListener('keyup', function() {
+        // ========== SEARCH ==========
+        document.getElementById('searchInput').addEventListener('input', function() {
             const searchValue = this.value.toLowerCase();
             const tableRows = document.querySelectorAll('#patientsTable tbody tr');
 
             tableRows.forEach(function(row) {
                 const nom = row.cells[0].textContent.toLowerCase();
-                const prenom = row.cells[1].textContent.toLowerCase();
 
-                if (nom.includes(searchValue) || prenom.includes(searchValue)) {
+                if (nom.includes(searchValue)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -630,6 +624,7 @@
             });
         });
 
+        // ========== EDIT PATIENT ==========
         function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, socialSecurityNumber, physioId, weight, height, doctorName, doctorINAMI, address) {
             document.getElementById('edit_Id').value = id;
             document.getElementById('edit_LastName').value = lastName;
