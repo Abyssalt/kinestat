@@ -8,8 +8,9 @@ namespace KineStat.Models
         public int Id { get; set; }
 
         [Required]
-        public string Nom { get; set; }
+        public string Name { get; set; }
         [Required]
+        public double Prior {  get; set; }
 
         public List<Cluster> Clusters { get; set; }
         public virtual ICollection<Pathology> Pathologies { get; set; } = new List<Pathology>();
