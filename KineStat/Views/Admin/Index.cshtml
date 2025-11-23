@@ -1,0 +1,275 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model List<KineStat.Models.Physio>
+
+@{
+    ViewData["Title"] = "Administration - Kinésithérapeutes";
+}
+
+<div class="container-fluid py-4">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 text-primary">
+                <i class="bi bi-shield-lock-fill me-3"></i>Administration
+            </h1>
+            <p class="lead text-muted">Gestion des kinésithérapeutes</p>
+            <hr class="border-primary border-2 opacity-50">
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#createPhysioModal">
+                <i class="bi bi-plus-circle me-2"></i>Ajouter un Kinésithérapeute
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Liste des Kinésithérapeutes
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Nom</th>
+                                        <th scope="col">Prénom</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Téléphone</th>
+                                        <th scope="col">N° INAMI</th>
+                                        <th scope="col">Patients</th>
+                                        <th scope="col" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var physio in Model)
+                                    {
+                                        <tr>
+                                            <td class="align-middle">@physio.Id</td>
+                                            <td class="align-middle fw-bold">@physio.LastName</td>
+                                            <td class="align-middle">@physio.FirstName</td>
+                                            <td class="align-middle">
+                                                <a href="mailto:@physio.Email" class="text-decoration-none">
+                                                    @physio.Email
+                                                </a>
+                                            </td>
+                                            <td class="align-middle">@physio.PhoneNumber</td>
+                                            <td class="align-middle">
+                                                <span class="badge bg-info">@physio.INAMINumber</span>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="badge bg-secondary">@physio.Patients.Count patient(s)</span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-warning"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editPhysioModal"
+                                                            onclick="loadPhysioData(@physio.Id, '@physio.FirstName', '@physio.LastName', '@physio.Email', '@physio.PhoneNumber', '@physio.Password', @physio.INAMINumber)">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deletePhysioModal"
+                                                            onclick="loadDeletePhysioData(@physio.Id, '@physio.FirstName', '@physio.LastName')">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <p class="lead text-muted mt-3">Aucun kinésithérapeute enregistré</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="createPhysioModal" tabindex="-1" aria-labelledby="createPhysioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-controller="Admin" asp-action="Create" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="createPhysioModalLabel">
+                        <i class="bi bi-person-plus-fill me-2"></i>Ajouter un Kinésithérapeute
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="createFirstName" class="form-label fw-bold">Prénom</label>
+                            <input type="text" class="form-control" id="createFirstName" name="FirstName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="createLastName" class="form-label fw-bold">Nom</label>
+                            <input type="text" class="form-control" id="createLastName" name="LastName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="createEmail" class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" id="createEmail" name="Email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="createPhoneNumber" class="form-label fw-bold">Téléphone</label>
+                            <input type="tel" class="form-control" id="createPhoneNumber" name="PhoneNumber" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="createPassword" class="form-label fw-bold">Mot de passe</label>
+                            <input type="password" class="form-control" id="createPassword" name="Password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="createINAMI" class="form-label fw-bold">Numéro INAMI</label>
+                            <input type="number" class="form-control" id="createINAMI" name="INAMINumber" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-2"></i>Créer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editPhysioModal" tabindex="-1" aria-labelledby="editPhysioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-controller="Admin" asp-action="Edit" method="post">
+                <input type="hidden" id="editId" name="Id">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="editPhysioModalLabel">
+                        <i class="bi bi-pencil-fill me-2"></i>Modifier un Kinésithérapeute
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="editFirstName" class="form-label fw-bold">Prénom</label>
+                            <input type="text" class="form-control" id="editFirstName" name="FirstName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editLastName" class="form-label fw-bold">Nom</label>
+                            <input type="text" class="form-control" id="editLastName" name="LastName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editEmail" class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="Email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editPhoneNumber" class="form-label fw-bold">Téléphone</label>
+                            <input type="tel" class="form-control" id="editPhoneNumber" name="PhoneNumber" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editPassword" class="form-label fw-bold">Mot de passe</label>
+                            <input type="password" class="form-control" id="editPassword" name="Password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editINAMI" class="form-label fw-bold">Numéro INAMI</label>
+                            <input type="number" class="form-control" id="editINAMI" name="INAMINumber" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deletePhysioModal" tabindex="-1" aria-labelledby="deletePhysioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="Admin" asp-action="Delete" method="post">
+                <input type="hidden" id="deleteId" name="id">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deletePhysioModalLabel">
+                        <i class="bi bi-trash-fill me-2"></i>Supprimer un Kinésithérapeute
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Êtes-vous sûr de vouloir supprimer <strong id="deletePhysioName"></strong> ?
+                    </div>
+                    <p class="text-muted mb-0">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill me-2"></i>Supprimer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadPhysioData(id, firstName, lastName, email, phone, password, inami) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editFirstName').value = firstName;
+            document.getElementById('editLastName').value = lastName;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editPhoneNumber').value = phone;
+            document.getElementById('editPassword').value = password;
+            document.getElementById('editINAMI').value = inami;
+        }
+
+        function loadDeletePhysioData(id, firstName, lastName) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deletePhysioName').textContent = firstName + ' ' + lastName;
+        }
+    </script>
+}

@@ -32,9 +32,25 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="mb-3">
-                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un patient par nom ou prénom...">
-            </div>
+            <form method="get" asp-action="Index">
+                <div class="input-group mb-3">
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Rechercher un patient par nom ou prénom..."
+                           value="@ViewBag.SearchTerm">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i> Rechercher
+                    </button>
+                </div>
+            </form>
+
+            @if (string.IsNullOrWhiteSpace(ViewBag.SearchTerm))
+            {
+                <div class="alert alert-info">
+                    <strong>Protection des données (RGPD)</strong><br>
+                    Pour des raisons de confidentialité, aucun patient n'est affiché par défaut.
+                    Veuillez utiliser la barre de recherche ci-dessus pour afficher les patients.
+                </div>
+            }
 
             @if (Model != null && Model.Any())
             {
@@ -44,6 +60,7 @@
                             <tr>
                                 <th>Nom</th>
                                 <th>Prénom</th>
+                                <th>Email</th>
                                 <th>Genre</th>
                                 <th>Date de naissance</th>
                                 <th>Téléphone</th>
@@ -56,6 +73,11 @@
                                 <tr>
                                     <td>@patient.LastName</td>
                                     <td>@patient.FirstName</td>
+                                    <td>
+                                        <a href="mailto:@patient.Email" class="text-decoration-none">
+                                            @patient.Email
+                                        </a>
+                                    </td>
                                     <td>
                                         @switch (patient.Gender)
                                         {
@@ -91,12 +113,6 @@
                             }
                         </tbody>
                     </table>
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> Aucun patient enregistré pour le moment. Cliquez sur "Nouveau patient" pour ajouter votre premier patient.
                 </div>
             }
         </div>
@@ -609,7 +625,7 @@
         });
 
         // ========== SEARCH ==========
-        document.getElementById('searchInput').addEventListener('input', function() {
+        /*document.getElementById('searchInput').addEventListener('input', function() {
             const searchValue = this.value.toLowerCase();
             const tableRows = document.querySelectorAll('#patientsTable tbody tr');
 
@@ -622,7 +638,7 @@
                     row.style.display = 'none';
                 }
             });
-        });
+        });*/
 
         // ========== EDIT PATIENT ==========
         function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, socialSecurityNumber, physioId, weight, height, doctorName, doctorINAMI, address) {

@@ -14,17 +14,29 @@ namespace KineStat.Controllers
         {
             _context = context;
         }
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var patients = await _context.Patients
-                .Include(p => p.Physio)
-                .ToListAsync();
 
-            // Charger la liste des kinés pour le formulaire de création
+        [HttpGet]
+        public async Task<IActionResult> Index(string search)
+        {
+            List<Patient> patients = new List<Patient>();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                patients = await _context.Patients
+                    .Include(p => p.Physio)
+                    .Where(p =>
+                        p.FirstName.ToLower().Contains(searchLower) ||
+                        p.LastName.ToLower().Contains(searchLower)
+                    )
+                    .OrderBy(p => p.LastName)
+                    .ToListAsync();
+            }
             ViewBag.Physios = await _context.Physios
                 .OrderBy(p => p.LastName)
                 .ToListAsync();
+
+            ViewBag.SearchTerm = search;
 
             return View(patients);
         }
