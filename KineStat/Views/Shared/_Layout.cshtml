@@ -108,7 +108,7 @@
         height: 580px !important;
     }
 </style>
-    @if (ViewData["PatientId"] != null)
+    @if (ViewData["PatientId"] != null && ViewData["HideFloatingEye"] == null)
     {
         <div class="floating-info-container">
             <div class="collapse floating-info-panel" id="floatingInfoPanel">
