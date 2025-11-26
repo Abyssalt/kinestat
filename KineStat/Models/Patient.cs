@@ -56,6 +56,8 @@ namespace KineStat.Models
 
         public Physio? Physio { get; set; }
 
+        public ICollection<Dossier> Dossiers { get; set; } = new List<Dossier>();
+
         public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
     }
 }

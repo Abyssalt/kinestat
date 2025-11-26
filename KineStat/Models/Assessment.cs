@@ -22,5 +22,8 @@ namespace KineStat.Models
 
         public virtual ICollection<Redflag> RedFlagsDetected { get; set; } = new List<Redflag>();
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
+        [Required]
+        public int DossierId { get; set; }
+        public Dossier Dossier { get; set; }
     }
 }
