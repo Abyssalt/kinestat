@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Anamnèse";
     ViewData["PatientId"] = Model.Id.ToString();
+    ViewData["HideFloatingEye"] = true;
     ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - {Model.FirstName} {Model.LastName}</li>";
 }
 
