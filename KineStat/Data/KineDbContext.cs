@@ -13,6 +13,7 @@ namespace KineStat.Data
         public DbSet<Physio> Physios { get; set; }
         public DbSet<Cluster> Cluster { get; set; }
         public DbSet<Assessment> Assessments { get; set; }
+        public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionBool> QuestionBools { get; set; }
         public DbSet<QuestionQCM> QuestionQCMs { get; set; }
         public DbSet<QuestionLadder> QuestionLadders { get; set; }
@@ -23,6 +24,7 @@ namespace KineStat.Data
         public DbSet <ClinicalData> ClinicalDatas { get; set; }
         public DbSet<MedicalContext> MedicalContexts { get; set; }
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
+        public DbSet<PatientAnswer> PatientAnswers { get; set; }
         public DbSet<PatientAnswerBool> PatientAnswerBools { get; set; }
         public DbSet<PatientAnswerNumeric> PatientAnswerNumerics { get; set; }
         public DbSet<PatientAnswerQCM> PatientAnswerQCMs { get; set; }
