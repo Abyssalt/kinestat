@@ -1,6 +1,7 @@
-﻿using KineStat.Models;
-using KineStat.Data;
+﻿using KineStat.Data;
+using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace KineStat.Controllers
@@ -35,56 +36,104 @@ namespace KineStat.Controllers
         public IActionResult RedFlags(int id)
         {
             ViewData["PatientId"] = id.ToString();
-            return View(GetSimulatedQuestions());
+            return View();
         }
 
-        //Private method used to get simulated 
-        private List<QuestionBool> GetSimulatedQuestions()
-        {
-            int idCounter = 0;
-            var questions = new List<QuestionBool>
-            {
-                 // Tumeur / Métastase : Type = 1
-                 new QuestionBool { Id = idCounter++, Title = "Antécédent personnel de cancer (localisation/année)", RVPositive = 14.7, RVNegative = 0, CategoryId = 1 },
-                 new QuestionBool { Id = idCounter++, Title = "Perte de poids inexpliquée (>5% en 3–6 mois)", RVPositive = 9.2, RVNegative = 0, CategoryId = 1 },
-                 new QuestionBool { Id = idCounter++, Title = "Douleur nocturne sévère, réveillant le patient", RVPositive = 33.25, RVNegative = 0, CategoryId = 1 },
-                 new QuestionBool { Id = idCounter++, Title = "Douleur progressive sans amélioration malgré traitement (>4 semaines)", RVPositive = 3.1, RVNegative = 0.8, CategoryId = 1 },
-
-                 // Infection  :CategoryId = 2
-                 new QuestionBool { Id = idCounter++, Title = "Fièvre ≥ 38 °C ou frissons récents", RVPositive = 68.8, RVNegative = 0, CategoryId = 2 },
-                 new QuestionBool {Id = idCounter++, Title = "Signes systémiques d’infection (sueurs nocturnes, fatigue importante)", RVPositive = 1.8, RVNegative = 1, CategoryId = 2 },
-                 new QuestionBool { Id = idCounter++, Title = "Antécédent récent d’infection ou chirurgie/épisiotomie", RVPositive = 4, RVNegative = 0.6, CategoryId = 2 },
-                 new QuestionBool { Id = idCounter++, Title = "Immunodépression documentée (corticothérapie chronique)", RVPositive = 48.5, RVNegative = 0.8, CategoryId = 2 },
-
-                 // Neurologique :  CategoryId = 3
-                 new QuestionBool { Id = idCounter++, Title = "Anesthésie en selle / hypoesthésie périnéale", RVPositive = 1.7, RVNegative = 0.7, CategoryId = 3 },
-                 new QuestionBool {Id = idCounter++,  Title = "Rétention urinaire récente ou incontinence fécale / urinaire.", RVPositive = 5.85, RVNegative = 0.6, CategoryId = 3 }, // moyenne 2 à 8,7
-                 new QuestionBool { Id = idCounter++, Title = "Faiblesse motrice aiguë ou progressive des membres inférieurs (MRC ≤ 3) ou chute récente", RVPositive = 9.4, RVNegative = 0.1, CategoryId = 3 },
-                 new QuestionBool { Id = idCounter++, Title = "Troubles de la marche rapides ou signes pyramidaux / trouble coordination", RVPositive = 3, RVNegative = 0.4, CategoryId = 3 }
-             };
-
-            return questions;
-        }
 
         [HttpGet]
-        public IActionResult GetRedFlagsQuestions(int patientId, int? categoryId)
+        public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
         {
             ViewData["redflagsPercentage"] = 0.0;
-            List<QuestionBool> questions = GetSimulatedQuestions();
-            if (categoryId != null)
+            var patient = _context.Patients.Find(patientId);
+            if (patient == null) return NotFound();
+            var boolQuestions = _context.Questions
+                            .OfType<QuestionBool>()
+                            .Where (q => q.CategoryId == categoryId)
+                            .ToList();
+            var boolAnswers = _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId)
+                .ToList();
+ 
+            var questionAndAnswers = boolQuestions.Select(q => new QuestionPatientAnswerVM
             {
-                List<QuestionBool> filtredQuestions = new List<QuestionBool>();
-                
-                if (questions != null)
-                {
-                    filtredQuestions = questions
-                        .Where(q => q.CategoryId == categoryId)
-                        .ToList();
-                    return PartialView("_QuestionsPartial", filtredQuestions);
-                }
+                PatientId = patientId,
+                Question = q,
+                Answer = boolAnswers.FirstOrDefault(ba => ba.QuestionId == q.Id)
+            })
+            .ToList();
+            
+            return PartialView("_QuestionsPartial",questionAndAnswers);
 
+        }
+
+        //Return the patient in database with the specified Id 
+        //if there is no patient return null
+        private Patient FindPatientById(int patientId)
+        {
+            var patient = _context.Patients
+                .Where(p => p.Id == patientId)
+                .FirstOrDefault();
+            return patient;
+        }
+
+        [HttpPost]
+        [Route("~/Patient/SaveOrUpdateAnswer")]
+        public async Task<IActionResult> SaveOrUpdateAnswer([FromBody] SavePatientAnswerDTO answerDto)
+        {
+            try
+            {
+                var patient = FindPatientById(answerDto.PatientId);
+                if (patient == null)
+                {
+                    return NotFound(new { success = false, message = "Le patient n'existe pas" });
+                }
+                   
+                var assessment = _context.Assessments
+                    .Where(a => a.PatientId == answerDto.PatientId)
+                    .OrderByDescending(a => a.Date)
+                    .FirstOrDefault();
+                if (assessment == null)
+                {
+                    assessment = new Assessment
+                    {
+                            PatientId = answerDto.PatientId,
+                            Date = DateTime.Now,
+                            PhysioId = patient.PhysioId
+                    };
+                    _context.Assessments.Add(assessment);
+                    await _context.SaveChangesAsync();
+                }
+                var savedAnswer = _context.PatientAnswers
+                    .OfType<PatientAnswerBool>()
+                    .FirstOrDefault(a => a.PatientId == answerDto.PatientId && a.QuestionId == answerDto.QuestionId);
+                if (savedAnswer == null)
+                {
+                    savedAnswer = new PatientAnswerBool { PatientId = answerDto.PatientId, QuestionId = answerDto.QuestionId, Comment = answerDto.Comment, AssessmentId = assessment.Id };
+                    _context.PatientAnswers.Add(savedAnswer);
+                } else
+                {
+                    savedAnswer = savedAnswer as PatientAnswerBool;
+                    if (answerDto.BoolValue != null)
+                    {
+                        savedAnswer.Value = answerDto.BoolValue.Value;
+
+                    }
+                    savedAnswer.Comment = answerDto.Comment;
+                }
+                
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true });
             }
-            return PartialView("_QuestionsPartial", questions);
+            catch (DbUpdateException dbEx)
+            {
+                return StatusCode(500, new { success = false, message = "Erreur lors de la sauvegarde en base", details = dbEx.InnerException?.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Une erreur inattendue est survenue", details = ex.Message });
+            }
+
         }
 
         public IActionResult GetQuestionsClinique(int patientId/* ,int categoryId*/)
