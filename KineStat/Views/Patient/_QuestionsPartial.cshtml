@@ -1,9 +1,8 @@
-﻿@model IEnumerable<KineStat.Models.QuestionBool> 
+﻿@model IEnumerable<KineStat.Models.QuestionPatientAnswerVM> 
 
-
-
-@foreach (var question in Model)
+@foreach (var qa in Model)
 {
+    var question = qa.Question;
     <div class="mb-3 border p-3 rounded" data-question-id="@question.Id" name="question">
         <p>@question.Title
             <i class="bi bi-question-circle ms-2 text-primary"
@@ -12,15 +11,18 @@
 
         @if (question is QuestionBool qb)
         {
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="q_@question.Id" value="true">
-                <label class="form-check-label">Oui</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="q_@question.Id" value="false">
-                <label class="form-check-label">Non</label>
-            </div>
+            var boolAnswer = qa.Answer as PatientAnswerBool;
+           <div class="form-check">
+                <input class="form-check-input" type="radio" name="q_@question.Id" value="true" data-question-id="@question.Id" @(boolAnswer != null && boolAnswer.Value ? "checked" : "")>
+               <label class="form-check-label">Oui</label>
+           </div>
+           <div class="form-check">
+                <input class="form-check-input" type="radio" name="q_@question.Id" value="false" data-question-id="@question.Id" @(boolAnswer != null && !boolAnswer.Value ? "checked" : "")>
+               <label class="form-check-label">Non</label>
+           </div>
         }
+           
+
 
         <button type="button" id="notes_button_@question.Id" class="btn btn-sm btn-outline-secondary mt-2"
                 data-bs-toggle="collapse" data-bs-target="#notesContainer_@question.Id">
@@ -29,7 +31,7 @@
 
         <div class="collapse mt-2" id="notesContainer_@question.Id">
             <label for="noteInput_@question.Id">Notes :</label>
-            <textarea class="form-control" id="noteInput_@question.Id" name="note_@question.Id" placeholder="Notes (optionnel)"></textarea>
+            <textarea class="form-control" id="noteInput_@question.Id" name="note_@question.Id" data-question-id="@question.Id" placeholder="Notes (optionnel)">@qa.GetComment()</textarea>
         </div>
     </div>
 }
