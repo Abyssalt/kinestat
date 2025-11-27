@@ -31,6 +31,7 @@ namespace KineStat.Data
         public DbSet<RedflagThreshold> RedflagThresholds { get; set; }
 
         public DbSet<Dossier> Dossiers { get; set; }
+        public DbSet<Administrator> Administrators { get; set; }
 
 
 

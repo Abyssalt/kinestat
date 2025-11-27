@@ -12,6 +12,17 @@ builder.Services.AddDbContext<KineDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Add sessions support for authentication
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Add HttpContextAccessor for accessing session in controllers
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,6 +38,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
