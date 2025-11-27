@@ -27,8 +27,23 @@
         <div class="card mb-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="bi bi-person-badge"></i> Informations administratives</h4>
-                <button type="button" class="btn btn-warning btn-sm ms-2" title="Modifier"
-                        onclick="editPatient(@Model.Id, '@Model.LastName', '@Model.FirstName', '@Model.Email', '@Model.PhoneNumber', @((int)Model.Gender), '@Model.BirthDate.ToString("yyyy-MM-dd")', @Model.SocialSecurityNumber, @Model.PhysioId, @(Model.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), @(Model.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), '@(Model.DoctorName ?? "")', '@(Model.DoctorINAMI ?? "")', '@(Model.Address ?? "")')">
+                <button type="button" 
+                        class="btn btn-warning btn-sm ms-2 edit-patient-btn" 
+                        title="Modifier"
+                        data-id="@Model.Id"
+                        data-lastname="@Model.LastName"
+                        data-firstname="@Model.FirstName"
+                        data-email="@Model.Email"
+                        data-phonenumber="@Model.PhoneNumber"
+                        data-gender="@((int)Model.Gender)"
+                        data-birthdate="@Model.BirthDate.ToString("yyyy-MM-dd")"
+                        data-socialsecuritynumber="@(Model.SocialSecurityNumber ?? "")"
+                        data-physioid="@(Model.PhysioId)"
+                        data-weight="@(Model.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-height="@(Model.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-doctorname="@(Model.DoctorName ?? "")"
+                        data-doctorinami="@(Model.DoctorINAMI ?? "")"
+                        data-address="@(Model.Address ?? "")">
                     <i class="bi bi-pencil"></i>
                     Modifier le patient
                 </button>
@@ -219,7 +234,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Adresse du patient</label>
-                        <textarea class="form-control edit-field" id="edit_Address" name="Address" rows="2"></textarea>
+                        <input type="text" class="form-control edit-field" id="edit_Address" name="Address">
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
@@ -237,7 +252,7 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">N° Sécurité sociale *</label>
-                            <input type="text" class="form-control edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-validation="number" required>
+                            <input type="text" class="form-control edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-validation="SocialSecNumber" required>
                         </div>
                     </div>
                     <div class="row">
@@ -354,6 +369,33 @@
                 case 'select':
                     return value !== '';
 
+                case 'SocialSecNumber':
+                    if (!value) return false;
+                    const nissClean = value.replace(/[\s\.\-]/g, '');
+                    if (!/^\d{11}$/.test(nissClean)) return false;
+                    
+                    const year = parseInt(nissClean.substring(0, 2));
+                    const month = parseInt(nissClean.substring(2, 4));
+                    const day = parseInt(nissClean.substring(4, 6));
+                    const checkDigits = parseInt(nissClean.substring(9, 11));
+
+                    const validMonths = (month >= 1 && month <= 12) ||
+                                      (month >= 21 && month <= 32) ||
+                                      (month >= 41 && month <= 52) ||
+                                      (month >= 61 && month <= 72);
+                    if (!validMonths) return false;
+                    if (day < 1 || day > 31) return false;
+
+                    let baseNumber = parseInt(nissClean.substring(0, 9));
+                    let calculatedCheck = 97 - (baseNumber % 97);
+
+                    if (calculatedCheck !== checkDigits) {
+                        baseNumber = parseInt('2' + nissClean.substring(0, 9));
+                        calculatedCheck = 97 - (baseNumber % 97);
+                    }
+
+                    return calculatedCheck === checkDigits;
+
                 default:
                     return value.length > 0;
             }
@@ -441,6 +483,39 @@
                     document.getElementById('editPatientForm').submit();
                 }
             });
+
+            document.querySelectorAll('.edit-patient-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const data = this.dataset;
+                    
+                    document.getElementById('edit_Id').value = data.id;
+                    document.getElementById('edit_LastName').value = data.lastname;
+                    document.getElementById('edit_FirstName').value = data.firstname;
+                    document.getElementById('edit_Email').value = data.email;
+                    document.getElementById('edit_PhoneNumber').value = data.phonenumber;
+                    document.getElementById('edit_Address').value = data.address || '';
+                    document.getElementById('edit_Genre').value = data.gender;
+                    document.getElementById('edit_BirthDate').value = data.birthdate;
+                    document.getElementById('edit_SocialSecurityNumber').value = data.socialsecuritynumber;
+                    document.getElementById('edit_PhysioId').value = data.physioid;
+                    document.getElementById('edit_Weight').value = data.weight;
+                    document.getElementById('edit_Height').value = data.height;
+                    document.getElementById('edit_DoctorName').value = data.doctorname || '';
+                    document.getElementById('edit_DoctorINAMI').value = data.doctorinami || '';
+
+                    const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+                    editModal.show();
+
+                    setTimeout(() => {
+                        document.querySelectorAll('.edit-field').forEach(input => {
+                            if (input.value.trim()) {
+                                updateFieldVisualState(input);
+                            }
+                        });
+                        updateEditButton();
+                    }, 150);
+                });
+            });
         });
 
         // ========== MODAL EVENTS ==========
@@ -453,35 +528,5 @@
                 input.classList.remove('is-valid-custom', 'is-invalid-custom');
             });
         });
-
-        // ========== EDIT PATIENT ==========
-        function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, socialSecurityNumber, physioId, weight, height, doctorName, doctorINAMI, address) {
-            document.getElementById('edit_Id').value = id;
-            document.getElementById('edit_LastName').value = lastName;
-            document.getElementById('edit_FirstName').value = firstName;
-            document.getElementById('edit_Email').value = email;
-            document.getElementById('edit_PhoneNumber').value = phoneNumber;
-            document.getElementById('edit_Address').value = address || '';
-            document.getElementById('edit_Genre').value = genre;
-            document.getElementById('edit_BirthDate').value = birthDate;
-            document.getElementById('edit_SocialSecurityNumber').value = socialSecurityNumber;
-            document.getElementById('edit_PhysioId').value = physioId;
-            document.getElementById('edit_Weight').value = weight;
-            document.getElementById('edit_Height').value = height;
-            document.getElementById('edit_DoctorName').value = doctorName || '';
-            document.getElementById('edit_DoctorINAMI').value = doctorINAMI || '';
-
-            const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
-            editModal.show();
-
-            setTimeout(() => {
-                document.querySelectorAll('.edit-field').forEach(input => {
-                    if (input.value.trim()) {
-                        updateFieldVisualState(input);
-                    }
-                });
-                updateEditButton();
-            }, 150);
-        }
     </script>
 }
