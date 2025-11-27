@@ -52,7 +52,7 @@ namespace KineStat.Models
         public Gender Gender { get; set; }
 
         [Required] 
-        public int SocialSecurityNumber { get; set; }
+        public String SocialSecurityNumber { get; set; }
 
         public PatientStatus PatientStatus { get; set; } = PatientStatus.Active;
 
