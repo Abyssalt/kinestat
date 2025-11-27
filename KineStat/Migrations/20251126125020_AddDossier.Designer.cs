@@ -3,6 +3,7 @@ using System;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126125020_AddDossier")]
+    partial class AddDossier
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,9 +66,6 @@ namespace KineStat.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("date");
 
-                    b.Property<int>("DossierId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("MedicalRecordId")
                         .HasColumnType("integer");
 
@@ -76,8 +76,6 @@ namespace KineStat.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DossierId");
 
                     b.HasIndex("MedicalRecordId");
 
@@ -293,9 +291,6 @@ namespace KineStat.Migrations
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("PatientStatus")
-                        .HasColumnType("integer");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -697,12 +692,6 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Assessment", b =>
                 {
-                    b.HasOne("KineStat.Models.Dossier", "Dossier")
-                        .WithMany("Assessments")
-                        .HasForeignKey("DossierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("KineStat.Models.MedicalRecord", null)
                         .WithMany("Assessments")
                         .HasForeignKey("MedicalRecordId");
@@ -718,8 +707,6 @@ namespace KineStat.Migrations
                         .HasForeignKey("PhysioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Dossier");
 
                     b.Navigation("Patient");
 
@@ -984,11 +971,6 @@ namespace KineStat.Migrations
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
                 {
                     b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("KineStat.Models.Dossier", b =>
-                {
-                    b.Navigation("Assessments");
                 });
 
             modelBuilder.Entity("KineStat.Models.MedicalContext", b =>

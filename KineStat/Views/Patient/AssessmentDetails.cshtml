@@ -1,0 +1,59 @@
+﻿@model KineStat.Models.Assessment
+
+@{
+    ViewData["Title"] = "Détails du bilan";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-clipboard2-pulse"></i>
+            Bilan du @Model.Date.ToString("dd/MM/yyyy")
+        </h2>
+
+        <a asp-action="DossierDetails"
+           asp-route-id="@Model.DossierId"
+           class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour au dossier
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Informations générales
+        </div>
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Date</div>
+                <div class="col-md-8">
+                    @Model.Date.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Patient</div>
+                <div class="col-md-8">
+                    @Model.Patient.FirstName @Model.Patient.LastName
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Kiné</div>
+                <div class="col-md-8">
+                    @Model.Physio.FirstName
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Dossier</div>
+                <div class="col-md-8">
+                    @Model.Dossier.Titre
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
