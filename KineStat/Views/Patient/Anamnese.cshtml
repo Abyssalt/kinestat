@@ -4,7 +4,7 @@
     ViewData["Title"] = "Anamnèse";
     ViewData["PatientId"] = Model.Id.ToString();
     ViewData["HideFloatingEye"] = true;
-    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - {Model.FirstName} {Model.LastName}</li>";
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse - {Model.FirstName} {Model.LastName}</li>";
 }
 
 <div class="container mt-4">
@@ -14,11 +14,24 @@
             <i class="bi bi-arrow-left"></i> Retour à la liste
         </a>
     </div>
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <form asp-controller="Patient" asp-action="SaveAnamnese" method="post">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white" data-bs-toggle="collapse" data-bs-target="#adminInfo" style="cursor:pointer;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><i class="bi bi-person-badge"></i> Informations administratives</h4>
+                <button type="button" class="btn btn-warning btn-sm ms-2" title="Modifier"
+                        onclick="editPatient(@Model.Id, '@Model.LastName', '@Model.FirstName', '@Model.Email', '@Model.PhoneNumber', @((int)Model.Gender), '@Model.BirthDate.ToString("yyyy-MM-dd")', @Model.SocialSecurityNumber, @Model.PhysioId, @(Model.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), @(Model.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)), '@(Model.DoctorName ?? "")', '@(Model.DoctorINAMI ?? "")', '@(Model.Address ?? "")')">
+                    <i class="bi bi-pencil"></i>
+                    Modifier le patient
+                </button>
             </div>
             <div id="adminInfo" class="collapse show">
                 <div class="card-body">
@@ -64,7 +77,7 @@
                         </div>
                     </div>
 
-                    <!-- Row 3 -->
+                    <!-- Row 4 -->
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Numéro de sécurité sociale</label>
@@ -117,15 +130,6 @@
             </div>
         </div>
 
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
         <div class="card mb-4">
             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                 <div data-bs-toggle="collapse"
@@ -142,13 +146,10 @@
                    class="btn btn-light btn-sm ms-2">
                     <i class="bi bi-plus-circle"></i> Nouveau dossier
                 </a>
-
-
             </div>
 
             <div id="dossiersCollapse" class="collapse show">
                 <div class="card-body">
-
                     @if (!Model.Dossiers.Any())
                     {
                         <p class="text-muted text-center">
@@ -158,13 +159,11 @@
                     else
                     {
                         <div class="list-group">
-
                             @foreach (var dossier in Model.Dossiers.OrderByDescending(d => d.DateOuverture))
                             {
                                 <a asp-action="DossierDetails"
                                    asp-route-id="@dossier.Id"
                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-
                                     <div>
                                         <h6 class="mb-1">
                                             <i class="bi bi-folder"></i> @dossier.Titre
@@ -173,18 +172,316 @@
                                             Ouvert le @dossier.DateOuverture.ToString("dd/MM/yyyy")
                                         </small>
                                     </div>
-
                                     <div>
                                     </div>
-
                                 </a>
                             }
-
                         </div>
                     }
-
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+<!-- Edit patient modal -->
+<div class="modal fade" id="editPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPatientForm" asp-controller="Patient" asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="edit_Id" name="Id">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" class="form-control edit-field" id="edit_LastName" name="LastName" data-validation="text" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prénom *</label>
+                            <input type="text" class="form-control edit-field" id="edit_FirstName" name="FirstName" data-validation="text" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control edit-field" id="edit_Email" name="Email" data-validation="email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Téléphone *</label>
+                            <input type="tel" class="form-control edit-field" id="edit_PhoneNumber" name="PhoneNumber" data-validation="phone" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adresse du patient</label>
+                        <textarea class="form-control edit-field" id="edit_Address" name="Address" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Genre *</label>
+                            <select class="form-select edit-field" id="edit_Genre" name="Genre" data-validation="select" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="0">Homme</option>
+                                <option value="1">Femme</option>
+                                <option value="2">Autre</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date de naissance *</label>
+                            <input type="date" class="form-control edit-field" id="edit_BirthDate" name="BirthDate" data-validation="date" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">N° Sécurité sociale *</label>
+                            <input type="text" class="form-control edit-field" id="edit_SocialSecurityNumber" name="SocialSecurityNumber" data-validation="number" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Kinésithérapeute *</label>
+                            <select class="form-select edit-field" id="edit_PhysioId" name="PhysioId" data-validation="select" required>
+                                <option value="">-- Sélectionner un kiné --</option>
+                                @if (ViewBag.Physios != null)
+                                {
+                                    @foreach (var physio in ViewBag.Physios)
+                                    {
+                                        <option value="@physio.Id">@physio.FirstName @physio.LastName (INAMI: @physio.INAMINumber)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Poids (kg)</label>
+                            <input type="number" step="0.1" class="form-control edit-field" id="edit_Weight" name="Weight" data-validation="decimal">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Taille (cm)</label>
+                            <input type="number" step="0.1" class="form-control edit-field" id="edit_Height" name="Height" data-validation="decimal">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Médecin traitant</label>
+                            <input type="text" class="form-control edit-field" id="edit_DoctorName" name="DoctorName">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">N° INAMI du médecin</label>
+                            <input type="text" class="form-control edit-field" id="edit_DoctorINAMI" name="DoctorINAMI" data-validation="inami">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="saveEditBtn" class="btn btn-warning" disabled>
+                    <i class="bi bi-save"></i> Enregistrer les modifications
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .is-valid-custom {
+        border-color: #28a745 !important;
+        background-color: #f0fff4 !important;
+    }
+
+    .is-invalid-custom {
+        border-color: #dc3545 !important;
+        background-color: #fff5f5 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // ========== VALIDATION ==========
+        function validateField(input) {
+            const validationType = input.dataset.validation;
+            const value = input.value.trim();
+            const isRequired = input.hasAttribute('required');
+
+            if (!isRequired && !value) {
+                return true;
+            }
+
+            if (isRequired && !value) {
+                return false;
+            }
+
+            switch (validationType) {
+                case 'text':
+                    const textRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+                    return value.length >= 1 && textRegex.test(value);
+
+                case 'email':
+                    const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                    return emailRegex.test(value);
+
+                case 'phone':
+                    const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+                    const digitsOnly = value.replace(/[\s\+\-\(\)]/g, '');
+                    return phoneRegex.test(value) && digitsOnly.length >= 9;
+
+                case 'number':
+                    const numRegex = /^\d+$/;
+                    if (!numRegex.test(value)) return false;
+                    const num = parseInt(value);
+                    return !isNaN(num) && num > 0;
+
+                case 'inami':
+                    if (!value) return true;
+                    const inamiRegex = /^\d+$/;
+                    return inamiRegex.test(value);
+
+                case 'decimal':
+                    if (!value) return true;
+                    const dec = parseFloat(value);
+                    return !isNaN(dec) && dec > 0;
+
+                case 'date':
+                    if (!value) return false;
+                    const date = new Date(value);
+                    const now = new Date();
+                    return date < now;
+
+                case 'select':
+                    return value !== '';
+
+                default:
+                    return value.length > 0;
+            }
+        }
+
+        function updateFieldVisualState(input) {
+            const isRequired = input.hasAttribute('required');
+            const value = input.value.trim();
+
+            input.classList.remove('is-valid-custom', 'is-invalid-custom');
+
+            if (isRequired && !value) {
+                input.classList.add('is-invalid-custom');
+                return false;
+            }
+
+            if (value) {
+                const isValid = validateField(input);
+                if (isValid) {
+                    input.classList.add('is-valid-custom');
+                } else {
+                    input.classList.add('is-invalid-custom');
+                }
+                return isValid;
+            }
+
+            return true;
+        }
+
+        // ========== EDIT FORM ==========
+        function areEditRequiredFieldsFilled() {
+            const requiredInputs = document.querySelectorAll('.edit-field[required]');
+            
+            for (let input of requiredInputs) {
+                const value = input.value.trim();
+                
+                if (!value || value === '') {
+                    return false;
+                }
+                
+                if (!validateField(input)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function updateEditButton() {
+            const btn = document.getElementById('saveEditBtn');
+            const allValid = areEditRequiredFieldsFilled();
+    
+            if (allValid) {
+                btn.disabled = false;
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-warning');
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-secondary');
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-field').forEach(input => {
+                input.addEventListener('input', function() {
+                    updateFieldVisualState(this);
+                    updateEditButton();
+                });
+
+                input.addEventListener('blur', function() {
+                    updateFieldVisualState(this);
+                    updateEditButton();
+                });
+
+                input.addEventListener('change', function() {
+                    updateFieldVisualState(this);
+                    updateEditButton();
+                });
+            });
+
+            document.getElementById('saveEditBtn').addEventListener('click', function() {
+                if (areEditRequiredFieldsFilled()) {
+                    document.getElementById('editPatientForm').submit();
+                }
+            });
+        });
+
+        // ========== MODAL EVENTS ==========
+        document.getElementById('editPatientModal').addEventListener('shown.bs.modal', function() {
+            updateEditButton();
+        });
+
+        document.getElementById('editPatientModal').addEventListener('hidden.bs.modal', function() {
+            document.querySelectorAll('.edit-field').forEach(input => {
+                input.classList.remove('is-valid-custom', 'is-invalid-custom');
+            });
+        });
+
+        // ========== EDIT PATIENT ==========
+        function editPatient(id, lastName, firstName, email, phoneNumber, genre, birthDate, socialSecurityNumber, physioId, weight, height, doctorName, doctorINAMI, address) {
+            document.getElementById('edit_Id').value = id;
+            document.getElementById('edit_LastName').value = lastName;
+            document.getElementById('edit_FirstName').value = firstName;
+            document.getElementById('edit_Email').value = email;
+            document.getElementById('edit_PhoneNumber').value = phoneNumber;
+            document.getElementById('edit_Address').value = address || '';
+            document.getElementById('edit_Genre').value = genre;
+            document.getElementById('edit_BirthDate').value = birthDate;
+            document.getElementById('edit_SocialSecurityNumber').value = socialSecurityNumber;
+            document.getElementById('edit_PhysioId').value = physioId;
+            document.getElementById('edit_Weight').value = weight;
+            document.getElementById('edit_Height').value = height;
+            document.getElementById('edit_DoctorName').value = doctorName || '';
+            document.getElementById('edit_DoctorINAMI').value = doctorINAMI || '';
+
+            const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+            editModal.show();
+
+            setTimeout(() => {
+                document.querySelectorAll('.edit-field').forEach(input => {
+                    if (input.value.trim()) {
+                        updateFieldVisualState(input);
+                    }
+                });
+                updateEditButton();
+            }, 150);
+        }
+    </script>
+}

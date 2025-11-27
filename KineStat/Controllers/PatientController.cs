@@ -17,7 +17,7 @@ namespace KineStat.Controllers
             _context = context;
         }
 
-        public IActionResult Anamnese(int id)
+        public async Task<IActionResult> Anamnese(int id)
         {
             var patient = _context.Patients
                 .Include(p => p.Dossiers)
@@ -26,8 +26,62 @@ namespace KineStat.Controllers
             if (patient == null)
                 return NotFound();
 
+            ViewBag.Physios = await _context.Physios
+                .OrderBy(p => p.LastName)
+                .ToListAsync();
+
             return View(patient);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Patient patient)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var existingPatient = await _context.Patients.FindAsync(patient.Id);
+                    if (existingPatient == null)
+                    {
+                        TempData["Error"] = "Patient introuvable.";
+                        return RedirectToAction(nameof(Anamnese));
+                    }
+
+                    existingPatient.FirstName = patient.FirstName;
+                    existingPatient.LastName = patient.LastName;
+                    existingPatient.Email = patient.Email;
+                    existingPatient.PhoneNumber = patient.PhoneNumber;
+                    existingPatient.Gender = patient.Gender;
+                    existingPatient.BirthDate = patient.BirthDate;
+                    existingPatient.SocialSecurityNumber = patient.SocialSecurityNumber;
+                    existingPatient.PhysioId = patient.PhysioId;
+                    existingPatient.Weight = patient.Weight;
+                    existingPatient.Height = patient.Height;
+                    existingPatient.DoctorName = patient.DoctorName;
+                    existingPatient.DoctorINAMI = patient.DoctorINAMI;
+                    existingPatient.Address = patient.Address;
+
+                    _context.Update(existingPatient);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} modifié avec succès.";
+                    return RedirectToAction(nameof(Anamnese));
+                }
+                return RedirectToAction(nameof(Anamnese));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                TempData["Error"] = "Erreur de concurrence lors de la modification. Le patient a peut-être été modifié ou supprimé.";
+                return RedirectToAction(nameof(Anamnese));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Erreur lors de la modification du patient.";
+                return RedirectToAction(nameof(Anamnese));
+            }
+        }
+
 
         [HttpPost]
         public IActionResult SaveAnamnese()
