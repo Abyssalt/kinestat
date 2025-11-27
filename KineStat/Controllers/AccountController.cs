@@ -100,6 +100,7 @@ namespace KineStat.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            TempData.Clear();
             TempData["InfoMessage"] = "Déconnecté avec succès.";
             return RedirectToAction("Login");
         }
