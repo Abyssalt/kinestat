@@ -90,7 +90,20 @@ namespace KineStat.Controllers
                 {
                     return NotFound(new { success = false, message = "Le patient n'existe pas" });
                 }
-                   
+
+                var dossier = _context.Dossiers
+                    .Where(d => d.PatientId == answerDto.PatientId)
+                    .OrderByDescending(d => d.DateOuverture)
+                    .FirstOrDefault();
+                if (dossier == null)
+                {
+                    return StatusCode(400, new
+                    {
+                        success = false,
+                        message = "Ce patient ne possède aucun dossier."
+                    });
+                }
+
                 var assessment = _context.Assessments
                     .Where(a => a.PatientId == answerDto.PatientId)
                     .OrderByDescending(a => a.Date)
@@ -99,9 +112,10 @@ namespace KineStat.Controllers
                 {
                     assessment = new Assessment
                     {
-                            PatientId = answerDto.PatientId,
-                            Date = DateTime.Now,
-                            PhysioId = patient.PhysioId
+                        PatientId = answerDto.PatientId,
+                        Date = DateTime.Now,
+                        PhysioId = patient.PhysioId,
+                        DossierId = dossier.Id
                     };
                     _context.Assessments.Add(assessment);
                     await _context.SaveChangesAsync();
