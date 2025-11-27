@@ -44,9 +44,9 @@ namespace KineStat.Controllers
                 await PasswordMigrationScript.MigratePasswords(_context);
 
                 return Content(
-                    "✅ Migration des mots de passe terminée avec succès !\n\n" +
+                    "Migration des mots de passe terminée avec succès !\n\n" +
                     "Consultez la console de Visual Studio pour voir les détails.\n\n" +
-                    "⚠️ IMPORTANT : Supprimez maintenant le fichier MaintenanceController.cs !",
+                    "IMPORTANT : Supprimez maintenant le fichier MaintenanceController.cs",
                     "text/plain");
             }
             catch (Exception ex)
