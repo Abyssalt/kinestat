@@ -85,12 +85,8 @@
         document.getElementById("questionnaireContainer").innerHTML = html;
         attachNoteToggleEvents();
         attachAnswerListeners();
-        updateCategoryProgress();
     }
-    //Add by default questions of first red flags  category when view is loaded for the first time
-    document.addEventListener("DOMContentLoaded", () => {
-        loadQuestionsByCategory(1);
-    });
+   
 
      function attachNoteToggleEvents() {
         document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
@@ -118,5 +114,78 @@
         const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
         modal.show();
          }
+    //Add by default questions of first red flags  category when view is loaded for the first time
 
+     document.addEventListener("DOMContentLoaded", function () {
+          loadQuestionsByCategory(1);
+    });
+
+     function attachAnswerListeners() {
+
+        const radios = document.querySelectorAll('input[name^="q_"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', handleRadioChange);
+        });
+
+        const textareas = document.querySelectorAll('textarea[name^="note_"]');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('change', handleTextareaInput);
+        });
+    }
+
+    function handleRadioChange(event) {
+        const radio = event.target;
+        const questionId = radio.dataset.questionId;
+        const value = radio.value === "true";
+        const patientId = @ViewData["PatientId"];
+        const comment = getCommentForQuestion(questionId);
+
+        saveAnswer(patientId, questionId, value, comment);
+    }
+
+    function handleTextareaInput(event) {
+        const textarea = event.target;
+        const questionId = textarea.dataset.questionId;
+        const comment = textarea.value;
+        const patientId = @ViewData["PatientId"];
+        const value = getRadioValueForQuestion(questionId);
+
+        saveAnswer(patientId, questionId, value, comment);
+    }
+
+    function getCommentForQuestion(questionId) {
+        const textarea = document.querySelector(`textarea[name="note_${questionId}"]`);
+        return textarea ? textarea.value : "";
+    }
+
+    function getRadioValueForQuestion(questionId) {
+        const radio = document.querySelector(`input[name="q_${questionId}"]:checked`);
+        return radio ? (radio.value === "true") : null;
+    }
+
+    function saveAnswer(patientId, questionId, boolValue, comment) {
+        const dto = {
+            PatientId: patientId,
+            QuestionId: questionId,
+            BoolValue: boolValue,
+            Comment: comment
+        };
+
+        fetch(`/Patient/SaveOrUpdateAnswer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dto)
+        })
+        .then(async response => {
+            if (!response.ok) {
+                const text = await response.text();
+                console.error("Erreur serveur:", text);
+                throw new Error('Erreur serveur');
+            }
+            return response.json();
+        })
+    .then(data => console.log("Saved:", data))
+    .catch(err => console.error("Erreur sauvegarde:", err));
+
+    }
     </script>
