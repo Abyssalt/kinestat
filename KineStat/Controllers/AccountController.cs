@@ -32,6 +32,8 @@ namespace KineStat.Controllers
                     return RedirectToAction("Index", "Admin");
             }
 
+            TempData.Clear();
+
             return View();
         }
 
