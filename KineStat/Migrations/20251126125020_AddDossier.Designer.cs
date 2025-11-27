@@ -3,6 +3,7 @@ using System;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251126125020_AddDossier")]
+    partial class AddDossier
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,9 +66,6 @@ namespace KineStat.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("date");
 
-                    b.Property<int>("DossierId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("MedicalRecordId")
                         .HasColumnType("integer");
 
@@ -76,8 +76,6 @@ namespace KineStat.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DossierId");
 
                     b.HasIndex("MedicalRecordId");
 
@@ -294,9 +292,6 @@ namespace KineStat.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PatientStatus")
-                        .HasColumnType("integer");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("text");
@@ -317,7 +312,7 @@ namespace KineStat.Migrations
                     b.ToTable("Patients");
                 });
 
-            modelBuilder.Entity("KineStat.Models.PatientAnswer", b =>
+            modelBuilder.Entity("KineStat.Models.PatientAnswerBool", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -331,16 +326,14 @@ namespace KineStat.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("text");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Value")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -350,11 +343,77 @@ namespace KineStat.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("PatientAnswers");
+                    b.ToTable("PatientAnswerBools");
+                });
 
-                    b.HasDiscriminator().HasValue("PatientAnswer");
+            modelBuilder.Entity("KineStat.Models.PatientAnswerNumeric", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.UseTphMappingStrategy();
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AssessmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("PatientAnswerNumerics");
+                });
+
+            modelBuilder.Entity("KineStat.Models.PatientAnswerQCM", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AssessmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("PatientAnswerQCMs");
                 });
 
             modelBuilder.Entity("KineStat.Models.Physio", b =>
@@ -463,7 +522,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("ClusterId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Question");
 
                     b.HasDiscriminator().HasValue("Question");
 
@@ -589,44 +648,6 @@ namespace KineStat.Migrations
                     b.ToTable("PathologyQuestion");
                 });
 
-            modelBuilder.Entity("KineStat.Models.PatientAnswerBool", b =>
-                {
-                    b.HasBaseType("KineStat.Models.PatientAnswer");
-
-                    b.Property<bool>("Value")
-                        .HasColumnType("boolean");
-
-                    b.HasDiscriminator().HasValue("PatientAnswerBool");
-                });
-
-            modelBuilder.Entity("KineStat.Models.PatientAnswerNumeric", b =>
-                {
-                    b.HasBaseType("KineStat.Models.PatientAnswer");
-
-                    b.Property<double>("Value")
-                        .HasColumnType("double precision");
-
-                    b.ToTable("PatientAnswers", t =>
-                        {
-                            t.Property("Value")
-                                .HasColumnName("PatientAnswerNumeric_Value");
-                        });
-
-                    b.HasDiscriminator().HasValue("PatientAnswerNumeric");
-                });
-
-            modelBuilder.Entity("KineStat.Models.PatientAnswerQCM", b =>
-                {
-                    b.HasBaseType("KineStat.Models.PatientAnswer");
-
-                    b.Property<int>("AnswerId")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("AnswerId");
-
-                    b.HasDiscriminator().HasValue("PatientAnswerQCM");
-                });
-
             modelBuilder.Entity("KineStat.Models.QuestionBool", b =>
                 {
                     b.HasBaseType("KineStat.Models.Question");
@@ -671,12 +692,6 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Assessment", b =>
                 {
-                    b.HasOne("KineStat.Models.Dossier", "Dossier")
-                        .WithMany("Assessments")
-                        .HasForeignKey("DossierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("KineStat.Models.MedicalRecord", null)
                         .WithMany("Assessments")
                         .HasForeignKey("MedicalRecordId");
@@ -692,8 +707,6 @@ namespace KineStat.Migrations
                         .HasForeignKey("PhysioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Dossier");
 
                     b.Navigation("Patient");
 
@@ -761,7 +774,7 @@ namespace KineStat.Migrations
                     b.Navigation("Physio");
                 });
 
-            modelBuilder.Entity("KineStat.Models.PatientAnswer", b =>
+            modelBuilder.Entity("KineStat.Models.PatientAnswerBool", b =>
                 {
                     b.HasOne("KineStat.Models.Assessment", "Assessment")
                         .WithMany()
@@ -782,6 +795,68 @@ namespace KineStat.Migrations
                         .IsRequired();
 
                     b.Navigation("Assessment");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("KineStat.Models.PatientAnswerNumeric", b =>
+                {
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("KineStat.Models.PatientAnswerQCM", b =>
+                {
+                    b.HasOne("KineStat.Models.Answer", "ChosenAnswer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KineStat.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+
+                    b.Navigation("ChosenAnswer");
 
                     b.Navigation("Patient");
 
@@ -879,17 +954,6 @@ namespace KineStat.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KineStat.Models.PatientAnswerQCM", b =>
-                {
-                    b.HasOne("KineStat.Models.Answer", "ChosenAnswer")
-                        .WithMany()
-                        .HasForeignKey("AnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChosenAnswer");
-                });
-
             modelBuilder.Entity("KineStat.Models.Assessment", b =>
                 {
                     b.Navigation("Questions");
@@ -907,11 +971,6 @@ namespace KineStat.Migrations
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
                 {
                     b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("KineStat.Models.Dossier", b =>
-                {
-                    b.Navigation("Assessments");
                 });
 
             modelBuilder.Entity("KineStat.Models.MedicalContext", b =>

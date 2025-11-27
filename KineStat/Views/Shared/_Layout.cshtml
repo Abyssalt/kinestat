@@ -167,68 +167,44 @@
                 type: 'radar',
                 data: {
                     labels: [
-                        "Articulaire/structurel",
-                        "Myofascial",
-                        "Nociceptif",
-                        "Neuropathique",
-                        "Nociplastique",
-                        "Contrôle sensorimoteur",
-                        "Croyance & cognition",
-                        "Socio-environnemental",
-                        "Émotionnel/Affectif"
+                        "Tumeur",
+                        "Infection",
+                        "Neurologique",
+                        "Traumatisme",
+                        "Inflammatoire",
+                        "Vasculaire"
                     ],
                     datasets: [{
-                        label: "Profil du patient",
-                        data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
-
-                        backgroundColor: "rgba(54,162,235,0.25)",
-                        borderColor: "rgb(54,162,235)",
+                        label: "Profil TINTIV",
+                        data: [3, 10, 2, 8, 7, 1],
+                        backgroundColor: "rgba(255,99,132,0.25)",
+                        borderColor: "rgb(255,99,132)",
                         borderWidth: 3,
-
-                        pointBackgroundColor: "rgb(54,162,235)",
-                        pointBorderColor: "#fff",
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointBackgroundColor: "rgb(255,99,132)",
+                        pointBorderColor: "#fff"
                     }]
                 },
-
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-
                     scales: {
                         r: {
                             min: 0,
                             max: 10,
                             ticks: {
                                 stepSize: 2,
-                                backdropColor: "transparent",
-                                color: "#666",
-                                font: { size: 12 }
-                            },
-                            grid: {
-                                color: "rgba(0,0,0,0.1)"
-                            },
-                            angleLines: {
-                                color: "rgba(0,0,0,0.15)"
-                            },
-                            pointLabels: {
-                                color: "#333",
-                                font: { size: 12 }
+                                backdropColor: "transparent"
                             }
                         }
                     },
-
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     }
                 }
             });
         });
-    </script>
+</script>
+
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

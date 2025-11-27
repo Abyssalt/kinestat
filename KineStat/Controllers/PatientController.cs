@@ -19,11 +19,13 @@ namespace KineStat.Controllers
 
         public IActionResult Anamnese(int id)
         {
-            var patient = _context.Patients.Find(id);
+            var patient = _context.Patients
+                .Include(p => p.Dossiers)
+                .FirstOrDefault(p => p.Id == id);
+
             if (patient == null)
-            {
                 return NotFound();
-            }
+
             return View(patient);
         }
 
@@ -205,5 +207,68 @@ namespace KineStat.Controllers
             ViewData["PatientId"] = id.ToString();
             return View();
         }
+
+
+
+        [HttpGet]
+        public IActionResult CreateDossier(int id)
+        {
+            return View(new Dossier { PatientId = id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateDossier(Dossier dossier)
+        {
+            if (!ModelState.IsValid)
+                return View(dossier);
+
+            _context.Dossiers.Add(dossier);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "✅ Dossier créé avec succès";
+
+            return RedirectToAction("Anamnese", new { id = dossier.PatientId });
+        }
+
+
+        public async Task<IActionResult> DossierDetails(int id)
+        {
+            var dossier = await _context.Dossiers
+                .Include(d => d.Patient)
+                .Include(d => d.Assessments)
+                .ThenInclude(a => a.Physio)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (dossier == null)
+                return NotFound();
+
+            return View(dossier);
+        }
+        public IActionResult CreateAssessment(int dossierId)
+        {
+            return View(new Assessment
+            {
+                DossierId = dossierId,
+                Date = DateTime.Today
+            });
+        }
+        public async Task<IActionResult> AssessmentDetails(int id)
+        {
+            var assessment = await _context.Assessments
+                .Include(a => a.Patient)
+                .Include(a => a.Physio)
+                .Include(a => a.Dossier)
+                .Include(a => a.RedFlagsDetected)
+                .Include(a => a.Questions)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (assessment == null)
+                return NotFound();
+
+            return View(assessment);
+        }
+
+
     }
 }

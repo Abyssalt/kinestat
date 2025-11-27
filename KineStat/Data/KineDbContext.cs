@@ -32,6 +32,8 @@ namespace KineStat.Data
         public DbSet<Socrate> Socrates { get; set; }
         public DbSet<RedflagThreshold> RedflagThresholds { get; set; }
 
+        public DbSet<Dossier> Dossiers { get; set; }
+
 
 
     }
