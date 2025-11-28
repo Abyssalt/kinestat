@@ -6,8 +6,13 @@
     <div class="mb-3 border p-3 rounded" data-question-id="@question.Id" name="question">
         <p>@question.Title
             <i class="bi bi-question-circle ms-2 text-primary"
-               title="RV+ : @question.RVPositive&#10;RV- : @question.RVNegative"> </i>
+               data-bs-toggle="tooltip"
+               data-bs-html="true"
+               data-bs-placement="right"
+               data-bs-title="RV+ : @question.RVPositive<br>RV- : @question.RVNegative<br>Source : @question.SourceRv">
+            </i>
         </p>
+
 
         @if (question is QuestionBool qb)
         {
