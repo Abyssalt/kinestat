@@ -1,10 +1,10 @@
-﻿@model IEnumerable<Question> 
+﻿@model IEnumerable<Question>
 @{
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
-    
-   // ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
+
+    // ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
 }
 
 <h2>Red Flags </h2>
@@ -41,6 +41,17 @@
                     <a href="#" class="text-decoration-none">Test de Slump</a>
                 </li>
             </ul>
+            <div class="card mt-4 border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Probabilité pathologie grave</h5>
+                    <div style="height: 40px;">
+                        <canvas id="redFlagsGauge"></canvas>
+                    </div>
+                    <div class="text-center mt-2">
+                        <h4 id="probabilityValue" class="text-primary">0%</h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -54,7 +65,7 @@
 
             <div class="modal-body">
                 <p>
-                    Un seuil de redflags grave a été detecté. Souhaitez vous continuer le bilan ? 
+                    Un seuil de redflags grave a été detecté. Souhaitez vous continuer le bilan ?
                 </p>
                 <p class="text-muted">
                     Vous pouvez poursuivre le questionnaire ou passer immédiatement aux résultats.
@@ -75,9 +86,9 @@
     </div>
 </div>
 
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    //Load dynamically questions by their categoryId , it calls the controller but return datas in a partial view
+<script>
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
         const response = await fetch(`/Patient/${patientId}/GetRedFlagsQuestions?patientId=${patientId}&categoryId=${categoryId}`);
@@ -86,7 +97,7 @@
         attachNoteToggleEvents();
         attachAnswerListeners();
     }
-   
+
 
      function attachNoteToggleEvents() {
         document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
@@ -114,10 +125,11 @@
         const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
         modal.show();
          }
-    //Add by default questions of first red flags  category when view is loaded for the first time
 
-     document.addEventListener("DOMContentLoaded", function () {
-          loadQuestionsByCategory(1);
+    document.addEventListener("DOMContentLoaded", function () {
+        loadQuestionsByCategory(1);
+        initializeGauge();
+        updateGauge(75);    // Change here the value of the gauge : 0..33 Green, 34..66 Yellow and 67..100 Red
     });
 
      function attachAnswerListeners() {
@@ -188,4 +200,63 @@
     .catch(err => console.error("Erreur sauvegarde:", err));
 
     }
-    </script>
+
+    let currentProbability = 0;
+    let gaugeChart = null;
+
+    function initializeGauge() {
+        const ctx = document.getElementById('redFlagsGauge');
+        if (!ctx) return;
+
+        gaugeChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: [
+                    {
+                        data: [currentProbability],
+                        backgroundColor: getColorForValue(currentProbability)
+                    },
+                    {
+                        data: [100 - currentProbability],
+                        backgroundColor: '#e9ecef'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, max: 100, display: false },
+                    y: { stacked: true, display: false }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+    }
+
+    function getColorForValue(value) {
+        if (value <= 33) return '#28a745';
+        else if (value <= 66) return '#ffc107';
+        else return '#dc3545';
+    }
+
+    function updateGauge(newValue) {
+        currentProbability = newValue;
+
+        if (gaugeChart) {
+            gaugeChart.data.datasets[0].data[0] = newValue;
+            gaugeChart.data.datasets[0].backgroundColor = getColorForValue(newValue);
+            gaugeChart.data.datasets[1].data[0] = 100 - newValue;
+            gaugeChart.update();
+        }
+
+        const elem = document.getElementById('probabilityValue');
+        if (elem) elem.textContent = newValue + '%';
+    }
+
+</script>
