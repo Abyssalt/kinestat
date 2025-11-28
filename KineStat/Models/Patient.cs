@@ -36,23 +36,20 @@ namespace KineStat.Models
         [Required]
         public string PhoneNumber { get; set; }
 
-        [Required]
-        public bool IsActive { get; set; }
-
         [Required, DataType(DataType.Date), Column(TypeName = "date")]
         public DateTime BirthDate { get; set; }
 
         [Range(0, 500)]
-        public double Weight { get; set; }
+        public double? Weight { get; set; }
 
         [Range(0, 500)]
-        public double Height { get; set; }
+        public double? Height { get; set; }
 
         [Required]
         public Gender Gender { get; set; }
 
         [Required] 
-        public String SocialSecurityNumber { get; set; }
+        public string SocialSecurityNumber { get; set; }
 
         public PatientStatus PatientStatus { get; set; } = PatientStatus.Active;
 

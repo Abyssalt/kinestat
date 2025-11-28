@@ -39,8 +39,8 @@
                         data-birthdate="@Model.BirthDate.ToString("yyyy-MM-dd")"
                         data-socialsecuritynumber="@(Model.SocialSecurityNumber ?? "")"
                         data-physioid="@(Model.PhysioId)"
-                        data-weight="@(Model.Weight.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
-                        data-height="@(Model.Height.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-weight="@(Model.Weight?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-height="@(Model.Height?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-doctorname="@(Model.DoctorName ?? "")"
                         data-doctorinami="@(Model.DoctorINAMI ?? "")"
                         data-address="@(Model.Address ?? "")">
@@ -399,30 +399,6 @@
                 default:
                     return value.length > 0;
             }
-        }
-
-        function updateFieldVisualState(input) {
-            const isRequired = input.hasAttribute('required');
-            const value = input.value.trim();
-
-            input.classList.remove('is-valid-custom', 'is-invalid-custom');
-
-            if (isRequired && !value) {
-                input.classList.add('is-invalid-custom');
-                return false;
-            }
-
-            if (value) {
-                const isValid = validateField(input);
-                if (isValid) {
-                    input.classList.add('is-valid-custom');
-                } else {
-                    input.classList.add('is-invalid-custom');
-                }
-                return isValid;
-            }
-
-            return true;
         }
 
         // ========== EDIT FORM ==========
