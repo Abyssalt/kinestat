@@ -51,6 +51,9 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Patient" asp-action="Anamnese" asp-route-id="@ViewData["PatientId"]">Anamnèse</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Patient" asp-action="Socrate" asp-route-id="@ViewData["PatientId"]">SOCRATE</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Patient" asp-action="RedFlags" asp-route-id="@ViewData["PatientId"]">Red flags</a>
                             </li>
                             <li class="nav-item">
@@ -93,21 +96,21 @@
             @RenderBody()
         </main>
     </div>
-<style>
-    .floating-info-panel {
-        position: absolute;
-        bottom: 60px;
-        right: 0;
-        width: 650px !important;
-        height: 650px !important;
-        max-width: 90vw;
-        max-height: 90vh;
-    }
+    <style>
+        .floating-info-panel {
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 650px !important;
+            height: 650px !important;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
 
-    .floating-info-content {
-        height: 580px !important;
-    }
-</style>
+        .floating-info-content {
+            height: 580px !important;
+        }
+    </style>
     @if (ViewData["PatientId"] != null && ViewData["HideFloatingEye"] == null)
     {
         <div class="floating-info-container">
@@ -203,7 +206,7 @@
                 }
             });
         });
-</script>
+    </script>
 
 
     @await RenderSectionAsync("Scripts", required: false)

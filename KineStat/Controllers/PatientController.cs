@@ -95,6 +95,58 @@ namespace KineStat.Controllers
             return RedirectToAction("Anamnese", new { id = id });
         }
 
+        [Route("Patient/{id}/Socrate")]
+        public IActionResult Socrate(int id)
+        {
+            ViewData["PatientId"] = id.ToString();
+            return View();
+        }
+
+        [HttpPost]
+        [Route("Patient/SaveSocrate")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveSocrate(Socrate socrate)
+        {
+            try
+            {
+                var patient = _context.Patients.Find(socrate.PatientId);
+                if (patient == null)
+                {
+                    TempData["Error"] = "Patient introuvable.";
+                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
+                }
+
+                var existingSocrate = _context.Socrates
+                    .FirstOrDefault(s => s.PatientId == socrate.PatientId);
+
+                if (existingSocrate != null)
+                {
+                    existingSocrate.Site = socrate.Site;
+                    existingSocrate.Onset = socrate.Onset;
+                    existingSocrate.Character = socrate.Character;
+                    existingSocrate.Radiation = socrate.Radiation;
+                    existingSocrate.Association = socrate.Association;
+                    existingSocrate.Timing = socrate.Timing;
+                    existingSocrate.ExacerbatingFactor = socrate.ExacerbatingFactor;
+                    existingSocrate.RelievingFactor = socrate.RelievingFactor;
+                    _context.Update(existingSocrate);
+                }
+                else
+                {
+                    _context.Socrates.Add(socrate);
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
+                return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
+                return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
+            }
+        }
+
         [Route("Patient/{id}/RedFlags")]
         public IActionResult RedFlags(int id)
         {
