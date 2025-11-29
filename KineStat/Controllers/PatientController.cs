@@ -54,6 +54,7 @@ namespace KineStat.Controllers
                     existingPatient.Email = patient.Email;
                     existingPatient.PhoneNumber = patient.PhoneNumber;
                     existingPatient.Gender = patient.Gender;
+                    existingPatient.Status = patient.Status;
                     existingPatient.BirthDate = patient.BirthDate;
                     existingPatient.SocialSecurityNumber = patient.SocialSecurityNumber;
                     existingPatient.PhysioId = patient.PhysioId;
