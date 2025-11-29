@@ -12,11 +12,10 @@ namespace KineStat.Models
 
     public enum PatientStatus
     {
-        Pending = 0,
-        Active = 1,
-        Completed = 2,
-        Suspended = 3,
-        Abandoned = 4
+        Actif,
+        Terminé,
+        Suspendu,
+        Abandonné,
     }
 
     public class Patient
@@ -49,7 +48,7 @@ namespace KineStat.Models
         [Required] 
         public string SocialSecurityNumber { get; set; }
 
-        public PatientStatus PatientStatus { get; set; } = PatientStatus.Active;
+        public PatientStatus Status { get; set; }
 
         public string? DoctorName { get; set; }
 

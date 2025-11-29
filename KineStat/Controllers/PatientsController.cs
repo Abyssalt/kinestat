@@ -49,6 +49,7 @@ namespace KineStat.Controllers
             {
                 try
                 {
+                    patient.Status = PatientStatus.Actif;
                     _context.Add(patient);
                     await _context.SaveChangesAsync();
 

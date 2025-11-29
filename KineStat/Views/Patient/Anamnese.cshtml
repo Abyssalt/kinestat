@@ -14,11 +14,18 @@
             <i class="bi bi-arrow-left"></i> Retour à la liste
         </a>
     </div>
-    
+
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -35,6 +42,7 @@
                         data-firstname="@Model.FirstName"
                         data-email="@Model.Email"
                         data-phonenumber="@Model.PhoneNumber"
+                        data-status="@((int)Model.Status)"
                         data-gender="@((int)Model.Gender)"
                         data-birthdate="@Model.BirthDate.ToString("yyyy-MM-dd")"
                         data-socialsecuritynumber="@(Model.SocialSecurityNumber ?? "")"
@@ -59,6 +67,17 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Prénom</label>
                             <p class="form-control-plaintext">@Model.FirstName</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Statut</label>
+                            <p class="form-control-plaintext">
+                                <span class="badge fs-4 px-4 py-2
+                                    @(Model.Status == PatientStatus.Actif || Model.Status == PatientStatus.Terminé ? "bg-success" :
+                                                                             Model.Status == PatientStatus.Suspendu ? "bg-warning" :
+                                                                             Model.Status == PatientStatus.Abandonné ? "bg-danger" : "bg-secondary")">
+                                    @Model.Status
+                                </span>
+                            </p>
                         </div>
                     </div>
 
@@ -93,6 +112,18 @@
                     </div>
 
                     <!-- Row 4 -->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Poids</label>
+                            <p class="form-control-plaintext">@(Model.Weight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Non renseigné")</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Taille</label>
+                            <p class="form-control-plaintext">@(Model.Height?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "Non renseigné")</p>
+                        </div>
+                    </div>
+
+                    <!-- Row 5 -->
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Numéro de sécurité sociale</label>
@@ -220,6 +251,15 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Prénom *</label>
                             <input type="text" class="form-control edit-field" id="edit_FirstName" name="FirstName" data-validation="text" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Statut</label>
+                            <select class="form-select edit-field" id="edit_Status" name="Status" data-validation="select">
+                                <option value="0">Actif</option>
+                                <option value="1">Terminé</option>
+                                <option value="2">Suspendu</option>
+                                <option value="3">Abandonné</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">
@@ -471,6 +511,7 @@
                     document.getElementById('edit_PhoneNumber').value = data.phonenumber;
                     document.getElementById('edit_Address').value = data.address || '';
                     document.getElementById('edit_Gender').value = data.gender;
+                    document.getElementById('edit_Status').value = data.status;
                     document.getElementById('edit_BirthDate').value = data.birthdate;
                     document.getElementById('edit_SocialSecurityNumber').value = data.socialsecuritynumber;
                     document.getElementById('edit_PhysioId').value = data.physioid;
