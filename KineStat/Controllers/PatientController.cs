@@ -96,9 +96,20 @@ namespace KineStat.Controllers
         }
 
         [Route("Patient/{id}/Socrate")]
-        public IActionResult Socrate(int id)
+        public async Task<IActionResult> Socrate(int id)
         {
-            ViewData["PatientId"] = id.ToString();
+            var patient = await _context.Patients.FindAsync(id);
+
+            if (patient == null)
+            {
+                TempData["Error"] = "Patient introuvable.";
+                return RedirectToAction("Index", "Patients");
+            }
+
+            ViewBag.PatientId = id;
+            ViewBag.FirstName = patient.FirstName;
+            ViewBag.LastName = patient.LastName;
+
             return View();
         }
 
@@ -138,7 +149,8 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
-                return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
+
+                return RedirectToAction(nameof(RedFlags), new { id = socrate.PatientId });
             }
             catch (Exception ex)
             {
