@@ -1,41 +1,61 @@
 ﻿@model KineStat.Models.Assessment
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Créer une évaluation";
 }
 
-<h1>Create</h1>
+<div class="container-fluid px-3 px-md-4 py-4">
 
-<h4>Assessment</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 fw-bold text-primary mb-2">
+                <i class="bi bi-plus-circle me-2"></i>Nouvelle évaluation
+            </h1>
+            <p class="text-secondary mb-3">Créer une évaluation pour un patient</p>
+            <hr class="border-primary border-2 opacity-25">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Date" class="form-label fw-medium">Date</label>
+                            <input asp-for="Date" class="form-control" />
+                            <span asp-validation-for="Date" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PatientId" class="form-label fw-medium">Patient</label>
+                            <select asp-for="PatientId" class="form-select" asp-items="ViewBag.PatientId"></select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PhysioId" class="form-label fw-medium">Kinésithérapeute</label>
+                            <select asp-for="PhysioId" class="form-select" asp-items="ViewBag.PhysioId"></select>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex">
+                            <button type="submit" class="btn btn-primary fw-medium">
+                                <i class="bi bi-save me-2"></i>Créer
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary fw-medium">
+                                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="PatientId" class="control-label"></label>
-                <select asp-for="PatientId" class ="form-control" asp-items="ViewBag.PatientId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhysioId" class="control-label"></label>
-                <select asp-for="PhysioId" class ="form-control" asp-items="ViewBag.PhysioId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
