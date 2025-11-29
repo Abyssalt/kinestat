@@ -39,11 +39,9 @@ namespace KineStat.Models
         [Required, DataType(DataType.Date), Column(TypeName = "date")]
         public DateTime BirthDate { get; set; }
 
-        [Range(0, 500)]
-        public double? Weight { get; set; }
+        public int? Weight { get; set; }
 
-        [Range(0, 500)]
-        public double? Height { get; set; }
+        public int? Height { get; set; }
 
         [Required]
         public Gender Gender { get; set; }
@@ -64,8 +62,8 @@ namespace KineStat.Models
 
         public Physio? Physio { get; set; }
 
-        public ICollection<Dossier> Dossiers { get; set; } = new List<Dossier>();
+        public ICollection<Dossier>? Dossiers { get; set; } = new List<Dossier>();
 
-        public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
+        public ICollection<Assessment>? Assessments { get; set; } = new List<Assessment>();
     }
 }

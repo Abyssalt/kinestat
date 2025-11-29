@@ -13,7 +13,6 @@ Pour le lancer, vous devez :
 
 using System.Net;
 using KineStat.Data;
-using KineStat.Migrations;
 using KineStat.Scripts;
 using Microsoft.AspNetCore.Mvc;
 

@@ -39,8 +39,8 @@
                         data-birthdate="@Model.BirthDate.ToString("yyyy-MM-dd")"
                         data-socialsecuritynumber="@(Model.SocialSecurityNumber ?? "")"
                         data-physioid="@(Model.PhysioId)"
-                        data-weight="@(Model.Weight?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
-                        data-height="@(Model.Height?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-weight="@(Model.Weight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
+                        data-height="@(Model.Height?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-doctorname="@(Model.DoctorName ?? "")"
                         data-doctorinami="@(Model.DoctorINAMI ?? "")"
                         data-address="@(Model.Address ?? "")">
@@ -239,7 +239,7 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Genre *</label>
-                            <select class="form-select edit-field" id="edit_Genre" name="Genre" data-validation="select" required>
+                            <select class="form-select edit-field" id="edit_Gender" name="Gender" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -470,7 +470,7 @@
                     document.getElementById('edit_Email').value = data.email;
                     document.getElementById('edit_PhoneNumber').value = data.phonenumber;
                     document.getElementById('edit_Address').value = data.address || '';
-                    document.getElementById('edit_Genre').value = data.gender;
+                    document.getElementById('edit_Gender').value = data.gender;
                     document.getElementById('edit_BirthDate').value = data.birthdate;
                     document.getElementById('edit_SocialSecurityNumber').value = data.socialsecuritynumber;
                     document.getElementById('edit_PhysioId').value = data.physioid;
