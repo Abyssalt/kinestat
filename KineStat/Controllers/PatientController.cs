@@ -6,17 +6,17 @@ using Microsoft.Extensions.Options;
 
 namespace KineStat.Controllers
 {
-    [Route("Patient/{id}/{action}")]
     public class PatientController : Controller
     {
         private readonly KineDbContext _context;
-        
-    
+
+
         public PatientController(KineDbContext context)
         {
             _context = context;
         }
 
+        [Route("Patient/{id}/Anamnese")]
         public async Task<IActionResult> Anamnese(int id)
         {
             var patient = _context.Patients
@@ -34,6 +34,7 @@ namespace KineStat.Controllers
         }
 
         [HttpPost]
+        [Route("Patient/Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Patient patient)
         {
@@ -45,7 +46,7 @@ namespace KineStat.Controllers
                     if (existingPatient == null)
                     {
                         TempData["Error"] = "Patient introuvable.";
-                        return RedirectToAction(nameof(Anamnese));
+                        return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
                     }
 
                     existingPatient.FirstName = patient.FirstName;
@@ -66,29 +67,34 @@ namespace KineStat.Controllers
                     await _context.SaveChangesAsync();
 
                     TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} modifié avec succès.";
-                    return RedirectToAction(nameof(Anamnese));
+                    return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
                 }
-                return RedirectToAction(nameof(Anamnese));
+
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["Error"] = "Erreur de validation : " + string.Join(", ", errors);
+                return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
             }
             catch (DbUpdateConcurrencyException)
             {
                 TempData["Error"] = "Erreur de concurrence lors de la modification. Le patient a peut-être été modifié ou supprimé.";
-                return RedirectToAction(nameof(Anamnese));
+                return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Erreur lors de la modification du patient.";
-                return RedirectToAction(nameof(Anamnese));
+                TempData["Error"] = $"Erreur lors de la modification du patient : {ex.Message}";
+                return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
             }
         }
 
 
         [HttpPost]
-        public IActionResult SaveAnamnese()
+        [Route("Patient/{id}/SaveAnamnese")]
+        public IActionResult SaveAnamnese(int id)
         {
-            return RedirectToAction("Anamnese", new { id = 1 });
+            return RedirectToAction("Anamnese", new { id = id });
         }
 
+        [Route("Patient/{id}/RedFlags")]
         public IActionResult RedFlags(int id)
         {
             ViewData["PatientId"] = id.ToString();
@@ -97,6 +103,7 @@ namespace KineStat.Controllers
 
 
         [HttpGet]
+        [Route("Patient/{patientId}/RedFlags/{categoryId}")]
         public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
         {
             ViewData["redflagsPercentage"] = 0.0;
@@ -104,13 +111,13 @@ namespace KineStat.Controllers
             if (patient == null) return NotFound();
             var boolQuestions = _context.Questions
                             .OfType<QuestionBool>()
-                            .Where (q => q.CategoryId == categoryId)
+                            .Where(q => q.CategoryId == categoryId)
                             .ToList();
             var boolAnswers = _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
                 .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId)
                 .ToList();
- 
+
             var questionAndAnswers = boolQuestions.Select(q => new QuestionPatientAnswerVM
             {
                 PatientId = patientId,
@@ -118,8 +125,8 @@ namespace KineStat.Controllers
                 Answer = boolAnswers.FirstOrDefault(ba => ba.QuestionId == q.Id)
             })
             .ToList();
-            
-            return PartialView("_QuestionsPartial",questionAndAnswers);
+
+            return PartialView("_QuestionsPartial", questionAndAnswers);
 
         }
 
@@ -134,7 +141,7 @@ namespace KineStat.Controllers
         }
 
         [HttpPost]
-        [Route("~/Patient/SaveOrUpdateAnswer")]
+        [Route("Patient/SaveOrUpdateAnswer")]
         public async Task<IActionResult> SaveOrUpdateAnswer([FromBody] SavePatientAnswerDTO answerDto)
         {
             try
@@ -181,7 +188,8 @@ namespace KineStat.Controllers
                 {
                     savedAnswer = new PatientAnswerBool { PatientId = answerDto.PatientId, QuestionId = answerDto.QuestionId, Comment = answerDto.Comment, AssessmentId = assessment.Id };
                     _context.PatientAnswers.Add(savedAnswer);
-                } else
+                }
+                else
                 {
                     savedAnswer = savedAnswer as PatientAnswerBool;
                     if (answerDto.BoolValue != null)
@@ -191,7 +199,7 @@ namespace KineStat.Controllers
                     }
                     savedAnswer.Comment = answerDto.Comment;
                 }
-                
+
                 await _context.SaveChangesAsync();
                 return Ok(new { success = true });
             }
@@ -206,12 +214,13 @@ namespace KineStat.Controllers
 
         }
 
-        public IActionResult GetQuestionsClinique(int patientId/* ,int categoryId*/)
+        [Route("Patient/{patientId}/QuestionsClinique")]
+        public IActionResult GetQuestionsClinique(int patientId)
         {
             var data = new List<dynamic>
 {
             new { Category = "Articulaire/structurel", Question = "Présence de raideur articulaire matinale (>30 minutes) ?", ExpectedData = "Oui / Non", RvPlus = "3,2", RvMinus = "0,5" },
-            new { Category = "Articulaire/structurel", Question = "Mobilité articulaire réduite ou limitation de l’amplitude de mouvement ?", ExpectedData = "Oui / Non", RvPlus = "2,1", RvMinus = "0,7" },
+            new { Category = "Articulaire/structurel", Question = "Mobilité articulaire réduite ou limitation de l'amplitude de mouvement ?", ExpectedData = "Oui / Non", RvPlus = "2,1", RvMinus = "0,7" },
 
             new { Category = "Myofascial", Question = "Présence de points gâchettes (trigger points) reproduisant la douleur ?", ExpectedData = "Oui / Non", RvPlus = "5,4", RvMinus = "0,6" },
             new { Category = "Myofascial", Question = "Douleur augmentée à la palpation ou lors de la contraction du muscle concerné ?", ExpectedData = "Oui / Non", RvPlus = "4,2", RvMinus = "0,8" },
@@ -225,17 +234,17 @@ namespace KineStat.Controllers
             new { Category = "Nociplastique", Question = "Douleur diffuse, non proportionnelle à la lésion tissulaire ?", ExpectedData = "Oui / Non", RvPlus = "8,3", RvMinus = "0,4" },
             new { Category = "Nociplastique", Question = "Sommeil non réparateur, fatigue persistante ou hypersensibilité généralisée ?", ExpectedData = "Oui / Non", RvPlus = "4,7", RvMinus = "0,6" },
 
-            new { Category = "Contrôle sensorimoteur", Question = "Présence d’altération du schéma corporel ou de la perception du mouvement ?", ExpectedData = "Oui / Non", RvPlus = "3,5", RvMinus = "0,8" },
+            new { Category = "Contrôle sensorimoteur", Question = "Présence d'altération du schéma corporel ou de la perception du mouvement ?", ExpectedData = "Oui / Non", RvPlus = "3,5", RvMinus = "0,8" },
             new { Category = "Contrôle sensorimoteur", Question = "Difficulté à contrôler le mouvement ou à stabiliser le segment corporel ?", ExpectedData = "Oui / Non", RvPlus = "2,9", RvMinus = "0,7" },
 
             new { Category = "Croyances et cognition", Question = "Le patient pense que la douleur signifie nécessairement une lésion grave ?", ExpectedData = "Oui / Non", RvPlus = "2,4", RvMinus = "0,9" },
-            new { Category = "Croyances et cognition", Question = "Le patient évite certaines activités par peur d’aggraver sa douleur ?", ExpectedData = "Oui / Non", RvPlus = "4,6", RvMinus = "0,7" },
+            new { Category = "Croyances et cognition", Question = "Le patient évite certaines activités par peur d'aggraver sa douleur ?", ExpectedData = "Oui / Non", RvPlus = "4,6", RvMinus = "0,7" },
 
             new { Category = "Socio-environnemental", Question = "Présence de facteurs de stress professionnel ou familial importants ?", ExpectedData = "Oui / Non", RvPlus = "3,1", RvMinus = "0,8" },
             new { Category = "Socio-environnemental", Question = "Soutien social limité ou isolement du patient ?", ExpectedData = "Oui / Non", RvPlus = "2,8", RvMinus = "0,9" },
 
-            new { Category = "Émotionnel/affectif", Question = "Présence de symptômes d’anxiété, d’irritabilité ou de tristesse ?", ExpectedData = "Oui / Non", RvPlus = "3,9", RvMinus = "0,7" },
-            new { Category = "Émotionnel/affectif", Question = "La douleur varie selon l’état émotionnel du patient ?", ExpectedData = "Oui / Non", RvPlus = "4,1", RvMinus = "0,6" }
+            new { Category = "Émotionnel/affectif", Question = "Présence de symptômes d'anxiété, d'irritabilité ou de tristesse ?", ExpectedData = "Oui / Non", RvPlus = "3,9", RvMinus = "0,7" },
+            new { Category = "Émotionnel/affectif", Question = "La douleur varie selon l'état émotionnel du patient ?", ExpectedData = "Oui / Non", RvPlus = "4,1", RvMinus = "0,6" }
         };
 
 
@@ -258,18 +267,21 @@ namespace KineStat.Controllers
 
         }
 
+        [Route("Patient/{id}/ExamenClinique")]
         public IActionResult ExamenClinique(int id)
         {
             ViewData["PatientId"] = id.ToString();
             return View();
         }
 
+        [Route("Patient/{id}/Tests")]
         public IActionResult Tests(int id)
         {
             ViewData["PatientId"] = id.ToString();
             return View();
         }
 
+        [Route("Patient/{id}/Resultat")]
         public IActionResult Resultat(int id)
         {
             ViewData["PatientId"] = id.ToString();
@@ -279,12 +291,14 @@ namespace KineStat.Controllers
 
 
         [HttpGet]
+        [Route("Patient/{id}/CreateDossier")]
         public IActionResult CreateDossier(int id)
         {
             return View(new Dossier { PatientId = id });
         }
 
         [HttpPost]
+        [Route("Patient/CreateDossier")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateDossier(Dossier dossier)
         {
@@ -300,6 +314,7 @@ namespace KineStat.Controllers
         }
 
 
+        [Route("Dossier/{id}/Details")]
         public async Task<IActionResult> DossierDetails(int id)
         {
             var dossier = await _context.Dossiers
@@ -313,6 +328,8 @@ namespace KineStat.Controllers
 
             return View(dossier);
         }
+
+        [Route("Dossier/{dossierId}/CreateAssessment")]
         public IActionResult CreateAssessment(int dossierId)
         {
             return View(new Assessment
@@ -321,6 +338,8 @@ namespace KineStat.Controllers
                 Date = DateTime.Today
             });
         }
+
+        [Route("Assessment/{id}/Details")]
         public async Task<IActionResult> AssessmentDetails(int id)
         {
             var assessment = await _context.Assessments

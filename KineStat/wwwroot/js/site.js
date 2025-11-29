@@ -25,3 +25,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+function updateFieldVisualState(input) {
+    const isRequired = input.hasAttribute('required');
+    const value = input.value.trim();
+
+    input.classList.remove('is-valid-custom', 'is-invalid-custom');
+
+    if (isRequired && !value) {
+        input.classList.add('is-invalid-custom');
+        return false;
+    }
+
+    if (value) {
+        const isValid = validateField(input);
+        if (isValid) {
+            input.classList.add('is-valid-custom');
+        } else {
+            input.classList.add('is-invalid-custom');
+        }
+        return isValid;
+    }
+
+    return true;
+}
+

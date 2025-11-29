@@ -313,11 +313,8 @@ namespace KineStat.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Height")
-                        .HasColumnType("double precision");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                    b.Property<int?>("Height")
+                        .HasColumnType("integer");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -337,8 +334,8 @@ namespace KineStat.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("double precision");
+                    b.Property<int?>("Weight")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
