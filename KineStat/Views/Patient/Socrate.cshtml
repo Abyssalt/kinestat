@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "SOCRATE";
+    ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+    var patientId = ViewData["PatientId"];
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clipboard-heart"></i> SOCRATE</h2>
+        <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="bi bi-question-circle"></i> Questionnaire SOCRATE</h4>
+        </div>
+        <div class="card-body">
+            <form asp-controller="Patient" asp-action="SaveSocrate" method="post">
+                <input type="hidden" name="PatientId" value="@patientId" />
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">S</span> Site
+                    </label>
+                    <p class="text-muted small">Où se situe la douleur ? Pouvez-vous montrer exactement où ?</p>
+                    <textarea class="form-control" name="Site" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">O</span> Onset (Début)
+                    </label>
+                    <p class="text-muted small">Quand la douleur a-t-elle commencé ? Comment a-t-elle débuté (progressive, soudaine) ?</p>
+                    <textarea class="form-control" name="Onset" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">C</span> Character (Caractère)
+                    </label>
+                    <p class="text-muted small">Comment décririez-vous la douleur ? (brûlure, coup de poignard, pression, pulsatile...)</p>
+                    <textarea class="form-control" name="Character" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">R</span> Radiation
+                    </label>
+                    <p class="text-muted small">La douleur se propage-t-elle ailleurs ? Si oui, où ?</p>
+                    <textarea class="form-control" name="Radiation" rows="2" placeholder=""></textarea>
+                </div>
+
+                <!-- Association -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">A</span> Association
+                    </label>
+                    <p class="text-muted small">Y a-t-il d'autres symptômes associés ? (nausées, sueurs, engourdissements, faiblesse...)</p>
+                    <textarea class="form-control" name="Association" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">T</span> Timing (Temporalité)
+                    </label>
+                    <p class="text-muted small">La douleur est-elle constante ou intermittente ? À quels moments survient-elle ?</p>
+                    <textarea class="form-control" name="Timing" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">E</span> Exacerbating Factor (Facteurs aggravants)
+                    </label>
+                    <p class="text-muted small">Qu'est-ce qui aggrave la douleur ? (mouvement, position, activité...)</p>
+                    <textarea class="form-control" name="ExacerbatingFactor" rows="2" placeholder=""></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <span class="badge bg-info me-2">R</span> Relieving Factor (Facteurs soulageants)
+                    </label>
+                    <p class="text-muted small">Qu'est-ce qui soulage la douleur ? (repos, position, médicaments...)</p>
+                    <textarea class="form-control" name="RelievingFactor" rows="2" placeholder=""></textarea>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@patientId" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à l'anamnèse
+                    </a>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Enregistrer
+                        </button>
+                        <a asp-controller="Patient" asp-action="RedFlags" asp-route-id="@patientId" class="btn btn-success ms-2">
+                            Continuer <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
