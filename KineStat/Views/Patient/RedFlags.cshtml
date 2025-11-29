@@ -4,24 +4,32 @@
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
 
-    // ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Red Flags</li>";
 }
 
 <h2>Red Flags </h2>
 <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>
 
+<ul class="nav nav-tabs mb-3" id="redflagsTabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="#" data-category="1">Tumeur / Métastase</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-category="2">Infection</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-category="3">Neurologique</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-category="4">Traumatisme / Fracture</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-category="5">Inflammatoire</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#" data-category="6">Vasculaire / Circulatoire</a>
+    </li>
+</ul>
 
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-    <ol class="breadcrumb" id="breadcrumbTINTIV">
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(1)">Tumeur / Métastase</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(2)">Infection</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(3)">Neurologique</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(4)">Traumatisme / Fracture</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(5)">Inflammatoire</a></li>
-        <li class="breadcrumb-item"><a href="#" onclick="loadQuestionsByCategory(6)">Vasculaire / Circulatoire</a></li>
-
-    </ol>
-</nav>
 
 
 <div id="baseContainer" class="container mt-4">
@@ -96,10 +104,36 @@
         document.getElementById("questionnaireContainer").innerHTML = html;
         attachNoteToggleEvents();
         attachAnswerListeners();
+        initializeTooltips();
+    }
+
+    function initializeTabs() {
+        document.querySelectorAll('#redflagsTabs .nav-link').forEach(tab => {
+            tab.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // activate selected tab
+            document.querySelectorAll('#redflagsTabs .nav-link')
+                .forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+
+            // load questions 
+            const categoryId = this.dataset.category;
+            loadQuestionsByCategory(categoryId);
+            });
+        });
+    }
+
+        // Function to initialize all Bootstrap tooltips on the page
+    function initializeTooltips() {
+        const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipElements.forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
     }
 
 
-     function attachNoteToggleEvents() {
+    function attachNoteToggleEvents() {
         document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
             if (btn.dataset.listenersAdded === "true") return;
             btn.dataset.listenersAdded = "true";
@@ -107,13 +141,21 @@
             const target = document.querySelector(targetSelector);
 
             if (!target) return;
+            const textarea = target.querySelector('textarea');
+            let btnText = "";
+            if (textarea && textarea.value.trim() !== "")  {
+                btnText = "Afficher la note";
+            }else {
+                btnText = "Ajouter une note";
+            }
+            btn.textContent = btnText; 
 
             target.addEventListener('shown.bs.collapse', () => {
                 btn.textContent = "Masquer la note";
             });
 
             target.addEventListener('hidden.bs.collapse', () => {
-                btn.textContent = "Ajouter une note";
+                btn.textContent = btnText;
             });
         });
     }
@@ -127,9 +169,11 @@
          }
 
     document.addEventListener("DOMContentLoaded", function () {
+        initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
         updateGauge(75);    // Change here the value of the gauge : 0..33 Green, 34..66 Yellow and 67..100 Red
+        
     });
 
      function attachAnswerListeners() {
