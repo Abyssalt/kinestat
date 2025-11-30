@@ -4,127 +4,143 @@
     ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Résultat</h2>
-        <a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Retour à la liste
-        </a>
+<div class="container-fluid px-3 px-md-4 py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <h1 class="h2 fw-bold text-primary mb-2">
+                        <i class="bi bi-graph-up me-2"></i>Résultat
+                    </h1>
+                </div>
+                <a asp-controller="Patients" asp-action="Index" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                </a>
+            </div>
+            <hr class="border-primary border-2 opacity-25 mt-3">
+        </div>
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Tests effectués</h5>
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-list-check me-2"></i>Tests effectués</h5>
                 </div>
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item">Test Lasègue </a>
-                    <a class="list-group-item">Test Schober </a>
-                    <a class="list-group-item">Test Slump</a>
-                    <a class="list-group-item">Question 1</a>
-                    <a class="list-group-item">Question 2 </a>
+                    <a class="list-group-item py-3">Test Lasègue</a>
+                    <a class="list-group-item py-3">Test Schober</a>
+                    <a class="list-group-item py-3">Test Slump</a>
+                    <a class="list-group-item py-3">Question 1</a>
+                    <a class="list-group-item py-3">Question 2</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-activity"></i> Analyse du risque</h5>
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-warning py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-activity me-2"></i>Analyse du risque</h5>
                 </div>
-
-                <div class="card-body text-center">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <span class="fw-bold">Neuro</span><br />
-                            <span class="fs-4">12%</span>
+                <div class="card-body text-center p-3 p-md-4">
+                    <div class="row mb-3 g-2">
+                        <div class="col-6 col-sm-3">
+                            <span class="fw-semibold small">Neuro</span><br />
+                            <span class="fs-4 fw-bold text-primary">12%</span>
                         </div>
-                        <div class="col">
-                            <span class="fw-bold">Onco</span><br />
-                            <span class="fs-4">26%</span>
+                        <div class="col-6 col-sm-3">
+                            <span class="fw-semibold small">Onco</span><br />
+                            <span class="fs-4 fw-bold text-primary">26%</span>
                         </div>
-                        <div class="col">
-                            <span class="fw-bold">Trauma</span><br />
-                            <span class="fs-4">8%</span>
+                        <div class="col-6 col-sm-3">
+                            <span class="fw-semibold small">Trauma</span><br />
+                            <span class="fs-4 fw-bold text-primary">8%</span>
                         </div>
-                        <div class="col">
-                            <span class="fw-bold">Vasculaire</span><br />
-                            <span class="fs-4">32%</span>
+                        <div class="col-6 col-sm-3">
+                            <span class="fw-semibold small">Vasculaire</span><br />
+                            <span class="fs-4 fw-bold text-primary">32%</span>
                         </div>
                     </div>
 
-                    <div class="progress" style="height: 18px;">
+                    <div class="progress mb-2" style="height: 18px;">
                         <div class="progress-bar bg-success" style="width: 25%"></div>
                         <div class="progress-bar bg-warning" style="width: 25%"></div>
                         <div class="progress-bar bg-danger" style="width: 50%"></div>
                     </div>
                     <small class="text-danger fw-bold">Risque élevé</small>
-
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi"></i> Pathologies suspectées</h5>
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>Pathologies suspectées</h5>
                 </div>
-
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Tumoral</strong> <span>26%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Tumoral</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">26%</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Infectieux</strong> <span>10%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Infectieux</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">10%</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Neurologique</strong> <span>12%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Neurologique</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">12%</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Traumatique</strong> <span>8%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Traumatique</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">8%</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Inflammatoire</strong> <span>7%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Inflammatoire</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">7%</span>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <strong>Vasculaire</strong> <span>32%</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold">Vasculaire</span>
+                        <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">32%</span>
                     </li>
                 </ul>
             </div>
         </div>
+    </div>
 
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-secondary text-white py-3">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-pentagon me-2"></i>Profil clinique</h5>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <div class="row text-center">
+                        <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+                            <h6 class="fw-bold mb-3">Profil clinique (9 catégories)</h6>
+                            <div style="height: 350px;">
+                                <canvas id="radarChart9" height="350"></canvas>
+                            </div>
+                        </div>
 
-        <div class="card shadow-sm mb-5">
-            <div class="card-header bg-secondary text-white align-content-center">
-                <h5 class="mb-0"><i class="bi bi-pentagon"></i> Profil clinique</h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-6 mb-4">
-                        <h6 class="fw-bold">Profil clinique (9 catégories)</h6>
-                        <div style="height: 350px;">
-                            <canvas id="radarChart9" height="350"></canvas>
+                        <div class="col-12 col-lg-6">
+                            <h6 class="fw-bold mb-3">TINTIV (6 catégories)</h6>
+                            <div style="height: 350px;">
+                                <canvas id="radarChart6" height="350"></canvas>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="col-md-6 mb-4">
-                        <h6 class="fw-bold">TINTIV (6 catégories)</h6>
-                        <div style="height: 350px;">
-                            <canvas id="radarChart6" height="350"></canvas>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-end mb-5">
-        <button type="button" class="btn btn-primary btn-lg">
-            <i class="bi bi-save"></i> Enregistrer
+    <div class="d-flex justify-content-end mb-4">
+        <button type="button" class="btn btn-primary btn-lg fw-medium">
+            <i class="bi bi-save me-2"></i>Enregistrer
         </button>
     </div>
+
 </div>
 
 <script>
@@ -182,7 +198,21 @@
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 10, ticks: { stepSize: 10, backdropColor: "transparent" } } }, plugins: { legend: { display: false } }
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 10,
+                            backdropColor: "transparent"
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
             }
         });
 
@@ -208,11 +238,23 @@
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 10, ticks: { stepSize: 10, backdropColor: "transparent" } } }, plugins: { legend: { display: false } }
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 10,
+                            backdropColor: "transparent"
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
             }
         });
 
     });
 </script>
-
-
