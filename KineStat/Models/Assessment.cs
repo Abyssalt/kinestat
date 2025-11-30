@@ -15,6 +15,8 @@ namespace KineStat.Models
         [Required]
         public int PatientId { get; set; }
         public virtual Patient Patient { get; set; }
+        [Required]
+        public int MedicalContextId { get; set; }
 
         [Required]
         public int PhysioId { get; set; }
@@ -22,6 +24,7 @@ namespace KineStat.Models
 
         public virtual ICollection<Redflag> RedFlagsDetected { get; set; } = new List<Redflag>();
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
+        public virtual MedicalContext MedicalContext { get; set; }
         [Required]
         public int DossierId { get; set; }
         public Dossier Dossier { get; set; }

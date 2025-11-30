@@ -122,14 +122,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    let lastSavedRedflagsPercentage = 0;
+    let hasDisplayedCriticalModal = false;
+    let criticalRedflagThreshold= 50; //unsure
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
-        const response = await fetch(`/Patient/${patientId}/GetRedFlagsQuestions?patientId=${patientId}&categoryId=${categoryId}`);
+        const response = await fetch(`/Patient/${patientId}/RedFlags/${categoryId}`);
         const html = await response.text();
         document.getElementById("questionnaireContainer").innerHTML = html;
         attachNoteToggleEvents();
         attachAnswerListeners();
         initializeTooltips();
+        updateGauge(lastSavedRedflagsPercentage);
     }
 
     function initializeTabs() {
@@ -183,6 +187,8 @@
     }
 
     function showCriticalRedFlagModal(patientId) {
+        if (hasDisplayedCriticalModal) return;
+        hasDisplayedCriticalModal = true;
         const btn = document.getElementById("redirectToSummaryBtn");
         btn.href = `/Patient/${patientId}/Resultat`;
 
@@ -194,7 +200,8 @@
         initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
-        updateGauge(75);
+        updateGauge(0);    // Change here the value of the gauge : 0..33 Green, 34..66 Yellow and 67..100 Red
+        
     });
 
     function attachAnswerListeners() {
@@ -253,16 +260,24 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)
         })
-            .then(async response => {
-                if (!response.ok) {
-                    const text = await response.text();
-                    console.error("Erreur serveur:", text);
-                    throw new Error('Erreur serveur');
-                }
-                return response.json();
-            })
-            .then(data => console.log("Saved:", data))
-            .catch(err => console.error("Erreur sauvegarde:", err));
+        .then(async response => {
+            if (!response.ok) {
+                const text = await response.text();
+                console.error("Erreur serveur:", text);
+                throw new Error('Erreur serveur');
+            }
+            return response.json();
+        })
+    .then(data => {
+        console.log("Saved:", data)
+        let redflagsPercentage = data.redflags;
+        if (redflagsPercentage > 100) redflagsPercentage = 100;
+        if (redflagsPercentage < 0.001) redflagsPercentage = 0;
+        lastSavedRedflagsPercentage = redflagsPercentage;
+        updateGauge(redflagsPercentage);
+        if (redflagsPercentage >= criticalRedflagThreshold) showCriticalRedFlagModal(patientId);
+    })
+    .catch(err => console.error("Erreur sauvegarde:", err));
 
     }
 
@@ -321,6 +336,6 @@
         }
 
         const elem = document.getElementById('probabilityValue');
-        if (elem) elem.textContent = newValue + '%';
+        if (elem) elem.textContent = newValue.toFixed(2) + '%';
     }
 </script>
