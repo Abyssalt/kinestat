@@ -453,6 +453,12 @@
                 #patientsCardsView .patient-card {
                     margin-bottom: 0 !important;
                 }
+                    /* 🌟 Centrer la dernière card si le nombre total est impair */
+                    #patientsCardsView .patient-card:nth-last-child(1):nth-child(odd) {
+                        grid-column: 1 / span 2; /* Prend toute la ligne */
+                        justify-self: center; /* Se centre */
+                        width: 70%; /* Optionnel, pour éviter un card énorme */
+                    }
         }
 
         @@media (max-width: 991px) {
