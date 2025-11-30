@@ -3,6 +3,8 @@ using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KineStat.Controllers
 {
@@ -10,11 +12,13 @@ namespace KineStat.Controllers
     public class PatientController : Controller
     {
         private readonly KineDbContext _context;
+        private readonly BayesCalculator _bayesCalculator;
         
     
         public PatientController(KineDbContext context)
         {
             _context = context;
+            _bayesCalculator = new BayesCalculator();
         }
 
         public async Task<IActionResult> Anamnese(int id)
@@ -99,7 +103,7 @@ namespace KineStat.Controllers
         [HttpGet]
         public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
         {
-            ViewData["redflagsPercentage"] = 0.0;
+            
             var patient = _context.Patients.Find(patientId);
             if (patient == null) return NotFound();
             var boolQuestions = _context.Questions
@@ -139,6 +143,7 @@ namespace KineStat.Controllers
         {
             try
             {
+              
                 var patient = FindPatientById(answerDto.PatientId);
                 if (patient == null)
                 {
@@ -169,7 +174,8 @@ namespace KineStat.Controllers
                         PatientId = answerDto.PatientId,
                         Date = DateTime.Now,
                         PhysioId = patient.PhysioId,
-                        DossierId = dossier.Id
+                        DossierId = dossier.Id,
+                        MedicalContextId = 1
                     };
                     _context.Assessments.Add(assessment);
                     await _context.SaveChangesAsync();
@@ -191,9 +197,12 @@ namespace KineStat.Controllers
                     }
                     savedAnswer.Comment = answerDto.Comment;
                 }
-                
+             
                 await _context.SaveChangesAsync();
-                return Ok(new { success = true });
+
+                double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
+              
+                return Ok(new { success = true, redflags = redflagsPercentage});
             }
             catch (DbUpdateException dbEx)
             {
@@ -204,6 +213,66 @@ namespace KineStat.Controllers
                 return StatusCode(500, new { success = false, message = "Une erreur inattendue est survenue", details = ex.Message });
             }
 
+        }
+
+        private async Task<Dictionary<int, double>> GetAllCategoriesProbability(int patientId, int assessmentId)
+        {
+            Dictionary<int, double> CategoryRedFlags = new Dictionary<int, double>();
+            var categoryIds = _context.Categories
+                .Select(c => c.Id)
+                .ToList();
+            foreach (var id in categoryIds)
+            {
+                double result = await CalculateRedFlagCategory(patientId, assessmentId, id);
+                CategoryRedFlags[id] = result;
+            }
+            return CategoryRedFlags;
+        }
+
+        //This method return the sum off all redflags percentage from every category
+        //This is not a probability but a sum of all percentage of every category used to indicate the level of redflags 
+        public async Task<double> GetSumRedflagsPercentage(int patientId, int assessmentId) {
+            var categoryIds = _context.Categories
+                .Where (c=> c.Id <=6) //TODO : next sprint include all categories
+                .Select(c => c.Id) 
+                .ToList();
+            double result = 0;
+            foreach (var id in categoryIds)
+            {
+                result += await CalculateRedFlagCategory(patientId, assessmentId, id) * 100;
+               
+            }
+            return result;
+        }
+
+        
+        private async Task<double> CalculateRedFlagCategory(int patientId, int assessmentId, int categoryId)
+        {
+            var answersForCategory = _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Question.CategoryId == categoryId)
+                .Include(a => a.Question)
+                .ToList();
+
+            var assessment = await  _context.Assessments.FindAsync(assessmentId);
+            var priorContext = _context.PriorContexts
+                .FirstOrDefault(p => p.MedicalContextId == assessment.MedicalContextId && p.CategoryId == categoryId);
+
+            if (priorContext == null)
+            {
+                throw new InvalidOperationException(
+                    $"Aucun prior défini pour le contexte médical {assessment.MedicalContextId} et la catégorie {categoryId}");
+            }
+
+            if (priorContext.Value <= 0 || priorContext.Value >= 1)
+            {
+                throw new InvalidOperationException(
+                    $"Le prior ({priorContext.Value}) doit être strictement entre 0 et 1.");
+            }
+            double categoryPrior = priorContext.Value;
+            double posterior = _bayesCalculator.CalculateCategoryProbability(answersForCategory, categoryPrior);
+
+            return posterior;
         }
 
         public IActionResult GetQuestionsClinique(int patientId/* ,int categoryId*/)
