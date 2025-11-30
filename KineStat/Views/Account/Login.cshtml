@@ -3,17 +3,15 @@
     ViewData["Title"] = "Connexion";
     Layout = "_Layout";
 }
-
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
-        <div class="col-md-5 col-lg-4">
-            <div class="card border-0 shadow">
+<div class="container-fluid px-0 px-lg-3">
+    <div class="row g-0 justify-content-center align-items-center min-vh-75">
+        <div class="col-12 col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg rounded-0 rounded-lg-3">
                 <div class="card-body p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold text-primary mb-2">KineStat</h2>
-                        <p class="text-secondary">Connectez-vous à votre compte</p>
+                        <h2 class="fw-bold text-primary text-uppercase ls-wide mb-2">KineStat</h2>
+                        <p class="text-muted small text-uppercase ls-base">Connectez-vous à votre compte</p>
                     </div>
-
                     @if (TempData["InfoMessage"] != null)
                     {
                         <div class="alert alert-info alert-dismissible fade show border-0" role="alert">
@@ -21,7 +19,6 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                         </div>
                     }
-
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success alert-dismissible fade show border-0" role="alert">
@@ -29,30 +26,25 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
                         </div>
                     }
-
                     <form asp-controller="Account" asp-action="Login" method="post">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small" role="alert"></div>
-
                         <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-medium">Adresse email</label>
-                            <input asp-for="Email" class="form-control form-control-lg" placeholder="exemple@email.com" />
+                            <label asp-for="Email" class="form-label text-uppercase small fw-bold ls-base">Adresse email</label>
+                            <input asp-for="Email" class="form-control form-control-lg py-3" placeholder="exemple@email.com" autocomplete="email" inputmode="email" />
                             <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
-
                         <div class="mb-4">
-                            <label asp-for="Password" class="form-label fw-medium">Mot de passe</label>
-                            <input asp-for="Password" class="form-control form-control-lg" placeholder="••••••••••" />
+                            <label asp-for="Password" class="form-label text-uppercase small fw-bold ls-base">Mot de passe</label>
+                            <input asp-for="Password" class="form-control form-control-lg py-3" placeholder="••••••••••" autocomplete="current-password" />
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
-
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg fw-medium">
+                            <button type="submit" class="btn btn-primary btn-lg text-uppercase ls-base fw-bold py-3">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
                             </button>
                         </div>
-
-                        <div class="text-center">
-                            <a href="#" class="text-secondary text-decoration-none small link-opacity-75-hover"
+                        <div class="text-center py-2">
+                            <a href="#" class="text-muted text-decoration-none small text-uppercase ls-base link-opacity-75-hover"
                                onclick="alert('Veuillez contacter le support de Hexadevs pour réinitialiser votre mot de passe.'); return false;">
                                 Mot de passe oublié ?
                             </a>
@@ -63,6 +55,39 @@
         </div>
     </div>
 </div>
+
+<style>
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+
+    .ls-wide {
+        letter-spacing: 3px;
+    }
+
+    .ls-base {
+        letter-spacing: 1px;
+    }
+
+    .rounded-lg-3 {
+        border-radius: 0 !important;
+    }
+
+    @@media (min-width: 992px) {
+        .rounded-lg-3 {
+            border-radius: var(--bs-border-radius-lg) !important;
+        }
+    }
+
+    .form-control:focus {
+        border-color: #1a1a1a;
+        box-shadow: 0 0 0 0.25rem rgba(26, 26, 26, 0.15);
+    }
+
+    .link-opacity-75-hover:hover {
+        color: #1a1a1a !important;
+    }
+</style>
 
 @section Scripts {
     @{
