@@ -356,26 +356,32 @@ namespace KineStat.Controllers
 
 
         [HttpGet]
-        [Route("Patient/{id}/CreateDossier")]
-        public IActionResult CreateDossier(int id)
+        [Route("Patient/{id}/CreateFolder")]
+        public IActionResult CreateFolder(int id)
         {
             return View(new Dossier { PatientId = id });
         }
 
         [HttpPost]
-        [Route("Patient/CreateDossier")]
+        [Route("Patient/SaveDossier")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateDossier(Dossier dossier)
+        public async Task<IActionResult> SaveDossier(Dossier dossier)
         {
-            if (!ModelState.IsValid)
-                return View(dossier);
-
+            dossier.DateOuverture = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
             _context.Dossiers.Add(dossier);
-            await _context.SaveChangesAsync();
 
-            TempData["Success"] = "✅ Dossier créé avec succès";
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erreur: {ex.InnerException?.Message ?? ex.Message}";
+                return RedirectToAction(nameof(Anamnese), new { id = dossier.PatientId });
+            }
 
-            return RedirectToAction("Anamnese", new { id = dossier.PatientId });
+            TempData["Success"] = "Dossier créé avec succès";
+            return RedirectToAction(nameof(Anamnese), new { id = dossier.PatientId });
         }
 
 
