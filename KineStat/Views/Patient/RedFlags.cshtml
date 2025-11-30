@@ -3,91 +3,116 @@
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
-
 }
 
-<h2>Red Flags </h2>
-<a asp-controller="Patients" asp-action="Index" class="btn btn-secondary">Retour</a>
+<div class="container-fluid px-3 px-md-4 py-4">
 
-<ul class="nav nav-tabs mb-3" id="redflagsTabs">
-    <li class="nav-item">
-        <a class="nav-link active" href="#" data-category="1">Tumeur / Métastase</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#" data-category="2">Infection</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#" data-category="3">Neurologique</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#" data-category="4">Traumatisme / Fracture</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#" data-category="5">Inflammatoire</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#" data-category="6">Vasculaire / Circulatoire</a>
-    </li>
-</ul>
-
-
-
-<div id="baseContainer" class="container mt-4">
-    <div class="row">
-        <div id="questionnaireContainer" class="col-md-8">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <h1 class="h2 fw-bold text-danger mb-2">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Red Flags
+                    </h1>
+                </div>
+                <a asp-controller="Patients" asp-action="Index" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+            <hr class="border-danger border-2 opacity-25 mt-3">
         </div>
-        <div id="testsContainer" class="col-md-4">
-            <h4>Tests suggérés</h4>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <a href="#" class="text-decoration-none">Test de Lasègue</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs flex-nowrap overflow-auto" id="redflagsTabs">
+                <li class="nav-item">
+                    <a class="nav-link active fw-medium" href="#" data-category="1">Tumeur / Métastase</a>
                 </li>
-                <li class="list-group-item">
-                    <a href="#" class="text-decoration-none">Test de Schober</a>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#" data-category="2">Infection</a>
                 </li>
-                <li class="list-group-item">
-                    <a href="#" class="text-decoration-none">Test de Slump</a>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#" data-category="3">Neurologique</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#" data-category="4">Traumatisme / Fracture</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#" data-category="5">Inflammatoire</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-medium" href="#" data-category="6">Vasculaire / Circulatoire</a>
                 </li>
             </ul>
-            <div class="card mt-4 border-primary">
-                <div class="card-body">
-                    <h5 class="card-title">Probabilité pathologie grave</h5>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="questionnaireContainer" class="col-12 col-lg-8 mb-4 mb-lg-0">
+        </div>
+        <div id="testsContainer" class="col-12 col-lg-4">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-list-check me-2"></i>Tests suggérés
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item py-3">
+                            <a href="#" class="text-decoration-none">Test de Lasègue</a>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <a href="#" class="text-decoration-none">Test de Schober</a>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <a href="#" class="text-decoration-none">Test de Slump</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow border-start border-danger border-4">
+                <div class="card-body p-3 p-md-4">
+                    <h5 class="card-title fw-bold mb-3">
+                        <i class="bi bi-activity text-danger me-2"></i>Probabilité pathologie grave
+                    </h5>
                     <div style="height: 40px;">
                         <canvas id="redFlagsGauge"></canvas>
                     </div>
-                    <div class="text-center mt-2">
-                        <h4 id="probabilityValue" class="text-primary">0%</h4>
+                    <div class="text-center mt-3">
+                        <h4 id="probabilityValue" class="text-primary fw-bold mb-0">0%</h4>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="redFlagCriticalModal" tabindex="-1" aria-hidden="true">
+
+<!-- Modal Red Flag Critique -->
+<div class="modal fade" id="redFlagCriticalModal" tabindex="-1" aria-labelledby="redFlagCriticalModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger shadow-lg">
-
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Alerte Red Flag Critique</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white py-3">
+                <h5 class="modal-title fw-bold" id="redFlagCriticalModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Alerte Red Flag Critique
+                </h5>
             </div>
-
-            <div class="modal-body">
-                <p>
+            <div class="modal-body p-4">
+                <p class="mb-2">
                     Un seuil de redflags grave a été detecté. Souhaitez vous continuer le bilan ?
                 </p>
-                <p class="text-muted">
+                <p class="text-secondary small mb-0">
                     Vous pouvez poursuivre le questionnaire ou passer immédiatement aux résultats.
                 </p>
             </div>
-
-            <div class="modal-footer d-flex justify-content-between">
-                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Continuer
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <button class="btn btn-outline-secondary fw-medium" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-right me-2"></i>Continuer
                 </button>
-
-                <a id="redirectToSummaryBtn"
-                   class="btn btn-danger text-white">
-                    Arrêter
+                <a id="redirectToSummaryBtn" class="btn btn-danger fw-medium">
+                    <i class="bi bi-x-circle me-2"></i>Arrêter
                 </a>
             </div>
         </div>
@@ -110,21 +135,18 @@
     function initializeTabs() {
         document.querySelectorAll('#redflagsTabs .nav-link').forEach(tab => {
             tab.addEventListener('click', function (e) {
-            e.preventDefault();
+                e.preventDefault();
 
-            // activate selected tab
-            document.querySelectorAll('#redflagsTabs .nav-link')
-                .forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('#redflagsTabs .nav-link')
+                    .forEach(el => el.classList.remove('active'));
                 this.classList.add('active');
 
-            // load questions 
-            const categoryId = this.dataset.category;
-            loadQuestionsByCategory(categoryId);
+                const categoryId = this.dataset.category;
+                loadQuestionsByCategory(categoryId);
             });
         });
     }
 
-        // Function to initialize all Bootstrap tooltips on the page
     function initializeTooltips() {
         const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltipElements.forEach(el => {
@@ -143,12 +165,12 @@
             if (!target) return;
             const textarea = target.querySelector('textarea');
             let btnText = "";
-            if (textarea && textarea.value.trim() !== "")  {
+            if (textarea && textarea.value.trim() !== "") {
                 btnText = "Afficher la note";
-            }else {
+            } else {
                 btnText = "Ajouter une note";
             }
-            btn.textContent = btnText; 
+            btn.textContent = btnText;
 
             target.addEventListener('shown.bs.collapse', () => {
                 btn.textContent = "Masquer la note";
@@ -166,17 +188,16 @@
 
         const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
         modal.show();
-         }
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
-        updateGauge(75);    // Change here the value of the gauge : 0..33 Green, 34..66 Yellow and 67..100 Red
-        
+        updateGauge(75);
     });
 
-     function attachAnswerListeners() {
+    function attachAnswerListeners() {
 
         const radios = document.querySelectorAll('input[name^="q_"]');
         radios.forEach(radio => {
@@ -232,16 +253,16 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)
         })
-        .then(async response => {
-            if (!response.ok) {
-                const text = await response.text();
-                console.error("Erreur serveur:", text);
-                throw new Error('Erreur serveur');
-            }
-            return response.json();
-        })
-    .then(data => console.log("Saved:", data))
-    .catch(err => console.error("Erreur sauvegarde:", err));
+            .then(async response => {
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error("Erreur serveur:", text);
+                    throw new Error('Erreur serveur');
+                }
+                return response.json();
+            })
+            .then(data => console.log("Saved:", data))
+            .catch(err => console.error("Erreur sauvegarde:", err));
 
     }
 
@@ -302,5 +323,4 @@
         const elem = document.getElementById('probabilityValue');
         if (elem) elem.textContent = newValue + '%';
     }
-
 </script>
