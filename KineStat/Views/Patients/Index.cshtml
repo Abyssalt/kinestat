@@ -5,7 +5,6 @@
     ViewData["Breadcrumbs"] = "<li class='breadcrumb-item active' aria-current='page'>Patients</li>";
 }
 
-<!-- Success/error messages -->
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -32,25 +31,30 @@
 
     <div class="card">
         <div class="card-body">
-            <form method="get" asp-action="Index">
-                <div class="input-group mb-3">
-                    <input type="text" name="search" class="form-control"
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input type="text" id="searchInput" class="form-control"
                            placeholder="Rechercher un patient par nom ou prénom..."
                            value="@ViewBag.SearchTerm">
-                    <button class="btn btn-primary" type="submit">
-                        <i class="bi bi-search"></i> Rechercher
-                    </button>
                 </div>
-            </form>
+                <div class="col-md-4">
+                    <select id="statusFilter" class="form-select">
+                        <option value="Tous">Tous les statuts</option>
+                        <option value="Actif">Actif</option>
+                        <option value="Terminé">Terminé</option>
+                        <option value="Suspendu">Suspendu</option>
+                        <option value="Abandonné">Abandonné</option>
+                    </select>
+                </div>
+            </div>
 
-            @if (string.IsNullOrWhiteSpace(ViewBag.SearchTerm))
-            {
-                <div class="alert alert-info">
-                    <strong>Protection des données (RGPD)</strong><br>
-                    Pour des raisons de confidentialité, aucun patient n'est affiché par défaut.
-                    Veuillez utiliser la barre de recherche ci-dessus pour afficher les patients.
-                </div>
-            }
+            <div id="loadingIndicator" class="alert alert-info" style="display:none;">
+                <i class="bi bi-hourglass-split"></i> Chargement en cours...
+            </div>
+
+            <div id="noResultsMessage" class="alert alert-warning" style="display:none;">
+                Aucun patient ne correspond à votre recherche.
+            </div>
 
             @if (Model != null && Model.Any())
             {
@@ -62,12 +66,13 @@
                                 <th>Prénom</th>
                                 <th>Email</th>
                                 <th>Genre</th>
+                                <th>Statut</th>
                                 <th>Date de naissance</th>
                                 <th>Téléphone</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="patientsTableBody">
                             @foreach (Patient patient in Model)
                             {
                                 <tr>
@@ -92,6 +97,23 @@
                                                 break;
                                         }
                                     </td>
+                                    <td>
+                                        @switch (patient.Status)
+                                        {
+                                            case PatientStatus.Actif:
+                                                <span class="badge bg-success">Actif</span>
+                                                break;
+                                            case PatientStatus.Terminé:
+                                                <span class="badge bg-secondary">Terminé</span>
+                                                break;
+                                            case PatientStatus.Suspendu:
+                                                <span class="badge bg-warning">Suspendu</span>
+                                                break;
+                                            case PatientStatus.Abandonné:
+                                                <span class="badge bg-danger">Abandonné</span>
+                                                break;
+                                        }
+                                    </td>
                                     <td>@patient.BirthDate.ToString("dd/MM/yyyy")</td>
                                     <td>@patient.PhoneNumber</td>
                                     <td>
@@ -109,12 +131,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <nav aria-label="Page navigation" id="paginationContainer">
+                    <ul class="pagination justify-content-center" id="paginationControls">
+                    </ul>
+                </nav>
             }
         </div>
     </div>
 </div>
 
-<!-- Add a patient modal -->
 <div class="modal fade" id="addPatientModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -175,107 +201,110 @@
                          </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Kinésithérapeute *</label>
-                            <select class="form-select cache-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
-                                <option value="">-- Sélectionner un kiné --</option>
-                                @if (ViewBag.Physios != null)
-                                {
-                                    @foreach (var physio in ViewBag.Physios)
-                                    {
-                                        <option value="@physio.Id">@physio.FirstName @physio.LastName (INAMI: @physio.INAMINumber)</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Poids (kg)</label>
-                            <input type="number" step="0.1" class="form-control cache-field" name="Weight" data-field="Weight" data-validation="decimal">
+                            <input type="number" class="form-control cache-field" name="Weight" data-field="Weight" data-validation="decimal" min="0">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Taille (cm)</label>
-                            <input type="number" step="0.1" class="form-control cache-field" name="Height" data-field="Height" data-validation="decimal">
+                            <input type="number" class="form-control cache-field" name="Height" data-field="Height" data-validation="decimal" min="0">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Médecin traitant</label>
+                            <label class="form-label">Nom du médecin</label>
                             <input type="text" class="form-control cache-field" name="DoctorName" data-field="DoctorName">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">N° INAMI du médecin</label>
-                            <input type="text" class="form-control cache-field" name="DoctorINAMI" data-field="DoctorINAMI" data-validation="inami">
+                            <input type="text" class="form-control cache-field" name="DoctorINAMI" data-field="DoctorINAMI">
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kinésithérapeute *</label>
+                        <select class="form-select cache-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
+                            <option value="">-- Sélectionner --</option>
+                            @foreach (var physio in ViewBag.Physios)
+                            {
+                                <option value="@physio.Id">@physio.FirstName @physio.LastName</option>
+                            }
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" id="createPatientBtn" class="btn btn-primary" disabled>
-                    <i class="bi bi-save"></i> Créer le patient
+                <button type="button" class="btn btn-secondary" id="createPatientBtn" disabled>
+                    <i class="bi bi-check-circle"></i> Créer le patient
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .is-valid-custom {
-        border-color: #28a745 !important;
-        background-color: #f0fff4 !important;
-    }
-
-    .is-invalid-custom {
-        border-color: #dc3545 !important;
-        background-color: #fff5f5 !important;
-    }
-</style>
-
 @section Scripts {
+    <style>
+        .is-valid-custom {
+            border-color: #198754 !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .is-invalid-custom {
+            border-color: #dc3545 !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+
     <script>
-        const ADD_STORAGE_KEY = 'patient_add_form_data';
+        const ADD_STORAGE_KEY = 'addPatientFormData';
+        
         let addFormData = {};
 
-        // ========== VALIDATION ==========
+        function updateFieldVisualState(input) {
+            const validationType = input.dataset.validation;
+            const value = input.value.trim();
+            
+            if (value === '') {
+                input.classList.remove('is-valid-custom', 'is-invalid-custom');
+                return;
+            }
+
+            const isValid = validateField(input);
+
+            if (isValid) {
+                input.classList.remove('is-invalid-custom');
+                input.classList.add('is-valid-custom');
+            } else {
+                input.classList.remove('is-valid-custom');
+                input.classList.add('is-invalid-custom');
+            }
+        }
+
         function validateField(input) {
             const validationType = input.dataset.validation;
             const value = input.value.trim();
-            const isRequired = input.hasAttribute('required');
 
-            if (!isRequired && !value) {
-                return true;
-            }
-
-            if (isRequired && !value) {
-                return false;
-            }
+            if (!validationType) return true;
 
             switch (validationType) {
                 case 'text':
-                    const textRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
-                    return value.length >= 1 && textRegex.test(value);
+                    return value.length >= 2;
 
                 case 'email':
                     const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
                     return emailRegex.test(value);
 
                 case 'phone':
-                    const phoneRegex = /^[\d\s\+\-\(\)]+$/;
-                    const digitsOnly = value.replace(/[\s\+\-\(\)]/g, '');
-                    return phoneRegex.test(value) && digitsOnly.length >= 9;
-
-                case 'number':
-                    const numRegex = /^\d+$/;
-                    if (!numRegex.test(value)) return false;
-                    const num = parseInt(value);
-                    return !isNaN(num) && num > 0;
-
-                case 'inami':
-                    if (!value) return true;
-                    const inamiRegex = /^\d+$/;
-                    return inamiRegex.test(value);
+                    const phoneClean = value.replace(/[\s\-\(\)\.]/g, '');
+                    return phoneClean.length >= 9;
 
                 case 'decimal':
                     if (!value) return true;
@@ -323,7 +352,6 @@
             }
         }
 
-        // ========== CACHE MANAGEMENT ==========
         function loadFromStorage(storageKey) {
             const stored = localStorage.getItem(storageKey);
             if (stored) {
@@ -349,7 +377,6 @@
             localStorage.removeItem(storageKey);
         }
 
-        // ========== ADD FORM ==========
         function areAddRequiredFieldsFilled() {
             const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber', 'PhysioId'];
             
@@ -417,9 +444,170 @@
             }
         }
 
-        // ========== EVENT LISTENERS ==========
+        let currentPage = 1;
+        let currentSearch = '';
+        let currentStatus = 'Tous';
+        const pageSize = 5;
+        let searchTimeout = null;
+
+        function performSearch() {
+            const searchValue = document.getElementById('searchInput').value;
+            const statusValue = document.getElementById('statusFilter').value;
+
+            currentSearch = searchValue;
+            currentStatus = statusValue;
+            currentPage = 1;
+
+            if (currentSearch.trim() === '') {
+                const tableBody = document.getElementById('patientsTableBody');
+                const paginationContainer = document.getElementById('paginationContainer');
+                const noResultsMessage = document.getElementById('noResultsMessage');
+
+                if (tableBody) tableBody.innerHTML = '';
+                if (paginationContainer) paginationContainer.style.display = 'none';
+                noResultsMessage.style.display = 'none';
+                return;
+            }
+
+            loadPatients();
+        }
+
+        function loadPatients() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+            const tableBody = document.getElementById('patientsTableBody');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            loadingIndicator.style.display = 'block';
+            noResultsMessage.style.display = 'none';
+            if (tableBody) tableBody.style.opacity = '0.5';
+            
+            const params = new URLSearchParams({
+                search: currentSearch,
+                status: currentStatus,
+                page: currentPage,
+                pageSize: pageSize
+            });
+            
+            fetch(`/Patients/SearchPatients?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingIndicator.style.display = 'none';
+                    if (tableBody) tableBody.style.opacity = '1';
+                    
+                    if (data.patients.length === 0) {
+                        noResultsMessage.style.display = 'block';
+                        if (tableBody) {
+                            tableBody.innerHTML = '';
+                        }
+                        if (paginationContainer) {
+                            paginationContainer.style.display = 'none';
+                        }
+                    } else {
+                        noResultsMessage.style.display = 'none';
+                        updateTable(data.patients);
+                        updatePagination(data.currentPage, data.totalPages);
+                        if (paginationContainer) {
+                            paginationContainer.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la recherche:', error);
+                    loadingIndicator.style.display = 'none';
+                    if (tableBody) tableBody.style.opacity = '1';
+                    alert('Une erreur est survenue lors de la recherche.');
+                });
+        }
+
+        function updateTable(patients) {
+            const tbody = document.getElementById('patientsTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+                
+                let genderBadge = '';
+                switch(patient.gender) {
+                    case 0: genderBadge = '<span class="badge bg-primary">H</span>'; break;
+                    case 1: genderBadge = '<span class="badge bg-danger">F</span>'; break;
+                    case 2: genderBadge = '<span class="badge bg-secondary">A</span>'; break;
+                }
+                
+                let statusBadge = '';
+                switch(patient.status) {
+                    case 0: statusBadge = '<span class="badge bg-success">Actif</span>'; break;
+                    case 1: statusBadge = '<span class="badge bg-secondary">Terminé</span>'; break;
+                    case 2: statusBadge = '<span class="badge bg-warning">Suspendu</span>'; break;
+                    case 3: statusBadge = '<span class="badge bg-danger">Abandonné</span>'; break;
+                }
+                
+                const birthDate = new Date(patient.birthDate);
+                const formattedDate = `${birthDate.getDate().toString().padStart(2, '0')}/${(birthDate.getMonth() + 1).toString().padStart(2, '0')}/${birthDate.getFullYear()}`;
+                
+                row.innerHTML = `
+                    <td>${patient.lastName}</td>
+                    <td>${patient.firstName}</td>
+                    <td><a href="mailto:${patient.email}" class="text-decoration-none">${patient.email}</a></td>
+                    <td>${genderBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>${formattedDate}</td>
+                    <td>${patient.phoneNumber}</td>
+                    <td>
+                        <a href="/Patient/${patient.id}/Anamnese/" class="btn btn-sm btn-info" title="Voir">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <form action="/Patients/${patient.id}/Delete" method="post" style="display:inline;">
+                            <input type="hidden" name="__RequestVerificationToken" value="${document.querySelector('input[name="__RequestVerificationToken"]').value}">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Supprimer" onclick="return confirm('Supprimer ce patient ?');">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePagination(current, total) {
+            const paginationControls = document.getElementById('paginationControls');
+            if (!paginationControls) return;
+            
+            paginationControls.innerHTML = '';
+            
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${current === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" data-page="${current - 1}">Précédent</a>`;
+            paginationControls.appendChild(prevLi);
+            
+            for (let i = 1; i <= total; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === current ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+                paginationControls.appendChild(li);
+            }
+            
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${current === total ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" data-page="${current + 1}">Suivant</a>`;
+            paginationControls.appendChild(nextLi);
+            
+            paginationControls.querySelectorAll('a.page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!this.parentElement.classList.contains('disabled') && 
+                        !this.parentElement.classList.contains('active')) {
+                        currentPage = parseInt(this.dataset.page);
+                        loadPatients();
+                    }
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Add form fields
             document.querySelectorAll('.cache-field').forEach(input => {
                 input.addEventListener('input', function() {
                     saveAddField(this);
@@ -434,7 +622,6 @@
                 });
             });
 
-            // Create patient button
             document.getElementById('createPatientBtn').addEventListener('click', function() {
                 if (areAddRequiredFieldsFilled()) {
                     clearStorage(ADD_STORAGE_KEY);
@@ -442,9 +629,24 @@
                     document.getElementById('addPatientForm').submit();
                 }
             });
+
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(performSearch, 300);
+                });
+            }
+            
+            if (statusFilter) {
+                statusFilter.addEventListener('change', performSearch);
+            }
+            
+            performSearch();
         });
 
-        // ========== MODAL EVENTS ==========
         document.getElementById('addPatientModal').addEventListener('shown.bs.modal', function() {
             restoreAddFormData();
         });
