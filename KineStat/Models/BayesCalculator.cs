@@ -6,13 +6,12 @@
         /// Calculates the posterior probability using Bayes theorem
         /// </summary>
         /// <exception cref="ArgumentException">Thrown if prior is not between 0 and 1 or RV+ / RV- ≤ 0.</exception>
-        private double CalculatePosterior(double prior, double rvPlus, double rvMinus, bool answer)
+        public double CalculatePosterior(double prior, double rvPlus, double rvMinus, bool answer)
         {
-            if (prior <= 0 || prior >= 1)
-                throw new ArgumentException("Prior must be between 0 and 1");
-            if (rvPlus <= 0 || rvMinus <= 0)
-                throw new ArgumentException("RV+ and RV- must be > 0");
-            
+            if (prior <= 0) prior = 0.001;
+            rvPlus = rvPlus <= 0 ? 0.001 : rvPlus;
+            rvMinus = rvMinus <= 0 ? 0.001 : rvMinus;
+
             double oddPrior = prior / (1 - prior);
             double oddPost = 0;
             if (answer)
@@ -25,6 +24,7 @@
             }
             //Convert odd to actual probability
             double posterior = oddPost/ (1 + oddPost);
+            
             return posterior;
 
         }
