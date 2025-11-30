@@ -5,25 +5,24 @@
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class PatientStatus : Migration
+    public partial class renamedStatusAttribute : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.RenameColumn(
                 name: "PatientStatus",
                 table: "Patients",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                newName: "Status");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PatientStatus",
-                table: "Patients");
+            migrationBuilder.RenameColumn(
+                name: "Status",
+                table: "Patients",
+                newName: "PatientStatus");
         }
     }
 }

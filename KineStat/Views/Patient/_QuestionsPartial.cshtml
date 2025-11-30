@@ -1,42 +1,65 @@
-﻿@model IEnumerable<KineStat.Models.QuestionPatientAnswerVM> 
+﻿@model IEnumerable<KineStat.Models.QuestionPatientAnswerVM>
 
 @foreach (var qa in Model)
 {
     var question = qa.Question;
-    <div class="mb-3 border p-3 rounded" data-question-id="@question.Id" name="question">
-        <p>@question.Title
-            <i class="bi bi-question-circle ms-2 text-primary"
-               data-bs-toggle="tooltip"
-               data-bs-html="true"
-               data-bs-placement="right"
-               data-bs-title="RV+ : @question.RVPositive<br>RV- : @question.RVNegative<br>Source : @question.SourceRv">
-            </i>
-        </p>
+    <div class="card border-0 shadow-sm mb-3" data-question-id="@question.Id" name="question">
+        <div class="card-body p-3 p-md-4">
+            <p class="fw-medium mb-3">
+                @question.Title
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   data-bs-toggle="tooltip"
+                   data-bs-html="true"
+                   data-bs-placement="right"
+                   data-bs-title="RV+ : @question.RVPositive<br>RV- : @question.RVNegative<br>Source : @question.SourceRv">
+                </i>
+            </p>
 
 
-        @if (question is QuestionBool qb)
-        {
-            var boolAnswer = qa.Answer as PatientAnswerBool;
-           <div class="form-check">
-                <input class="form-check-input" type="radio" name="q_@question.Id" value="true" data-question-id="@question.Id" @(boolAnswer != null && boolAnswer.Value ? "checked" : "")>
-               <label class="form-check-label">Oui</label>
-           </div>
-           <div class="form-check">
-                <input class="form-check-input" type="radio" name="q_@question.Id" value="false" data-question-id="@question.Id" @(boolAnswer != null && !boolAnswer.Value ? "checked" : "")>
-               <label class="form-check-label">Non</label>
-           </div>
-        }
-           
+            @if (question is QuestionBool qb)
+            {
+                var boolAnswer = qa.Answer as PatientAnswerBool;
+                <div class="d-flex flex-wrap gap-3 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="q_@question.Id"
+                               id="q_@(question.Id)_yes"
+                               value="true"
+                               data-question-id="@question.Id"
+                               @(boolAnswer != null && boolAnswer.Value ? "checked" : "")>
+                        <label class="form-check-label" for="q_@(question.Id)_yes">Oui</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="q_@question.Id"
+                               id="q_@(question.Id)_no"
+                               value="false"
+                               data-question-id="@question.Id"
+                               @(boolAnswer != null && !boolAnswer.Value ? "checked" : "")>
+                        <label class="form-check-label" for="q_@(question.Id)_no">Non</label>
+                    </div>
+                </div>
+            }
 
+            <button type="button"
+                    id="notes_button_@question.Id"
+                    class="btn btn-sm btn-outline-secondary fw-medium"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#notesContainer_@question.Id">
+                <i class="bi bi-pencil me-1"></i>Ajouter une note
+            </button>
 
-        <button type="button" id="notes_button_@question.Id" class="btn btn-sm btn-outline-secondary mt-2"
-                data-bs-toggle="collapse" data-bs-target="#notesContainer_@question.Id">
-            Ajouter une note
-        </button>
-
-        <div class="collapse mt-2" id="notesContainer_@question.Id">
-            <label for="noteInput_@question.Id">Notes :</label>
-            <textarea class="form-control" id="noteInput_@question.Id" name="note_@question.Id" data-question-id="@question.Id" placeholder="Notes (optionnel)">@qa.GetComment()</textarea>
+            <div class="collapse mt-3" id="notesContainer_@question.Id">
+                <label for="noteInput_@question.Id" class="form-label fw-medium small text-secondary">Notes</label>
+                <textarea class="form-control"
+                      id="noteInput_@question.Id"
+                      name="note_@question.Id"
+                      data-question-id="@question.Id"
+                      rows="3"
+                      placeholder="Notes (optionnel)">@qa.GetComment()</textarea>
+            </div>
         </div>
     </div>
 }

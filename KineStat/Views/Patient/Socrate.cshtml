@@ -1,0 +1,261 @@
+﻿@{
+    ViewData["Title"] = "SOCRATE";
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item'><a href='/Patient/Anamnese/{ViewBag.PatientId}'>Anamnèse - {ViewBag.FirstName} {ViewBag.LastName}</a></li><li class='breadcrumb-item active' aria-current='page'>SOCRATE</li>";
+    var patientId = ViewBag.PatientId;
+}
+
+<div class="container-fluid px-3 px-md-4 py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <h1 class="h2 fw-bold text-primary mb-2">
+                        <i class="bi bi-clipboard-heart me-2"></i>SOCRATE
+                    </h1>
+                </div>
+                <a asp-controller="Patients" asp-action="Index" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                </a>
+            </div>
+            <hr class="border-primary border-2 opacity-25 mt-3">
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-question-circle me-2"></i>Questionnaire SOCRATE
+                    </h5>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <form asp-controller="Patient" asp-action="SaveSocrate" method="post" id="socrateForm">
+                        <input type="hidden" name="PatientId" value="@patientId" />
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">S</span>Site
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Où se situe la douleur ? Pouvez-vous montrer exactement où ?</p>
+                            <textarea class="form-control socrate-field" name="Site" rows="2" data-field="site" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">O</span>Onset (Début)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Quand la douleur a-t-elle commencé ? Comment a-t-elle débuté (progressive, soudaine) ?</p>
+                            <textarea class="form-control socrate-field" name="Onset" rows="2" data-field="onset" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">C</span>Character (Caractère)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Comment décririez-vous la douleur ? (brûlure, coup de poignard, pression, pulsatile...)</p>
+                            <textarea class="form-control socrate-field" name="Character" rows="2" data-field="character" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">R</span>Radiation
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">La douleur se propage-t-elle ailleurs ? Si oui, où ?</p>
+                            <textarea class="form-control socrate-field" name="Radiation" rows="2" data-field="radiation" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">A</span>Association
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Y a-t-il d'autres symptômes associés ? (nausées, sueurs, engourdissements, faiblesse...)</p>
+                            <textarea class="form-control socrate-field" name="Association" rows="2" data-field="association" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">T</span>Timing (Temporalité)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">La douleur est-elle constante ou intermittente ? À quels moments survient-elle ?</p>
+                            <textarea class="form-control socrate-field" name="Timing" rows="2" data-field="timing" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">E</span>Exacerbating Factor (Facteurs aggravants)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Qu'est-ce qui aggrave la douleur ? (mouvement, position, activité...)</p>
+                            <textarea class="form-control socrate-field" name="ExacerbatingFactor" rows="2" data-field="exacerbatingFactor" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <span class="badge bg-info me-2">R</span>Relieving Factor (Facteurs soulageants)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-secondary small">Qu'est-ce qui soulage la douleur ? (repos, position, médicaments...)</p>
+                            <textarea class="form-control socrate-field" name="RelievingFactor" rows="2" data-field="relievingFactor" required></textarea>
+                        </div>
+
+                        <hr class="my-4 border-secondary opacity-25" />
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+                            <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
+                                <i class="bi bi-arrow-left me-2"></i>Retour à l'anamnèse
+                            </a>
+                            <button type="submit" id="saveButton" class="btn btn-secondary fw-medium" disabled>
+                                <i class="bi bi-save me-2"></i>Enregistrer et continuer<i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .is-valid {
+        border-color: #198754 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(.375em + .1875rem) center;
+        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        padding-right: calc(1.5em + .75rem);
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(.375em + .1875rem) center;
+        background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+        padding-right: calc(1.5em + .75rem);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const patientId = '@patientId';
+            const cacheKey = `socrate_${patientId}`;
+            const fields = document.querySelectorAll('.socrate-field');
+            const saveButton = document.getElementById('saveButton');
+            const form = document.getElementById('socrateForm');
+
+            loadFromCache();
+
+            fields.forEach(field => {
+                field.addEventListener('blur', function () {
+                    saveToCache();
+                    validateForm();
+                });
+
+                field.addEventListener('input', function () {
+                    validateForm();
+                });
+
+                field.addEventListener('keydown', function (e) {
+                    if (e.key === 'Tab') {
+                        setTimeout(() => {
+                            saveToCache();
+                            validateForm();
+                        }, 100);
+                    }
+                });
+            });
+
+            function validateForm() {
+                let allFilled = true;
+
+                fields.forEach(field => {
+                    const value = field.value.trim();
+                    if (value === '') {
+                        allFilled = false;
+                        field.classList.remove('is-valid');
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                        field.classList.add('is-valid');
+                    }
+                });
+
+                saveButton.disabled = !allFilled;
+
+                if (allFilled) {
+                    saveButton.classList.remove('btn-secondary');
+                    saveButton.classList.add('btn-success');
+                } else {
+                    saveButton.classList.remove('btn-success');
+                    saveButton.classList.add('btn-secondary');
+                }
+
+                return allFilled;
+            }
+
+            function saveToCache() {
+                const data = {};
+                fields.forEach(field => {
+                    const fieldName = field.getAttribute('data-field');
+                    data[fieldName] = field.value;
+                });
+
+                localStorage.setItem(cacheKey, JSON.stringify(data));
+                console.log('Données sauvegardées en cache');
+            }
+
+            function loadFromCache() {
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData) {
+                    const data = JSON.parse(cachedData);
+                    fields.forEach(field => {
+                        const fieldName = field.getAttribute('data-field');
+                        if (data[fieldName]) {
+                            field.value = data[fieldName];
+                        }
+                    });
+                    validateForm();
+                    console.log('Données chargées depuis le cache');
+                }
+            }
+
+            form.addEventListener('submit', function (e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    alert('Veuillez remplir tous les champs obligatoires.');
+                    return false;
+                }
+
+                localStorage.removeItem(cacheKey);
+            });
+
+            validateForm();
+        });
+    </script>
+}

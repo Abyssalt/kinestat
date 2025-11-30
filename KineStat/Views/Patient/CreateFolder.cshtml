@@ -1,0 +1,47 @@
+﻿@model KineStat.Models.Dossier
+@{
+    ViewData["Title"] = "Nouveau dossier";
+}
+
+<div class="container-fluid px-3 px-md-4 py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 fw-bold text-primary mb-2">
+                <i class="bi bi-folder-plus me-2"></i>Nouveau dossier
+            </h1>
+            <hr class="border-primary border-2 opacity-25">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form asp-controller="Patient" asp-action="SaveDossier" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="PatientId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Titre" class="form-label fw-medium">Titre du dossier</label>
+                            <input asp-for="Titre" class="form-control" />
+                            <span asp-validation-for="Titre" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Notes" class="form-label fw-medium">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg fw-medium">
+                                <i class="bi bi-check-circle me-2"></i>Créer le dossier
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

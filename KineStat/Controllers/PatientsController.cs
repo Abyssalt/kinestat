@@ -16,29 +16,81 @@ namespace KineStat.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search)
+        public async Task<IActionResult> Index(string search, string status)
         {
-            List<Patient> patients = new List<Patient>();
+            var query = _context.Patients.Include(p => p.Physio).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchLower = search.ToLower();
-                patients = await _context.Patients
-                    .Include(p => p.Physio)
-                    .Where(p =>
-                        p.FirstName.ToLower().Contains(searchLower) ||
-                        p.LastName.ToLower().Contains(searchLower)
-                    )
-                    .OrderBy(p => p.LastName)
-                    .ToListAsync();
+                query = query.Where(p =>
+                    p.FirstName.ToLower().Contains(searchLower) ||
+                    p.LastName.ToLower().Contains(searchLower)
+                );
             }
+
+            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<PatientStatus>(status, out var patientStatus))
+            {
+                query = query.Where(p => p.Status == patientStatus);
+            }
+
+            var patients = await query.OrderBy(p => p.LastName).ToListAsync();
+
             ViewBag.Physios = await _context.Physios
                 .OrderBy(p => p.LastName)
                 .ToListAsync();
 
             ViewBag.SearchTerm = search;
+            ViewBag.StatusFilter = status;
 
             return View(patients);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> SearchPatients(string search, string status, int page = 1, int pageSize = 5)
+        {
+            var query = _context.Patients.Include(p => p.Physio).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(p =>
+                    p.FirstName.ToLower().Contains(searchLower) ||
+                    p.LastName.ToLower().Contains(searchLower)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && status != "Tous" && Enum.TryParse<PatientStatus>(status, out var patientStatus))
+            {
+                query = query.Where(p => p.Status == patientStatus);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var patients = await query
+                .OrderBy(p => p.LastName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.FirstName,
+                    p.LastName,
+                    p.Email,
+                    p.Gender,
+                    p.BirthDate,
+                    p.PhoneNumber,
+                    p.Status
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                patients,
+                totalCount,
+                currentPage = page,
+                totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            });
         }
 
         [HttpPost]
@@ -49,6 +101,7 @@ namespace KineStat.Controllers
             {
                 try
                 {
+                    patient.Status = PatientStatus.Actif;
                     _context.Add(patient);
                     await _context.SaveChangesAsync();
 
