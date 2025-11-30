@@ -233,7 +233,7 @@ namespace KineStat.Controllers
         //This is not a probability but a sum of all percentage of every category used to indicate the level of redflags 
         public async Task<double> GetSumRedflagsPercentage(int patientId, int assessmentId) {
             var categoryIds = _context.Categories
-                .Where (c=> c.Id <=6) //TODO : next sprint include all categories
+                .Where (c=> c.Id <=6) 
                 .Select(c => c.Id) 
                 .ToList();
             double result = 0;
