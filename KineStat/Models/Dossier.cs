@@ -11,14 +11,13 @@ namespace KineStat.Models
         public string Titre { get; set; }
 
         [Required]
-        public DateTime DateOuverture { get; set; } = DateTime.Today;
+        public DateTime DateOuverture { get; set; }
 
         public string? Notes { get; set; }
 
-        // 🔗 Relation Patient
         [Required]
         public int PatientId { get; set; }
-        public Patient Patient { get; set; }
+        public Patient? Patient { get; set; }
 
         public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
     }
