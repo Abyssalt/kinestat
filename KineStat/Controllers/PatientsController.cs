@@ -154,5 +154,80 @@ namespace KineStat.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> Tests(int id)
+        {
+            Console.WriteLine($"=== DEBUG Tests Action ===");
+            Console.WriteLine($"Patient ID: {id}");
+
+            // Récupère le patient
+            var patient = await _context.Patients
+                .Include(p => p.Physio)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (patient == null)
+            {
+                Console.WriteLine("ERROR: Patient NOT FOUND");
+                TempData["Error"] = "Patient introuvable.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            Console.WriteLine($"Patient found: {patient.FirstName} {patient.LastName}");
+
+            // ✅ Récupère TOUS les clusters avec leurs questions
+            var clusters = await _context.Cluster
+                .Include(c => c.Questions)
+                .ToListAsync();
+
+            Console.WriteLine($"Clusters found: {clusters.Count}");
+
+            if (clusters.Count == 0)
+            {
+                Console.WriteLine("WARNING: No clusters in database!");
+                TempData["Warning"] = "Aucun cluster de tests disponible.";
+                return RedirectToAction("Index", new { id });
+            }
+
+            foreach (var cluster in clusters)
+            {
+                Console.WriteLine($"  - Cluster '{cluster.Name}': {cluster.Questions?.Count ?? 0} questions");
+
+                if (cluster.Questions != null)
+                {
+                    foreach (var q in cluster.Questions.Take(2))  // Affiche les 2 premières questions
+                    {
+                        Console.WriteLine($"    * Question ID={q.Id}: {q.Title}");
+                    }
+                }
+            }
+
+            // Prépare les données pour la vue
+            ViewData["Patient"] = patient;
+            ViewData["PatientId"] = id;
+            ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
+            ViewData["Clusters"] = clusters;
+            ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
+                                      $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+                                      $"<li class='breadcrumb-item'><a href='/Patients/Anamnese/{id}'>Anamnèse</a></li>" +
+                                      $"<li class='breadcrumb-item active' aria-current='page'>Tests</li>";
+
+            Console.WriteLine($"Returning view with {clusters.Count} clusters");
+
+            return View("~/Views/Patient/Tests.cshtml", clusters);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveTestResults(int clusterId, int patientId, string syntheseCluster)
+        {
+            // TODO: Sauvegarder les résultats dans une table Answers
+            // Pour l'instant, juste un message de confirmation
+
+            TempData["Success"] = "Résultats des tests enregistrés avec succès !";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
