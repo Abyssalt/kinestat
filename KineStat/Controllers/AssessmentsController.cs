@@ -46,43 +46,7 @@ namespace KineStat.Controllers
             return View(assessment);
         }
 
-        // GET: Assessments/Create
-        public IActionResult Create(int dossierId)
-        {
-            var dossier = _context.Dossiers
-                .Include(d => d.Patient)
-                .FirstOrDefault(d => d.Id == dossierId);
-
-            if (dossier == null) return NotFound();
-
-            var assessment = new Assessment
-            {
-                DossierId = dossier.Id,
-                PatientId = dossier.PatientId,
-                PhysioId = dossier.Patient.PhysioId
-            };
-
-            return View(assessment);
-        }
-
-        // POST: Assessments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Date,PatientId,PhysioId")] Assessment assessment)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(assessment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Email", assessment.PatientId);
-            ViewData["PhysioId"] = new SelectList(_context.Physios, "Id", "Email", assessment.PhysioId);
-            return View(assessment);
-        }
-
+ 
         // GET: Assessments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -177,5 +141,36 @@ namespace KineStat.Controllers
         {
             return _context.Assessments.Any(e => e.Id == id);
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StartAssessment(Assessment input)
+        {
+            var patient = await _context.Patients.FindAsync(input.PatientId);
+            if (patient == null)
+                return NotFound("Patient introuvable");
+
+            var dossier = await _context.Dossiers.FindAsync(input.DossierId);
+            if (dossier == null)
+                return NotFound("Dossier introuvable");
+
+            var assessment = new Assessment
+            {
+                PatientId = input.PatientId,
+                PhysioId = input.PhysioId,
+                DossierId = input.DossierId,
+                MedicalContextId = input.MedicalContextId,
+                Date = DateTime.Now
+            };
+
+            _context.Assessments.Add(assessment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Socrate", "Patient", new { id = input.PatientId });
+        }
+
+
+
     }
 }
