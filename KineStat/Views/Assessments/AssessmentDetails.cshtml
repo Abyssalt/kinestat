@@ -2,6 +2,10 @@
 
 @{
     ViewData["Title"] = "Détails du bilan";
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+                              $"<li class='breadcrumb-item'><a href='/Patient/{Model.Patient.Id}/Anamnese'>Anamnèse - {Model.Patient.FirstName} {Model.Patient.LastName}</a></li>" +
+                              $"<li class='breadcrumb-item'><a href='/Dossier/{Model.DossierId}/details'>Dossier {Model.Dossier.Titre}</a></li>" +
+                              $"<li class='breadcrumb-item active'>Bilan du {Model.Date:dd/MM/yyyy}</li>";
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
