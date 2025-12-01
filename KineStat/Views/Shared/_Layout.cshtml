@@ -67,13 +67,13 @@
                     {
                         <ul class="navbar-nav align-items-center">
                             <li class="nav-item me-2">
-                                <span class="navbar-text small">
+                                <span class="navbar-text">
                                     <i class="bi bi-person-circle me-1"></i>@Context.Session.GetString("UserName")
                                 </span>
                             </li>
                             <li class="nav-item">
                                 <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm fw-medium">
+                                    <button type="submit" class="btn btn-outline-danger fw-medium">
                                         <i class="bi bi-box-arrow-right me-1"></i>Se déconnecter
                                     </button>
                                 </form>
