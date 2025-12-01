@@ -112,15 +112,6 @@ namespace KineStat.Controllers
                 catch (Exception ex)
                 {
                     TempData["Error"] = $"Erreur lors de la création : {ex.Message}";
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine("Inner: " + ex.InnerException.Message);
-
-                        if (ex.InnerException.InnerException != null)
-                        {
-                            Console.WriteLine("Inner Inner: " + ex.InnerException.InnerException.Message);
-                        }
-                    }
                     return RedirectToAction(nameof(Index));
                 }
             }

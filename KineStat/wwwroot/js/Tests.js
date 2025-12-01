@@ -262,3 +262,89 @@ function handleSubmit(event) {
     alert(`✓ Évaluation validée!\n\n${answered} test(s) complété(s).`);
     return false;
 }
+
+
+function loadExistingResponses(responses) {
+    console.log('=== Chargement des réponses existantes ===');
+    console.log('Nombre de réponses:', responses.length);
+
+    let loadedCount = 0;
+
+    responses.forEach(response => {
+        if (response.isCustom) {
+            // TODO: Gérer les tests personnalisés si nécessaire
+            console.log('Test personnalisé ignoré:', response.customName);
+            return;
+        }
+
+        const questionId = response.questionId;
+        const card = document.getElementById('test-' + questionId);
+
+        if (!card) {
+            console.warn('Card non trouvée pour question:', questionId);
+            return;
+        }
+
+        // Pré-remplir la valeur
+        const radioInput = card.querySelector(`input[name="test-${questionId}-value"][value="${response.value}"]`);
+        const numberInput = card.querySelector(`input[name="test-${questionId}-value"][type="number"]`);
+        const rangeInput = card.querySelector(`input[type="range"]#range-${questionId}`);
+        const selectInput = card.querySelector(`select[name="test-${questionId}-value"]`);
+
+        if (radioInput) {
+            // QuestionBool
+            radioInput.checked = true;
+            console.log(`Question ${questionId} (Bool): ${response.value}`);
+        } else if (numberInput) {
+            // QuestionLadder
+            numberInput.value = response.value;
+            if (rangeInput) {
+                rangeInput.value = response.value;
+                const displaySpan = card.querySelector(`#display-${questionId}`);
+                if (displaySpan) {
+                    displaySpan.textContent = response.value;
+                }
+            }
+            console.log(`Question ${questionId} (Ladder): ${response.value}`);
+        } else if (selectInput) {
+            // QuestionQCM
+            selectInput.value = response.value;
+            console.log(`Question ${questionId} (QCM): ${response.value}`);
+        }
+
+        // Pré-remplir les observations
+        if (response.observations) {
+            const observationsTextarea = card.querySelector(`textarea[name="test-${questionId}-observations"]`);
+            if (observationsTextarea) {
+                observationsTextarea.value = response.observations;
+                // Affiche la section observations
+                const observationsZone = document.getElementById('observations-' + questionId);
+                if (observationsZone) {
+                    observationsZone.classList.add('show');
+                }
+            }
+        }
+
+        // Marque comme répondu
+        markAsAnswered(questionId);
+        loadedCount++;
+    });
+
+    console.log(`✓ ${loadedCount} réponses chargées`);
+
+    // Affiche un message si des réponses ont été chargées
+    if (loadedCount > 0) {
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'alert alert-info alert-dismissible fade show';
+        infoDiv.innerHTML = `
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>${loadedCount} réponse(s) précédente(s) chargée(s)</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        const container = document.querySelector('.container-fluid');
+        if (container) {
+            container.insertBefore(infoDiv, container.firstChild.nextSibling);
+        }
+    }
+}

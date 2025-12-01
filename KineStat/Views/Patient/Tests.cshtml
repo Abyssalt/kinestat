@@ -1,20 +1,19 @@
 ﻿@model List<KineStat.Models.Cluster>
+@using KineStat.Models
 
 @{
     ViewData["Title"] = "Tests";
 
-    var clusters = Model;  // ← Liste de tous les clusters
+    var clusters = Model; 
     var patientNom = ViewData["PatientNom"]?.ToString() ?? "Patient";
     var patientId = ViewData["PatientId"] != null ? Convert.ToInt32(ViewData["PatientId"]) : 0;
     var patient = ViewData["Patient"] as Patient;
 
-    // Calcul du nombre total de questions
     int totalQuestions = clusters.Sum(c => c.Questions.Count);
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
 
-    <!-- En-tête -->
     <div class="card border-0 shadow mb-4">
         <div class="card-body p-3 p-md-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
@@ -33,7 +32,6 @@
         </div>
     </div>
 
-    <!-- Barre de progression globale -->
     <div class="card border-0 shadow mb-4">
         <div class="card-body p-3 p-md-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -56,14 +54,11 @@
         </div>
     </div>
 
-    <!-- Bouton pour ajouter un test/cluster spécifique -->
-    <!-- ... ton code existant pour ajouter des tests personnalisés ... -->
     <div class="mb-4">
         <button type="button" class="btn btn-outline-primary fw-medium" onclick="toggleAddTestForm()">
             <i class="bi bi-plus-circle me-2"></i>Ajouter un test spécifique
         </button>
 
-        <!-- Formulaire d'ajout de test (masqué par défaut) -->
         <div class="collapse mt-3" id="addTestForm">
             <div class="card border-0 shadow border-start border-primary border-4">
                 <div class="card-header bg-primary text-white py-3">
@@ -73,7 +68,6 @@
                 </div>
                 <div class="card-body p-3 p-md-4">
                     <div class="row">
-                        <!-- ✅ NOUVEAU : Sélection du cluster -->
                         <div class="col-12 mb-3">
                             <label class="form-label fw-medium">
                                 <i class="bi bi-folder2-open me-1"></i>Dans quel cluster ajouter ce test ?
@@ -104,7 +98,6 @@
     <form id="formTests" asp-controller="Patients" asp-action="SaveTestResults" method="post" onsubmit="return handleSubmit(event)">
         <input type="hidden" name="patientId" value="@patientId">
 
-        <!-- ✅ BOUCLE SUR TOUS LES CLUSTERS -->
         @{
             int globalTestIndex = 0;
         }
@@ -118,8 +111,6 @@
                     <small>@cluster.Questions.Count question(s)</small>
                 </div>
                 <div class="card-body p-3">
-
-                    <!-- Conteneur pour les tests de ce cluster -->
                     <div id="testsContainer-@cluster.Id">
                         @foreach (var question in cluster.Questions)
                         {
@@ -155,7 +146,6 @@
                                 <div class="card-body p-3 p-md-4">
                                     @if (question is QuestionBool)
                                     {
-                                        <!-- Ton code QuestionBool existant -->
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Résultat</label>
                                             <div class="btn-group w-100" role="group">
@@ -205,7 +195,6 @@
                                     }
                                     else if (question is QuestionLadder ladder)
                                     {
-                                        <!-- Ton code QuestionLadder existant -->
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">
                                                 Valeur mesurée (@ladder.Min - @ladder.Max)
@@ -259,7 +248,6 @@
                                     }
                                     else if (question is QuestionQCM qcm)
                                     {
-                                        <!-- Ton code QuestionQCM existant -->
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Observation</label>
                                             <select class="form-select form-select-lg"
@@ -300,7 +288,6 @@
             </div>
         }
 
-        <!-- ✅ BOUTONS D'ACTION FINAUX -->
         <div class="card border-0 shadow">
             <div class="card-body p-3 p-md-4">
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-center">
@@ -333,6 +320,34 @@
     <script src="~/js/Tests.js"></script>
 
     <script>
+        @{
+                var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
+                var responsesData = new List<object>();
+
+                if (existingResponsesList != null)
+                {
+                        foreach (var r in existingResponsesList)
+                        {
+                                responsesData.Add(new
+                                {
+                                        questionId = r.QuestionId,
+                                        answerId = r.AnswerId,
+                                        value = r.ResponseValue,
+                                        observations = r.Observations,
+                                        isCustom = r.IsCustomTest,
+                                        customName = r.CustomTestName,
+                                        customType = r.CustomTestType
+                                });
+                        }
+                }
+        }
+
+        var existingResponses = @Html.Raw(Json.Serialize(responsesData));
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExistingResponses(existingResponses);
+        });
+
         function saveData() {
             const formData = new FormData(document.getElementById('formTests'));
             const data = {
@@ -340,7 +355,6 @@
                 tests: []
             };
 
-            // Récupère tous les tests standards
             document.querySelectorAll('.test-card:not([data-custom="true"])').forEach(card => {
                 const testId = parseInt(card.getAttribute('data-test-id'));
                 const valueInput = formData.get('test-' + testId + '-value');
@@ -355,7 +369,6 @@
                 }
             });
 
-            // Récupère les tests personnalisés
             document.querySelectorAll('[data-custom="true"]').forEach(card => {
                 const testId = card.getAttribute('data-test-id');
                 const testName = card.querySelector('h5').textContent.replace(/\d+/, '').replace('Personnalisé', '').trim();
@@ -382,7 +395,6 @@
 
             console.log('Données à envoyer:', data);
 
-            // Envoi au serveur
             fetch('/Patients/SaveTestResults', {
                 method: 'POST',
                 headers: {
