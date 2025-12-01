@@ -108,11 +108,21 @@ namespace KineStat.Controllers
                 return RedirectToAction("Index", "Patients");
             }
 
-            ViewBag.PatientId = id;
+            var socrate = await _context.Socrates
+                .FirstOrDefaultAsync(s => s.PatientId == id);
+
+            if (socrate == null)
+            {
+                socrate = new Socrate
+                {
+                    PatientId = id
+                };
+            }
+
             ViewBag.FirstName = patient.FirstName;
             ViewBag.LastName = patient.LastName;
 
-            return View();
+            return View(socrate);
         }
 
         [HttpPost]
@@ -159,6 +169,8 @@ namespace KineStat.Controllers
                 TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
                 return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
             }
+
+            return RedirectToAction("RedFlags", "Patient", new { id = socrate.PatientId }); ;
         }
 
         [Route("Patient/{id}/RedFlags")]

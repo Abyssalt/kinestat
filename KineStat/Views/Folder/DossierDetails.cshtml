@@ -16,7 +16,7 @@
                         <i class="bi bi-folder-open me-2"></i>@Model.Titre
                     </h1>
                 </div>
-                <a asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour à l'anamnèse
                 </a>
             </div>
