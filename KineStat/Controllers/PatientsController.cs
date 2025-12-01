@@ -1,5 +1,6 @@
 ﻿using KineStat.Data;
 using KineStat.Models;
+using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -191,19 +192,6 @@ namespace KineStat.Controllers
                 return RedirectToAction("Index", new { id });
             }
 
-            foreach (var cluster in clusters)
-            {
-                Console.WriteLine($"  - Cluster '{cluster.Name}': {cluster.Questions?.Count ?? 0} questions");
-
-                if (cluster.Questions != null)
-                {
-                    foreach (var q in cluster.Questions.Take(2))  // Affiche les 2 premières questions
-                    {
-                        Console.WriteLine($"    * Question ID={q.Id}: {q.Title}");
-                    }
-                }
-            }
-
             // Prépare les données pour la vue
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
@@ -218,16 +206,116 @@ namespace KineStat.Controllers
 
             return View("~/Views/Patient/Tests.cshtml", clusters);
         }
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveTestResults(int clusterId, int patientId, string syntheseCluster)
+        public async Task<IActionResult> SaveTestResults([FromBody] SaveTestResultsDTO dto)
         {
-            // TODO: Sauvegarder les résultats dans une table Answers
-            // Pour l'instant, juste un message de confirmation
+            try
+            {
+                Console.WriteLine($"=== SaveTestResults appelé ===");
+                Console.WriteLine($"PatientId: {dto.PatientId}");
+                Console.WriteLine($"Nombre de tests: {dto.Tests.Count}");
 
-            TempData["Success"] = "Résultats des tests enregistrés avec succès !";
-            return RedirectToAction(nameof(Index));
+                // Validation
+                if (dto.PatientId <= 0)
+                {
+                    return BadRequest(new { success = false, message = "Patient invalide" });
+                }
+
+                var patient = await _context.Patients.FindAsync(dto.PatientId);
+                if (patient == null)
+                {
+                    return NotFound(new { success = false, message = "Patient introuvable" });
+                }
+
+                var dateResponse = DateTime.Now;
+                int savedCount = 0;
+
+                // Sauvegarde des réponses
+                foreach (var test in dto.Tests)
+                {
+                    var response = new PatientAnswerTests()
+                    {
+                        PatientId = dto.PatientId,
+                        DateResponse = dateResponse,
+                        ResponseValue = test.Value,
+                        Observations = test.Observations,
+                        IsCustomTest = test.Custom
+                    };
+
+                    if (test.Custom)
+                    {
+                        // Test personnalisé
+                        response.CustomTestName = test.Name;
+                        response.CustomTestType = test.Type;
+                        response.QuestionId = null;
+                        response.AnswerId = null;
+
+                        Console.WriteLine($"Test personnalisé: {test.Name} = {test.Value}");
+                    }
+                    else
+                    {
+                        // Test standard
+                        response.QuestionId = test.Id;
+
+                        // ✅ CORRECTION : Vérifie d'abord le type de question
+                        var question = await _context.Questions.FindAsync(test.Id);
+
+                        if (question is QuestionQCM)
+                        {
+                            // ✅ Charge le QuestionQCM avec ses Answers
+                            var qcm = await _context.QuestionQCMs
+                                .Include(q => q.Answers)
+                                .FirstOrDefaultAsync(q => q.Id == test.Id);
+
+                            if (qcm != null)
+                            {
+                                // Cherche l'Answer qui correspond au titre sélectionné
+                                var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
+                                if (answer != null)
+                                {
+                                    response.AnswerId = answer.Id;
+                                    Console.WriteLine($"QuestionQCM #{test.Id}: Answer '{answer.Title}' (ID: {answer.Id})");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"⚠️ Answer non trouvé pour la valeur '{test.Value}'");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Question #{test.Id} (type: {question?.GetType().Name}) = {test.Value}");
+                        }
+                    }
+
+                    _context.PatientAnswerTests.Add(response);
+                    savedCount++;
+                }
+
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"✓ {savedCount} réponses enregistrées");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Évaluation enregistrée avec succès",
+                    testCount = savedCount,
+                    dateEvaluation = dateResponse.ToString("dd/MM/yyyy HH:mm")
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erreur SaveTestResults: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Erreur lors de l'enregistrement",
+                    error = ex.Message
+                });
+            }
         }
     }
 }
