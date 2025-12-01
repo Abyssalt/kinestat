@@ -89,6 +89,28 @@ namespace KineStat.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
+        {
+            var patient = await _context.Patients.FindAsync(PatientId);
+
+            if (patient == null)
+            {
+                TempData["Error"] = "Patient introuvable";
+                return RedirectToAction("Anamnese", new { id = PatientId });
+            }
+
+            patient.Profession = Profession;
+            patient.ActivitesPhysiques = ActivitesPhysiques;
+            patient.AntecedentsMedicaux = AntecedentsMedicaux;
+            patient.MedicationActuelle = MedicationActuelle;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Informations médicales mises à jour avec succès";
+            return RedirectToAction("Anamnese", new { id = PatientId });
+        }
+
 
         [HttpPost]
         [Route("Patient/{id}/SaveAnamnese")]
@@ -108,11 +130,21 @@ namespace KineStat.Controllers
                 return RedirectToAction("Index", "Patients");
             }
 
-            ViewBag.PatientId = id;
+            var socrate = await _context.Socrates
+                .FirstOrDefaultAsync(s => s.PatientId == id);
+
+            if (socrate == null)
+            {
+                socrate = new Socrate
+                {
+                    PatientId = id
+                };
+            }
+
             ViewBag.FirstName = patient.FirstName;
             ViewBag.LastName = patient.LastName;
 
-            return View();
+            return View(socrate);
         }
 
         [HttpPost]
@@ -159,6 +191,8 @@ namespace KineStat.Controllers
                 TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
                 return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
             }
+
+            return RedirectToAction("RedFlags", "Patient", new { id = socrate.PatientId }); ;
         }
 
         [Route("Patient/{id}/RedFlags")]
