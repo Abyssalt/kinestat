@@ -25,26 +25,26 @@
 
     <div class="row mb-4">
         <div class="col-12">
-            <ul class="nav nav-tabs flex-nowrap overflow-auto" id="redflagsTabs">
-                <li class="nav-item">
-                    <a class="nav-link active fw-medium" href="#" data-category="1">Tumeur / Métastase</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-medium" href="#" data-category="2">Infection</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-medium" href="#" data-category="3">Neurologique</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-medium" href="#" data-category="4">Traumatisme / Fracture</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-medium" href="#" data-category="5">Inflammatoire</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-medium" href="#" data-category="6">Vasculaire / Circulatoire</a>
-                </li>
-            </ul>
+            <div class="row g-2" id="redflagsTabs">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-primary w-100 h-100 py-3" data-category="1">Tumeur / Métastase</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="2">Infection</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="3">Neurologique</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="4">Traumatisme / Fracture</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="5">Inflammatoire</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="6">Vasculaire / Circulatoire</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -337,5 +337,24 @@
 
         const elem = document.getElementById('probabilityValue');
         if (elem) elem.textContent = newValue.toFixed(2) + '%';
+    }
+
+    function initializeTabs() {
+        document.querySelectorAll('#redflagsTabs button[data-category]').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelectorAll('#redflagsTabs button')
+                    .forEach(el => {
+                        el.classList.remove('btn-primary');
+                        el.classList.add('btn-outline-primary');
+                    });
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+
+                const categoryId = this.dataset.category;
+                loadQuestionsByCategory(categoryId);
+            });
+        });
     }
 </script>
