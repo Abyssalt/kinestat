@@ -26,62 +26,23 @@ namespace KineStat.Controllers
             return View(await kineDbContext.ToListAsync());
         }
 
-        // GET: Assessments/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [Route("Assessment/{id}/Details")]
+        public async Task<IActionResult> AssessmentDetails(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
                 .Include(a => a.Physio)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(a => a.Dossier)
+                .Include(a => a.RedFlagsDetected)
+                .Include(a => a.Questions)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
             if (assessment == null)
-            {
                 return NotFound();
-            }
 
             return View(assessment);
         }
 
-        // GET: Assessments/Create
-        public IActionResult Create(int dossierId)
-        {
-            var dossier = _context.Dossiers
-                .Include(d => d.Patient)
-                .FirstOrDefault(d => d.Id == dossierId);
-
-            if (dossier == null) return NotFound();
-
-            var assessment = new Assessment
-            {
-                DossierId = dossier.Id,
-                PatientId = dossier.PatientId,
-                PhysioId = dossier.Patient.PhysioId
-            };
-
-            return View(assessment);
-        }
-
-        // POST: Assessments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Date,PatientId,PhysioId")] Assessment assessment)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(assessment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Email", assessment.PatientId);
-            ViewData["PhysioId"] = new SelectList(_context.Physios, "Id", "Email", assessment.PhysioId);
-            return View(assessment);
-        }
 
         // GET: Assessments/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -176,6 +137,57 @@ namespace KineStat.Controllers
         private bool AssessmentExists(int id)
         {
             return _context.Assessments.Any(e => e.Id == id);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StartAssessment(int PatientId, int DossierId, int PhysioId, int MedicalContextId)
+        {
+            var patient = await _context.Patients.FindAsync(PatientId);
+            if (patient == null)
+                return NotFound("Patient introuvable");
+
+            var dossier = await _context.Dossiers.FindAsync(DossierId);
+            if (dossier == null)
+                return NotFound("Dossier introuvable");
+
+            var assessment = new Assessment
+            {
+                PatientId = PatientId,
+                PhysioId = PhysioId,
+                DossierId = DossierId,
+                MedicalContextId = MedicalContextId,
+                Date = DateTime.Now
+            };
+
+            _context.Assessments.Add(assessment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Socrate", "Patient", new { id = PatientId, assessmentId = assessment.Id });
+        }
+
+        [Route("Dossier/{dossierId}/CreateAssessment")]
+        public async Task<IActionResult> CreateAssessment(int dossierId)
+        {
+            var dossier = await _context.Dossiers
+                .Include(d => d.Patient)
+                .ThenInclude(p => p.Physio)
+                .FirstOrDefaultAsync(d => d.Id == dossierId);
+
+            if (dossier == null)
+                return NotFound("Dossier introuvable");
+
+            if (dossier.Patient == null)
+                return NotFound("Patient introuvable");
+
+            return View(new Assessment
+            {
+                DossierId = dossierId,
+                PatientId = dossier.Patient.Id,
+                PhysioId = dossier.Patient.PhysioId,
+                Date = DateTime.Today
+            });
         }
     }
 }

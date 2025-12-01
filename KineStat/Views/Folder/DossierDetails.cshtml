@@ -2,7 +2,9 @@
 
 @{
     ViewData["Title"] = "Détails du dossier";
-}
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+                              $"<li class='breadcrumb-item'><a href='/Patient/{Model.Patient.Id}/Anamnese'>Anamnèse - {Model.Patient.FirstName} {Model.Patient.LastName}</a></li>" +
+                              $"<li class='breadcrumb-item active'>Dossier {Model.Titre}</li>";}
 
 <div class="container-fluid px-3 px-md-4 py-4">
 
@@ -30,7 +32,7 @@
                         <h5 class="mb-0 fw-bold">
                             <i class="bi bi-clipboard2-pulse me-2"></i>Bilans
                         </h5>
-                        <a asp-action="CreateAssessment" asp-route-dossierId="@Model.Id" class="btn btn-light fw-medium">
+                        <a asp-controller="Assessments" asp-action="CreateAssessment" asp-route-dossierId="@Model.Id" class="btn btn-light fw-medium">
                             <i class="bi bi-plus-circle me-1"></i>Nouveau bilan
                         </a>
                     </div>
@@ -48,7 +50,7 @@
                         <div class="list-group list-group-flush">
                             @foreach (var assessment in Model.Assessments.OrderByDescending(a => a.Date))
                             {
-                                <a asp-action="AssessmentDetails"
+                                <a asp-controller="Assessments" asp-action="AssessmentDetails"
                                    asp-route-id="@assessment.Id"
                                    class="list-group-item list-group-item-action border-0 border-bottom px-0 py-3">
                                     <div class="d-flex justify-content-between align-items-center">
