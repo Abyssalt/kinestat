@@ -7,10 +7,14 @@ namespace KineStat.Models
     {
         [Key]
         public int Id { get; set; }
+
         public int PatientId {  get; set; }
+
         public virtual ICollection<Assessment> Assessments { get; set; }
+
         public bool IsArchived { get; set; }
         [Required, DataType(DataType.Date), Column(TypeName = "date")]
+
         public DateTime ArchivedAt { get; set; }
     }
 }

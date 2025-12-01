@@ -48,10 +48,5 @@
             }
             return posterior;
         }
-
-      
-    
-
-        
     }
 }

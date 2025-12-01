@@ -4,10 +4,10 @@
     public class QuestionPatientAnswerVM 
     {
         public int PatientId { get; set; }
+
         public Question Question { get; set; }
 
         public PatientAnswer Answer { get; set; }
-
 
         public string GetComment()
         {
@@ -26,6 +26,5 @@
         {
             return Question.RVNegative;
         }
-
     }
 }
