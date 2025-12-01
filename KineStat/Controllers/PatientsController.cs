@@ -102,20 +102,46 @@ namespace KineStat.Controllers
             {
                 try
                 {
+                    var existingPatientByNiss = await _context.Patients
+                        .FirstOrDefaultAsync(p => p.SocialSecurityNumber == patient.SocialSecurityNumber);
+
+                    if (existingPatientByNiss != null)
+                    {
+                        TempData["Error"] = $"Un patient avec ce numéro de sécurité sociale existe déjà : {existingPatientByNiss.FirstName} {existingPatientByNiss.LastName}";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    var existingPatientByPhone = await _context.Patients
+                        .FirstOrDefaultAsync(p => p.PhoneNumber == patient.PhoneNumber);
+
+                    if (existingPatientByPhone != null)
+                    {
+                        TempData["Error"] = $"Un patient avec ce numéro de téléphone existe déjà : {existingPatientByPhone.FirstName} {existingPatientByPhone.LastName}";
+                        return RedirectToAction(nameof(Index));
+                    }
+
                     patient.Status = PatientStatus.Actif;
                     _context.Add(patient);
                     await _context.SaveChangesAsync();
-
                     TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} créé avec succès !";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
                     TempData["Error"] = $"Erreur lors de la création : {ex.Message}";
+
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine("Inner: " + ex.InnerException.Message);
+                        if (ex.InnerException.InnerException != null)
+                        {
+                            Console.WriteLine("Inner Inner: " + ex.InnerException.InnerException.Message);
+                        }
+                    }
+
                     return RedirectToAction(nameof(Index));
                 }
             }
-
             TempData["Error"] = "Données invalides. Veuillez vérifier le formulaire.";
             return RedirectToAction(nameof(Index));
         }

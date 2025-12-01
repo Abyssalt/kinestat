@@ -48,6 +48,13 @@ namespace KineStat.Models
         [Required] 
         public string SocialSecurityNumber { get; set; }
 
+
+        //Medical Informations
+        public string? Profession { get; set; }
+        public string? ActivitesPhysiques { get; set; }
+        public string? AntecedentsMedicaux { get; set; }
+        public string? MedicationActuelle { get; set; }
+
         public PatientStatus Status { get; set; }
 
         public string? DoctorName { get; set; }

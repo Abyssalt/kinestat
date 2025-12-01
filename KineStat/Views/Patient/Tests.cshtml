@@ -25,7 +25,9 @@
                         <i class="bi bi-person-badge me-1"></i>Patient : <strong>@patientNom</strong>
                     </p>
                 </div>
-                <a asp-controller="Patients" asp-action="Index" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
+
+                <a asp-controller="Patient" asp-action="ExamenClinique" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
+
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
