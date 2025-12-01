@@ -119,10 +119,12 @@ namespace KineStat.Controllers
             return RedirectToAction("Anamnese", new { id = id });
         }
 
-        [Route("Patient/{id}/Socrate")]
-        public async Task<IActionResult> Socrate(int id)
+        [Route("Patient/{id}/Socrat/{assessmentId}")]
+        public async Task<IActionResult> Socrate(int id, int assessmentId)
         {
             var patient = await _context.Patients.FindAsync(id);
+            var assessment = await _context.Assessments.FindAsync(assessmentId);
+
 
             if (patient == null)
             {
@@ -133,14 +135,17 @@ namespace KineStat.Controllers
             var socrate = await _context.Socrates
                 .FirstOrDefaultAsync(s => s.PatientId == id);
 
+
             if (socrate == null)
             {
                 socrate = new Socrate
                 {
-                    PatientId = id
+                    PatientId = id,
+                    AssessmentId = assessmentId,
                 };
             }
 
+            ViewData["FolderId"] = assessment.DossierId;
             ViewBag.FirstName = patient.FirstName;
             ViewBag.LastName = patient.LastName;
 
@@ -155,11 +160,6 @@ namespace KineStat.Controllers
             try
             {
                 var patient = _context.Patients.Find(socrate.PatientId);
-                if (patient == null)
-                {
-                    TempData["Error"] = "Patient introuvable.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
-                }
 
                 var existingSocrate = _context.Socrates
                     .FirstOrDefault(s => s.PatientId == socrate.PatientId);

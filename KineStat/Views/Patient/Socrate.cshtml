@@ -5,6 +5,7 @@
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item'><a href='/Patient/Anamnese/{ViewBag.PatientId}'>Anamnèse - {ViewBag.FirstName} {ViewBag.LastName}</a></li><li class='breadcrumb-item active' aria-current='page'>SOCRATE</li>";
     var patientId = ViewData["PatientId"];
+    var dossierId = ViewData["FolderId"];
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
@@ -12,8 +13,8 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <a asp-controller="Assessments" asp-action="CreateAssessment" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
-                    <i class="bi bi-arrow-left me-2"></i>Retour 
+                <a asp-controller="Folder" asp-action="DossierDetails" asp-route-id="@dossierId" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Revenir au dossier 
                 </a>
                 <div>
                     <h1 class="h2 fw-bold text-primary mb-2">
