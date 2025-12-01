@@ -35,31 +35,6 @@
                                     <i class="bi bi-clipboard-pulse d-lg-none me-2"></i>Anamnèse
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="Socrate" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-chat-square-text d-lg-none me-2"></i>SOCRATE
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="RedFlags" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-exclamation-triangle d-lg-none me-2"></i>Red flags
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="ExamenClinique" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-search d-lg-none me-2"></i>Examen clinique
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="Tests" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-list-check d-lg-none me-2"></i>Tests
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="Resultat" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-graph-up d-lg-none me-2"></i>Résultat
-                                </a>
-                            </li>
                         }
                     </ul>
 
@@ -132,6 +107,15 @@
                 <i class="bi bi-eye-fill fs-5"></i>
             </button>
         </div>
+    }
+    
+    @if (ViewData["AssessmentId"] != null)
+    {
+        <li><a asp-action="Socrate" asp-route-id="@ViewData["AssessmentId"]">SOCRATE</a></li>
+        <li><a asp-action="RedFlags" asp-route-id="@ViewData["AssessmentId"]">Red Flags</a></li>
+        <li><a asp-action="ExamenClinique" asp-route-id="@ViewData["AssessmentId"]">Examen</a></li>
+        <li><a asp-action="Tests" asp-route-id="@ViewData["AssessmentId"]">Tests</a></li>
+        <li><a asp-action="Resultat" asp-route-id="@ViewData["AssessmentId"]">Résultat</a></li>
     }
 
     <footer class="border-top bg-light mt-auto">
