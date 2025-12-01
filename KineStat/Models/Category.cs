@@ -9,6 +9,7 @@ namespace KineStat.Models
 
         [Required]
         public string Name { get; set; }
+
         [Required]
         public double Prior {  get; set; }
 

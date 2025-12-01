@@ -12,8 +12,6 @@ namespace KineStat.Controllers
     {
         private readonly KineDbContext _context;
         private readonly BayesCalculator _bayesCalculator;
-        
-    
         public PatientController(KineDbContext context)
         {
             _context = context;

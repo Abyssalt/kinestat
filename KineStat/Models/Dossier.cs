@@ -17,6 +17,7 @@ namespace KineStat.Models
 
         [Required]
         public int PatientId { get; set; }
+
         public Patient? Patient { get; set; }
 
         public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();

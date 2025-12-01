@@ -14,7 +14,7 @@ namespace KineStat.Models
         public int MedicalContextId { get; set; }
 
         public virtual MedicalContext MedicalContext { get; set; }
-        public virtual Category Category { get; set; }
 
+        public virtual Category Category { get; set; }
     }
 }

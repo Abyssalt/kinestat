@@ -7,9 +7,13 @@
     public class SavePatientAnswerDTO
     {
         public int PatientId { get; set; }
+
         public int QuestionId { get; set; }
+
         public bool ? BoolValue { get; set; }
+
         public double ? NumericValue { get; set; }
+
         public string ? Comment { get; set;  }
     }
 }

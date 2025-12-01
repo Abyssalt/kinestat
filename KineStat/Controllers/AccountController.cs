@@ -52,13 +52,11 @@ namespace KineStat.Controllers
 
             try
             {
-                // Try to find Physio with this email
                 var physio = await _context.Physios
                     .FirstOrDefaultAsync(p => p.Email == model.Email);
 
                 if (physio != null && PasswordHasher.VerifyPassword(model.Password, physio.Password))
                 {
-                    // Successful Physio login, store the info in session
                     HttpContext.Session.SetString("UserId", physio.Id.ToString());
                     HttpContext.Session.SetString("UserRole", "Physio");
                     HttpContext.Session.SetString("UserName", $"{physio.FirstName} {physio.LastName}");
@@ -68,13 +66,11 @@ namespace KineStat.Controllers
                     return RedirectToAction("Index", "Patients");
                 }
 
-                // If not Physio, try Administrator (I put this verification in second because, normally, there are more Physio in the app than Admin)
                 var admin = await _context.Administrators
                     .FirstOrDefaultAsync(a => a.Email == model.Email);
 
                 if (admin != null && PasswordHasher.VerifyPassword(model.Password, admin.Password))
                 {
-                    // Successful Admin login, store the info in session
                     HttpContext.Session.SetString("UserId", admin.Id.ToString());
                     HttpContext.Session.SetString("UserRole", "Admin");
                     HttpContext.Session.SetString("UserName", $"{admin.FirstName} {admin.LastName}");
@@ -84,7 +80,6 @@ namespace KineStat.Controllers
                     return RedirectToAction("Index", "Admin");
                 }
 
-                // Invalid credentials
                 ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
                 return View(model);
             }

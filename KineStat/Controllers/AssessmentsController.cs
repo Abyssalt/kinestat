@@ -19,7 +19,6 @@ namespace KineStat.Controllers
             _context = context;
         }
 
-        // GET: Assessments
         public async Task<IActionResult> Index()
         {
             var kineDbContext = _context.Assessments.Include(a => a.Patient).Include(a => a.Physio);
@@ -43,8 +42,6 @@ namespace KineStat.Controllers
             return View(assessment);
         }
 
-
-        // GET: Assessments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
