@@ -89,6 +89,28 @@ namespace KineStat.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
+        {
+            var patient = await _context.Patients.FindAsync(PatientId);
+
+            if (patient == null)
+            {
+                TempData["Error"] = "Patient introuvable";
+                return RedirectToAction("Anamnese", new { id = PatientId });
+            }
+
+            patient.Profession = Profession;
+            patient.ActivitesPhysiques = ActivitesPhysiques;
+            patient.AntecedentsMedicaux = AntecedentsMedicaux;
+            patient.MedicationActuelle = MedicationActuelle;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Informations médicales mises à jour avec succès";
+            return RedirectToAction("Anamnese", new { id = PatientId });
+        }
+
 
         [HttpPost]
         [Route("Patient/{id}/SaveAnamnese")]
