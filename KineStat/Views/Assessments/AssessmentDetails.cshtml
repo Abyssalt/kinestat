@@ -19,8 +19,9 @@
                     </h1>
                     <p class="text-secondary mb-0">Bilan du @Model.Date.ToString("dd/MM/yyyy")</p>
                 </div>
-                <a asp-action="DossierDetails" asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium">
-                    <i class="bi bi-arrow-left me-2"></i>Retour au dossier
+                <<a asp-controller="Folder" asp-action="DossierDetails"
+                    asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Retour 
                 </a>
             </div>
             <hr class="border-primary border-2 opacity-25 mt-3">
