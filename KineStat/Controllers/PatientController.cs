@@ -180,9 +180,15 @@ namespace KineStat.Controllers
                             .OfType<QuestionBool>()
                             .Where(q => q.CategoryId == categoryId)
                             .ToList();
+            var lastAssessment = _context.Assessments
+                .Where(a => a.PatientId == patientId)
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Id)
+                .FirstOrDefault();
+            if (lastAssessment == null) return NotFound();
             var boolAnswers = _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId)
+                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId && a.AssessmentId == lastAssessment.Id)
                 .ToList();
 
             var questionAndAnswers = boolQuestions.Select(q => new QuestionPatientAnswerVM
@@ -223,6 +229,7 @@ namespace KineStat.Controllers
                 var dossier = _context.Dossiers
                     .Where(d => d.PatientId == answerDto.PatientId)
                     .OrderByDescending(d => d.DateOuverture)
+                    .ThenByDescending(d => d.Id)
                     .FirstOrDefault();
                 if (dossier == null)
                 {
@@ -234,28 +241,24 @@ namespace KineStat.Controllers
                 }
 
                 var assessment = _context.Assessments
-                    .Where(a => a.PatientId == answerDto.PatientId)
+                    .Where(a => a.PatientId == answerDto.PatientId && a.DossierId == dossier.Id)
                     .OrderByDescending(a => a.Date)
+                    .ThenByDescending(a => a.Id)
                     .FirstOrDefault();
                 if (assessment == null)
                 {
-                    assessment = new Assessment
+                    return StatusCode(400, new
                     {
-                        PatientId = answerDto.PatientId,
-                        Date = DateTime.Now,
-                        PhysioId = patient.PhysioId,
-                        DossierId = dossier.Id,
-                        MedicalContextId = 1
-                    };
-                    _context.Assessments.Add(assessment);
-                    await _context.SaveChangesAsync();
+                        success = false,
+                        message = "Erreur aucun bilan existant"
+                    });
                 }
                 var savedAnswer = _context.PatientAnswers
                     .OfType<PatientAnswerBool>()
-                    .FirstOrDefault(a => a.PatientId == answerDto.PatientId && a.QuestionId == answerDto.QuestionId);
+                    .FirstOrDefault(a => a.PatientId == answerDto.PatientId && a.QuestionId == answerDto.QuestionId && a.AssessmentId == assessment.Id);
                 if (savedAnswer == null)
                 {
-                    savedAnswer = new PatientAnswerBool { PatientId = answerDto.PatientId, QuestionId = answerDto.QuestionId, Comment = answerDto.Comment, AssessmentId = assessment.Id };
+                    savedAnswer = new PatientAnswerBool { PatientId = answerDto.PatientId, QuestionId = answerDto.QuestionId, Value = answerDto.BoolValue.Value, Comment = answerDto.Comment, AssessmentId = assessment.Id };
                     _context.PatientAnswers.Add(savedAnswer);
                 }
                 else
@@ -272,7 +275,7 @@ namespace KineStat.Controllers
                 await _context.SaveChangesAsync();
 
                 double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
-              
+  
                 return Ok(new { success = true, redflags = redflagsPercentage});
             }
             catch (DbUpdateException dbEx)
