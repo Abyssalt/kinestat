@@ -2,13 +2,6 @@
 
 @{
     ViewData["Title"] = "Nouveau bilan";
-    ViewData["Breadcrumbs"] =
-        $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{Model.PatientId}'>Anamnèse</a></li>" +
-        $"<li class='breadcrumb-item active'>Nouveau bilan</li>";
-}
-
-@{
     ViewData["PatientId"] = Model.PatientId;
 }
 
@@ -46,6 +39,8 @@
       asp-action="StartAssessment"
       method="post"
       class="card border-0 shadow-sm p-3">
+
+    @Html.AntiForgeryToken()
 
     <input type="hidden" name="PatientId" value="@Model.PatientId" />
     <input type="hidden" name="DossierId" value="@Model.DossierId" />
