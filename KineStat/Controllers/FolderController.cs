@@ -15,6 +15,13 @@ namespace KineStat.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        [Route("Patient/{id}/CreateFolder")]
+        public IActionResult CreateFolder(int id)
+        {
+            return View(new Dossier { PatientId = id });
+        }
+
         [HttpPost]
         [Route("Patient/SaveDossier")]
         [ValidateAntiForgeryToken]

@@ -12,8 +12,6 @@ namespace KineStat.Controllers
     {
         private readonly KineDbContext _context;
         private readonly BayesCalculator _bayesCalculator;
-        
-    
         public PatientController(KineDbContext context)
         {
             _context = context;
@@ -317,8 +315,6 @@ namespace KineStat.Controllers
             }
             return result;
         }
-
-        
         private async Task<double> CalculateRedFlagCategory(int patientId, int assessmentId, int categoryId)
         {
             var answersForCategory = _context.PatientAnswers
@@ -420,15 +416,6 @@ namespace KineStat.Controllers
         {
             ViewData["PatientId"] = id.ToString();
             return View();
-        }
-
-
-
-        [HttpGet]
-        [Route("Patient/{id}/CreateFolder")]
-        public IActionResult CreateFolder(int id)
-        {
-            return View(new Dossier { PatientId = id });
         }
     }
 }

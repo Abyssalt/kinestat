@@ -10,16 +10,6 @@ namespace KineStat.Controllers
             new QuestionBool { Id = 1, Title = "Test", CategoryId = 1 } // Test question, used to test GetQuestions (at https://localhost:7133/Question/GetQuestions)
         };
 
-        public IActionResult Index()
-        {
-            return View(_questions);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(string questionType, string title, double rvPositif, double rvNegatif, int? clusterId, int bilanId)
