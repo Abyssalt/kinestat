@@ -24,20 +24,38 @@
 
     <div class="row mb-4">
         <div class="col-12">
-            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-                <ol class="breadcrumb flex-wrap bg-light rounded p-3 mb-0" id="breadcrumbDIMENSIONS">
-                    <li class="breadcrumb-item active" aria-current="page"><a href="#" onclick="loadQuestionnaire('Toutes')" class="text-decoration-none fw-medium">Toutes</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Articulaire/structurel')" class="text-decoration-none">Articulaire/structurel</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Myofascial')" class="text-decoration-none">Myofascial</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Nociceptif')" class="text-decoration-none">Nociceptif</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Neuropathique')" class="text-decoration-none">Neuropathique</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Nociplastique')" class="text-decoration-none">Nociplastique</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Contrôle sensorimoteur')" class="text-decoration-none">Contrôle sensorimoteur</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Croyances et cognition')" class="text-decoration-none">Croyances et cognition</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Socio-environnemental')" class="text-decoration-none">Socio-environnemental</a></li>
-                    <li class="breadcrumb-item"><a href="#" onclick="loadQuestionnaire('Émotionnel/affectif')" class="text-decoration-none">Émotionnel/affectif</a></li>
-                </ol>
-            </nav>
+            <div class="row g-2" id="dimensionsTabs">
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-primary w-100 h-100 py-3" data-category="Toutes">Toutes</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Articulaire/structurel">Articulaire / structurel</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Myofascial">Myofascial</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Nociceptif">Nociceptif</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Neuropathique">Neuropathique</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Nociplastique">Nociplastique</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Contrôle sensorimoteur">Contrôle sensorimoteur</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Croyances et cognition">Croyances et cognition</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Socio-environnemental">Socio-environnemental</button>
+                </div>
+                <div class="col-6 col-md-4 col-lg">
+                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Émotionnel/affectif">Émotionnel / affectif</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -86,6 +104,25 @@
 
 <script>
     const patientId = @patientId;
+
+    function initializeTabs() {
+        document.querySelectorAll('#dimensionsTabs button[data-category]').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelectorAll('#dimensionsTabs button')
+                    .forEach(el => {
+                        el.classList.remove('btn-primary');
+                        el.classList.add('btn-outline-primary');
+                    });
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+
+                const category = this.dataset.category;
+                loadQuestionnaire(category);
+            });
+        });
+    }
 
     async function loadQuestionnaire(category) {
         const response = await fetch(`/Patient/${patientId}/GetQuestionsClinique`);
@@ -173,5 +210,9 @@
             container.appendChild(subCatDiv);
         }
     }
-    document.addEventListener('DOMContentLoaded', loadQuestionnaire('Toutes'));
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTabs();
+        loadQuestionnaire('Toutes');
+    });
 </script>
