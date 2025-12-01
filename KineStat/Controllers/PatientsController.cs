@@ -161,48 +161,49 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> Tests(int id)
         {
-            Console.WriteLine($"=== DEBUG Tests Action ===");
-            Console.WriteLine($"Patient ID: {id}");
-
-            // Récupère le patient
             var patient = await _context.Patients
                 .Include(p => p.Physio)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (patient == null)
             {
-                Console.WriteLine("ERROR: Patient NOT FOUND");
                 TempData["Error"] = "Patient introuvable.";
                 return RedirectToAction(nameof(Index));
             }
 
-            Console.WriteLine($"Patient found: {patient.FirstName} {patient.LastName}");
 
-            // ✅ Récupère TOUS les clusters avec leurs questions
             var clusters = await _context.Cluster
                 .Include(c => c.Questions)
                 .ToListAsync();
 
-            Console.WriteLine($"Clusters found: {clusters.Count}");
 
-            if (clusters.Count == 0)
+            var today = DateTime.UtcNow.Date;
+            var latestResponses = await _context.PatientAnswerTests
+                .Where(pr => pr.PatientId == id)
+                .OrderByDescending(pr => pr.DateResponse)
+                .Take(100)  
+                .ToListAsync();
+
+
+            var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
+            if (latestSessionDate.HasValue)
             {
-                Console.WriteLine("WARNING: No clusters in database!");
-                TempData["Warning"] = "Aucun cluster de tests disponible.";
-                return RedirectToAction("Index", new { id });
+                latestResponses = latestResponses
+                    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+                    .ToList();
+
             }
 
-            // Prépare les données pour la vue
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
             ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
             ViewData["Clusters"] = clusters;
+            ViewData["ExistingResponses"] = latestResponses;  
             ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
                                       $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-                                      $"<li class='breadcrumb-item'><a href='/Patients/Anamnese/{id}'>Anamnèse</a></li>" +
+                                      $"<li class='breadcrumb-item'><a href='/Patients/Details/{id}'>{patient.FirstName} {patient.LastName}</a></li>" +
                                       $"<li class='breadcrumb-item active' aria-current='page'>Tests</li>";
 
-            Console.WriteLine($"Returning view with {clusters.Count} clusters");
 
             return View("~/Views/Patient/Tests.cshtml", clusters);
         }
@@ -226,7 +227,6 @@ namespace KineStat.Controllers
                 var dateResponse = DateTime.UtcNow;
                 int savedCount = 0;
 
-                // Sauvegarde des réponses
                 foreach (var test in dto.Tests)
                 {
                     var response = new PatientAnswerTests()
@@ -240,48 +240,37 @@ namespace KineStat.Controllers
 
                     if (test.Custom)
                     {
-                        // Test personnalisé
+                       
                         response.CustomTestName = test.Name;
                         response.CustomTestType = test.Type;
                         response.QuestionId = null;
                         response.AnswerId = null;
-
-                        Console.WriteLine($"Test personnalisé: {test.Name} = {test.Value}");
                     }
                     else
                     {
-                        // Test standard
+
                         response.QuestionId = test.Id;
 
-                        // ✅ CORRECTION : Vérifie d'abord le type de question
                         var question = await _context.Questions.FindAsync(test.Id);
 
                         if (question is QuestionQCM)
                         {
-                            // ✅ Charge le QuestionQCM avec ses Answers
                             var qcm = await _context.QuestionQCMs
                                 .Include(q => q.Answers)
                                 .FirstOrDefaultAsync(q => q.Id == test.Id);
 
                             if (qcm != null)
                             {
-                                // Cherche l'Answer qui correspond au titre sélectionné
                                 var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
                                 if (answer != null)
                                 {
                                     response.AnswerId = answer.Id;
-                                    Console.WriteLine($"QuestionQCM #{test.Id}: Answer '{answer.Title}' (ID: {answer.Id})");
+                                   
                                 }
-                                else
-                                {
-                                    Console.WriteLine($"⚠️ Answer non trouvé pour la valeur '{test.Value}'");
-                                }
+                               
                             }
                         }
-                        else
-                        {
-                            Console.WriteLine($"Question #{test.Id} (type: {question?.GetType().Name}) = {test.Value}");
-                        }
+                       
                     }
 
                     _context.PatientAnswerTests.Add(response);
@@ -289,8 +278,6 @@ namespace KineStat.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-
-                Console.WriteLine($"✓ {savedCount} réponses enregistrées");
 
                 return Ok(new
                 {
@@ -302,8 +289,6 @@ namespace KineStat.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Erreur SaveTestResults: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
                 return StatusCode(500, new
                 {
