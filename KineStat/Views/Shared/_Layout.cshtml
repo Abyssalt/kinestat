@@ -28,14 +28,6 @@
                 <div class="navbar-collapse collapse" id="navbarMain">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                        @if (ViewData["PatientId"] != null)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link fw-medium" asp-area="" asp-controller="Patient" asp-action="Anamnese" asp-route-id="@ViewData["PatientId"]">
-                                    <i class="bi bi-clipboard-pulse d-lg-none me-2"></i>Anamnèse
-                                </a>
-                            </li>
-                        }
                     </ul>
 
                     @if (Context.Session.GetString("UserId") != null)
@@ -114,7 +106,11 @@
         <li><a asp-action="Socrate" asp-route-id="@ViewData["AssessmentId"]">SOCRATE</a></li>
         <li><a asp-action="RedFlags" asp-route-id="@ViewData["AssessmentId"]">Red Flags</a></li>
         <li><a asp-action="ExamenClinique" asp-route-id="@ViewData["AssessmentId"]">Examen</a></li>
-        <li><a asp-action="Tests" asp-route-id="@ViewData["AssessmentId"]">Tests</a></li>
+        <li>
+            <a asp-area="" asp-controller="Patients" asp-action="Tests" asp-route-id="@ViewData["PatientId"]">
+                Tests
+            </a>
+        </li>
         <li><a asp-action="Resultat" asp-route-id="@ViewData["AssessmentId"]">Résultat</a></li>
     }
 

@@ -203,7 +203,6 @@ namespace KineStat.Controllers
         {
             try
             {
-
                 if (dto.PatientId <= 0)
                 {
                     return BadRequest(new { success = false, message = "Patient invalide" });
@@ -216,36 +215,64 @@ namespace KineStat.Controllers
                 }
 
                 var dateResponse = DateTime.UtcNow;
+                var today = dateResponse.Date;
+
+                var existingResponses = await _context.PatientAnswerTests
+                    .Where(pr => pr.PatientId == dto.PatientId &&
+                                 pr.DateResponse.Date == today)
+                    .ToListAsync();
+
                 int savedCount = 0;
+                int updatedCount = 0;
 
                 foreach (var test in dto.Tests)
                 {
-                    var response = new PatientAnswerTests()
-                    {
-                        PatientId = dto.PatientId,
-                        DateResponse = dateResponse,
-                        ResponseValue = test.Value,
-                        Observations = test.Observations,
-                        IsCustomTest = test.Custom
-                    };
+                    PatientAnswerTests response;
 
                     if (test.Custom)
                     {
-                       
-                        response.CustomTestName = test.Name;
-                        response.CustomTestType = test.Type;
-                        response.QuestionId = null;
-                        response.AnswerId = null;
+                        response = existingResponses.FirstOrDefault(r =>
+                            r.IsCustomTest &&
+                            r.CustomTestName == test.Name);
+
+                        if (response != null)
+                        {
+                            response.ResponseValue = test.Value;
+                            response.Observations = test.Observations;
+                            response.DateResponse = dateResponse;
+                            _context.PatientAnswerTests.Update(response);
+                            updatedCount++;
+                        }
+                        else
+                        {
+                            response = new PatientAnswerTests
+                            {
+                                PatientId = dto.PatientId,
+                                DateResponse = dateResponse,
+                                ResponseValue = test.Value,
+                                Observations = test.Observations,
+                                IsCustomTest = true,
+                                CustomTestName = test.Name,
+                                CustomTestType = test.Type,
+                                QuestionId = null,
+                                AnswerId = null
+                            };
+                            _context.PatientAnswerTests.Add(response);
+                            savedCount++;
+                        }
                     }
                     else
                     {
+                        response = existingResponses.FirstOrDefault(r =>
+                            !r.IsCustomTest &&
+                            r.QuestionId == test.Id);
 
-                        response.QuestionId = test.Id;
-
-                        var question = await _context.Questions.FindAsync(test.Id);
-
-                        if (question is QuestionQCM)
+                        if (response != null)
                         {
+                            response.ResponseValue = test.Value;
+                            response.Observations = test.Observations;
+                            response.DateResponse = dateResponse;
+
                             var qcm = await _context.QuestionQCMs
                                 .Include(q => q.Answers)
                                 .FirstOrDefaultAsync(q => q.Id == test.Id);
@@ -253,19 +280,42 @@ namespace KineStat.Controllers
                             if (qcm != null)
                             {
                                 var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
-                                if (answer != null)
-                                {
-                                    response.AnswerId = answer.Id;
-                                   
-                                }
-                               
+                                response.AnswerId = answer?.Id;
                             }
-                        }
-                       
-                    }
+                            else
+                            {
+                                response.AnswerId = null;
+                            }
 
-                    _context.PatientAnswerTests.Add(response);
-                    savedCount++;
+                            _context.PatientAnswerTests.Update(response);
+                            updatedCount++;
+                        }
+                        else
+                        {
+                            response = new PatientAnswerTests
+                            {
+                                PatientId = dto.PatientId,
+                                DateResponse = dateResponse,
+                                QuestionId = test.Id,
+                                ResponseValue = test.Value,
+                                Observations = test.Observations,
+                                IsCustomTest = false
+                            };
+
+                            var qcm = await _context.QuestionQCMs
+                                .Include(q => q.Answers)
+                                .FirstOrDefaultAsync(q => q.Id == test.Id);
+
+                            if (qcm != null)
+                            {
+                                var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
+                                response.AnswerId = answer?.Id;
+                            }
+                           
+                            _context.PatientAnswerTests.Add(response);
+                            savedCount++;
+                        }
+                    }
                 }
 
                 await _context.SaveChangesAsync();
@@ -274,8 +324,10 @@ namespace KineStat.Controllers
                 {
                     success = true,
                     message = "Évaluation enregistrée avec succès",
-                    testCount = savedCount,
-                    dateEvaluation = dateResponse.ToString("dd/MM/yyyy HH:mm")
+                    testCount = savedCount + updatedCount,
+                    newCount = savedCount,
+                    updatedCount = updatedCount,
+                    dateEvaluation = dateResponse.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
                 });
             }
             catch (Exception ex)
@@ -289,5 +341,6 @@ namespace KineStat.Controllers
                 });
             }
         }
+    
     }
 }
