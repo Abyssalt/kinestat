@@ -211,11 +211,7 @@ namespace KineStat.Controllers
         {
             try
             {
-                Console.WriteLine($"=== SaveTestResults appelé ===");
-                Console.WriteLine($"PatientId: {dto.PatientId}");
-                Console.WriteLine($"Nombre de tests: {dto.Tests.Count}");
 
-                // Validation
                 if (dto.PatientId <= 0)
                 {
                     return BadRequest(new { success = false, message = "Patient invalide" });
@@ -227,7 +223,7 @@ namespace KineStat.Controllers
                     return NotFound(new { success = false, message = "Patient introuvable" });
                 }
 
-                var dateResponse = DateTime.Now;
+                var dateResponse = DateTime.UtcNow;
                 int savedCount = 0;
 
                 // Sauvegarde des réponses
