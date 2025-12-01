@@ -129,6 +129,7 @@ namespace KineStat.Controllers
         }
 
         [HttpPost]
+        [Route("Patients/{id}/Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
