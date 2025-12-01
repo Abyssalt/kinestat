@@ -2,9 +2,7 @@
 @{
     ViewData["Title"] = "Nouveau dossier";
 }
-
-<div class="container-fluid px-3 px-md-4 py-4">
-
+<div class="container-fluid px-2 px-sm-3 px-lg-4 py-3 py-md-4">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h2 fw-bold text-primary mb-2">
@@ -13,29 +11,32 @@
             <hr class="border-primary border-2 opacity-25">
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
             <div class="card border-0 shadow">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-folder-plus me-2"></i>Informations du dossier
+                    </h5>
+                </div>
                 <div class="card-body p-4">
                     <form asp-controller="Patient" asp-action="SaveDossier" method="post">
                         @Html.AntiForgeryToken()
-
                         <input type="hidden" asp-for="PatientId" />
-
-                        <div class="mb-3">
-                            <label asp-for="Titre" class="form-label fw-medium">Titre du dossier</label>
-                            <input asp-for="Titre" class="form-control" />
+                        <div class="mb-4">
+                            <label asp-for="Titre" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Titre du dossier <span class="text-danger">*</span></label>
+                            <input asp-for="Titre" class="form-control form-control-lg" />
                             <span asp-validation-for="Titre" class="text-danger small"></span>
                         </div>
-
                         <div class="mb-4">
-                            <label asp-for="Notes" class="form-label fw-medium">Notes</label>
-                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <label asp-for="Notes" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="5"></textarea>
                         </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg fw-medium">
+                        <div class="d-flex gap-3 justify-content-end mt-4">
+                            <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary btn-lg fw-medium">
+                                <i class="bi bi-arrow-left me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-info btn-lg fw-medium text-white">
                                 <i class="bi bi-check-circle me-2"></i>Créer le dossier
                             </button>
                         </div>
