@@ -56,7 +56,7 @@ namespace KineStat.Controllers
                 var physio = await _context.Physios
                     .FirstOrDefaultAsync(p => p.Email == model.Email);
 
-                if (physio != null && PasswordHasher.VerifyPassword(model.Password, physio.Password))
+                if (physio != null && physio.Password == model.Password)
                 {
                     // Successful Physio login, store the info in session
                     HttpContext.Session.SetString("UserId", physio.Id.ToString());

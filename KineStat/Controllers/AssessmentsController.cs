@@ -47,11 +47,22 @@ namespace KineStat.Controllers
         }
 
         // GET: Assessments/Create
-        public IActionResult Create()
+        public IActionResult Create(int dossierId)
         {
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Email");
-            ViewData["PhysioId"] = new SelectList(_context.Physios, "Id", "Email");
-            return View();
+            var dossier = _context.Dossiers
+                .Include(d => d.Patient)
+                .FirstOrDefault(d => d.Id == dossierId);
+
+            if (dossier == null) return NotFound();
+
+            var assessment = new Assessment
+            {
+                DossierId = dossier.Id,
+                PatientId = dossier.PatientId,
+                PhysioId = dossier.Patient.PhysioId
+            };
+
+            return View(assessment);
         }
 
         // POST: Assessments/Create
