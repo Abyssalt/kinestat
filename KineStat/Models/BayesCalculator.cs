@@ -9,8 +9,8 @@
         public double CalculatePosterior(double prior, double rvPlus, double rvMinus, bool answer)
         {
             if (prior <= 0) prior = 0.001;
-            rvPlus = rvPlus <= 0 ? 0.001 : rvPlus;
-            rvMinus = rvMinus <= 0 ? 0.001 : rvMinus;
+            rvPlus = rvPlus <= 0 ? 1 : rvPlus;
+            rvMinus = rvMinus <= 0 ? 1 : rvMinus;
 
             double oddPrior = prior / (1 - prior);
             double oddPost = 0;
