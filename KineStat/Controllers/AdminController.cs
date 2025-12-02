@@ -1,5 +1,6 @@
 ﻿using KineStat.Data;
 using KineStat.Models;
+using KineStat.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,7 @@ namespace KineStat.Controllers
             {
                 try
                 {
+                    physio.Password = PasswordHasher.HashPassword(physio.Password);
                     _context.Physios.Add(physio);
                     await _context.SaveChangesAsync();
 
@@ -69,7 +71,12 @@ namespace KineStat.Controllers
                     existingPhysio.LastName = physio.LastName;
                     existingPhysio.Email = physio.Email;
                     existingPhysio.PhoneNumber = physio.PhoneNumber;
-                    existingPhysio.Password = physio.Password;
+
+                    if (!string.IsNullOrEmpty(physio.Password) && physio.Password.Length < 50)
+                    {
+                        existingPhysio.Password = PasswordHasher.HashPassword(physio.Password);
+                    }
+
                     existingPhysio.INAMINumber = physio.INAMINumber;
 
                     _context.Update(existingPhysio);
