@@ -368,6 +368,107 @@ namespace KineStat.Controllers
                 });
             }
         }
-    
+
+        [HttpGet]
+        public async Task<IActionResult> GetQuestionsClinique(int id)
+        {
+            // Récupérer toutes les questions qui ne sont PAS des tests physiques
+            // c'est-à-dire les questions avec ClusterId = NULL
+            var allQuestions = await _context.Questions
+                .Include(q => q.Category)
+                .Where(q => q.ClusterId == null) // Seulement les questions de screening, pas les tests physiques
+                .OrderBy(q => q.CategoryId)
+                .ThenBy(q => q.Title)
+                .ToListAsync();
+
+            // Grouper par catégorie
+            var groupedQuestions = new Dictionary<string, List<object>>();
+
+            foreach (var question in allQuestions)
+            {
+                var categoryName = question.Category?.Name ?? "Autre";
+
+                if (!groupedQuestions.ContainsKey(categoryName))
+                {
+                    groupedQuestions[categoryName] = new List<object>();
+                }
+
+                // Créer l'objet question selon son type
+                object questionData;
+
+                if (question is QuestionBool qBool)
+                {
+                    questionData = new
+                    {
+                        id = question.Id,
+                        question = question.Title,
+                        type = "bool",
+                        options = new[] { "Oui", "Non" }
+                    };
+                }
+                else if (question is QuestionQCM qQcm)
+                {
+                    // Charger les réponses pour le QCM
+                    var qcmWithAnswers = await _context.QuestionQCMs
+                        .Include(q => q.Answers)
+                        .FirstOrDefaultAsync(q => q.Id == question.Id);
+
+                    questionData = new
+                    {
+                        id = question.Id,
+                        question = question.Title,
+                        type = "qcm",
+                        options = qcmWithAnswers?.Answers?.Select(a => a.Title).ToArray() ?? Array.Empty<string>()
+                    };
+                }
+                else if (question is QuestionLadder qLadder)
+                {
+                    questionData = new
+                    {
+                        id = question.Id,
+                        question = question.Title,
+                        type = "ladder",
+                        options = Enumerable.Range(0, 11).Select(i => i.ToString()).ToArray() // 0-10
+                    };
+                }
+                else
+                {
+                    questionData = new
+                    {
+                        id = question.Id,
+                        question = question.Title,
+                        type = "text",
+                        options = Array.Empty<string>()
+                    };
+                }
+
+                groupedQuestions[categoryName].Add(questionData);
+            }
+
+            return Json(groupedQuestions);
+        }
+
+        // ========================================
+        // ACTION ExamenClinique (GET) - Si elle n'existe pas déjà
+        // ========================================
+
+        [HttpGet]
+        public async Task<IActionResult> ExamenClinique(int id)
+        {
+            var patient = await _context.Patients
+                .Include(p => p.Physio)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["Patient"] = patient;
+            ViewData["PatientId"] = id;
+
+            return View("~/Views/Patient/ExamenClinique.cshtml");
+        }
+
     }
 }

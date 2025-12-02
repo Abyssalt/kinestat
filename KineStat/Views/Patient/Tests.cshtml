@@ -395,8 +395,6 @@
                 }
             });
 
-            console.log('Données à envoyer:', data);
-
             fetch('/Patients/SaveTestResults', {
                 method: 'POST',
                 headers: {
@@ -407,15 +405,15 @@
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    alert(`✓ Évaluation enregistrée avec succès!\n\n${result.testCount} réponse(s) enregistrée(s)\nDate: ${result.dateEvaluation}`);
+                  
                     console.log('Succès:', result);
                 } else {
-                    alert(`❌ Erreur: ${result.message}`);
+                   
                     console.error('Erreur:', result);
                 }
             })
             .catch(error => {
-                alert('❌ Erreur de connexion au serveur');
+               
                 console.error('Erreur:', error);
             });
         }
