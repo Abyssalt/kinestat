@@ -613,6 +613,8 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AssessmentId");
+
                     b.HasIndex("PatientId");
 
                     b.ToTable("Socrates");
@@ -907,11 +909,19 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Socrate", b =>
                 {
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Patient");
                 });
