@@ -149,6 +149,9 @@ namespace KineStat.Controllers
             if (dossier == null)
                 return NotFound("Dossier introuvable");
 
+            if (!await _context.MedicalContexts.AnyAsync(mc => mc.Id == MedicalContextId))
+                return BadRequest("Contexte médical invalide");
+
             var assessment = new Assessment
             {
                 PatientId = PatientId,
@@ -177,6 +180,8 @@ namespace KineStat.Controllers
 
             if (dossier.Patient == null)
                 return NotFound("Patient introuvable");
+
+            ViewBag.MedicalContexts = await _context.MedicalContexts.ToListAsync();
 
             return View(new Assessment
             {
