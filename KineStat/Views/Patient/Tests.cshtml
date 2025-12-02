@@ -350,25 +350,25 @@
 
     <script>
         @{
-                    var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
-                    var responsesData = new List<object>();
+                        var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
+                        var responsesData = new List<object>();
 
-                    if (existingResponsesList != null)
-                    {
-                                foreach (var r in existingResponsesList)
-                                {
-                                            responsesData.Add(new
-                                            {
-                                                        questionId = r.QuestionId,
-                                                        answerId = r.AnswerId,
-                                                        value = r.ResponseValue,
-                                                        observations = r.Observations,
-                                                        isCustom = r.IsCustomTest,
-                                                        customName = r.CustomTestName,
-                                                        customType = r.CustomTestType
-                                            });
-                                }
-                    }
+                        if (existingResponsesList != null)
+                        {
+                                        foreach (var r in existingResponsesList)
+                                        {
+                                                        responsesData.Add(new
+                                                        {
+                                                                        questionId = r.QuestionId,
+                                                                        answerId = r.AnswerId,
+                                                                        value = r.ResponseValue,
+                                                                        observations = r.Observations,
+                                                                        isCustom = r.IsCustomTest,
+                                                                        customName = r.CustomTestName,
+                                                                        customType = r.CustomTestType
+                                                        });
+                                        }
+                        }
         }
 
         var existingResponses = @Html.Raw(Json.Serialize(responsesData));
@@ -499,7 +499,7 @@
         }
 
         .accordion-button::after {
-            filter: brightness(0) invert(1); 
+            filter: brightness(0) invert(1);
         }
 
         .accordion-button:focus {

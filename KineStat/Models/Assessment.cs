@@ -34,5 +34,8 @@ namespace KineStat.Models
         public int DossierId { get; set; }
 
         public Dossier Dossier { get; set; }
+        
+        public double? RedFlagsPercentage { get; set; }
+
     }
 }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    [Migration("20251201100757_AddPatientAttribut")]
-    partial class AddPatientAttribut
+    [Migration("20251202192638_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -109,6 +109,9 @@ namespace KineStat.Migrations
 
                     b.Property<int>("PhysioId")
                         .HasColumnType("integer");
+
+                    b.Property<double?>("RedFlagsPercentage")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
@@ -302,7 +305,13 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActivitesPhysiques")
+                        .HasColumnType("text");
+
                     b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AntecedentsMedicaux")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("BirthDate")
@@ -332,12 +341,18 @@ namespace KineStat.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("MedicationActuelle")
+                        .HasColumnType("text");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PhysioId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Profession")
+                        .HasColumnType("text");
 
                     b.Property<string>("SocialSecurityNumber")
                         .IsRequired()
@@ -658,6 +673,8 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AssessmentId");
+
                     b.HasIndex("PatientId");
 
                     b.ToTable("Socrates");
@@ -975,11 +992,19 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Socrate", b =>
                 {
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Patient");
                 });

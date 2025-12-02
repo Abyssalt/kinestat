@@ -106,7 +106,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    let lastSavedRedflagsPercentage = 0;
     let hasDisplayedCriticalModal = false;
     let criticalRedflagThreshold= 50; //unsure
     async function loadQuestionsByCategory(categoryId) {
@@ -117,7 +116,8 @@
         attachNoteToggleEvents();
         attachAnswerListeners();
         initializeTooltips();
-        updateGauge(lastSavedRedflagsPercentage);
+        updateGauge(RedFlagsStore.get());
+
     }
 
     function initializeTabs() {
@@ -184,7 +184,9 @@
         initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
-        updateGauge(0);    // Change here the value of the gauge : 0..33 Green, 34..66 Yellow and 67..100 Red
+        RedFlagsStore.subscribe(function(newValue) {
+        updateGauge(newValue);
+    });
         
     });
 
@@ -252,16 +254,16 @@
             }
             return response.json();
         })
-    .then(data => {
-        console.log("Saved:", data)
-        let redflagsPercentage = data.redflags;
-        if (redflagsPercentage > 100) redflagsPercentage = 100;
-        if (redflagsPercentage < 0.001) redflagsPercentage = 0;
-        lastSavedRedflagsPercentage = redflagsPercentage;
-        updateGauge(redflagsPercentage);
-        if (redflagsPercentage >= criticalRedflagThreshold) showCriticalRedFlagModal(patientId);
-    })
-    .catch(err => console.error("Erreur sauvegarde:", err));
+        .then(data => {
+        console.log("Saved:", data);
+
+        RedFlagsStore.set(data.redflags);
+
+        if (data.redflags >= criticalRedflagThreshold) {
+            showCriticalRedFlagModal(patientId);
+        }
+    });
+
 
     }
 

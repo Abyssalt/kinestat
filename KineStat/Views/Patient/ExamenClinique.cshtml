@@ -1,8 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Examen clinique";
-    ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
-    var patientId = ViewData["PatientId"];
-    var assessmentId = ViewData["AssessmentId"];
+﻿﻿@{
+ViewData["Title"] = "Examen clinique";
+ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+var patientId = ViewData["PatientId"];
+var assessmentId = ViewData["AssessmentId"];
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
@@ -133,7 +133,7 @@
         const patientId = @patientId;
         let allQuestionsData = {};
         let currentCategory = 'Articulaire / Structurel';
-        let userResponses = {}; 
+        let userResponses = {};
 
 
         const testSuggestions = {
@@ -349,7 +349,7 @@
                 container.innerHTML = `
                     <div class="alert alert-info" role="alert">
                         <i class="bi bi-info-circle me-2"></i>
-                        Aucune question disponible pour cette catégorie.                    
+                        Aucune question disponible pour cette catégorie.
                     </div>
                 `;
                 return;
@@ -396,12 +396,12 @@
 
                     const radioInput = div.querySelector('input[type="radio"]');
 
- 
+
                     if (userResponses[category] && userResponses[category][question.id] === opt) {
                         radioInput.checked = true;
                     }
 
-  
+
                     radioInput.addEventListener('change', function() {
                         updateSuggestions(category, opt, question.id);
 

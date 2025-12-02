@@ -107,6 +107,9 @@ namespace KineStat.Migrations
                     b.Property<int>("PhysioId")
                         .HasColumnType("integer");
 
+                    b.Property<double?>("RedFlagsPercentage")
+                        .HasColumnType("double precision");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DossierId");

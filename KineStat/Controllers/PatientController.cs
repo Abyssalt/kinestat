@@ -462,11 +462,24 @@ namespace KineStat.Controllers
             return View();
         }
 
+
         [Route("Patient/{id}/Resultat")]
-        public IActionResult Resultat(int id)
+        public async Task<IActionResult> Resultat(int id)
         {
-            ViewData["PatientId"] = id.ToString();
-            return View();
+            var assessment = await _context.Assessments
+                .Include(a => a.Patient)
+                .Include(a => a.Dossier)
+                .OrderByDescending(a => a.Date)
+                .FirstOrDefaultAsync(a => a.PatientId == id);
+
+            if (assessment == null)
+                return NotFound("Aucun bilan trouvé pour ce patient");
+
+            ViewData["AssessmentId"] = assessment.Id;
+
+            return View(assessment);
         }
+
+
     }
 }

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using KineStat.Data;
+using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using KineStat.Data;
-using KineStat.Models;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KineStat.Controllers
 {
@@ -39,6 +40,10 @@ namespace KineStat.Controllers
             if (assessment == null)
                 return NotFound();
 
+            var socrate = await _context.Set<Socrate>()
+                .FirstOrDefaultAsync(s => s.AssessmentId == id);
+
+            ViewBag.Socrate = socrate;
             return View(assessment);
         }
 
@@ -96,30 +101,10 @@ namespace KineStat.Controllers
             return View(assessment);
         }
 
-        // GET: Assessments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var assessment = await _context.Assessments
-                .Include(a => a.Patient)
-                .Include(a => a.Physio)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (assessment == null)
-            {
-                return NotFound();
-            }
-
-            return View(assessment);
-        }
-
         // POST: Assessments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
         {
             var assessment = await _context.Assessments.FindAsync(id);
             if (assessment != null)
@@ -128,7 +113,9 @@ namespace KineStat.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                "DossierDetails", "Folder",new { id = dossierId }
+            );
         }
 
         private bool AssessmentExists(int id)
@@ -148,6 +135,9 @@ namespace KineStat.Controllers
             var dossier = await _context.Dossiers.FindAsync(DossierId);
             if (dossier == null)
                 return NotFound("Dossier introuvable");
+
+            if (!await _context.MedicalContexts.AnyAsync(mc => mc.Id == MedicalContextId))
+                return BadRequest("Contexte médical invalide");
 
             var assessment = new Assessment
             {
@@ -178,13 +168,53 @@ namespace KineStat.Controllers
             if (dossier.Patient == null)
                 return NotFound("Patient introuvable");
 
+            ViewBag.MedicalContexts = await _context.MedicalContexts.ToListAsync();
+
             return View(new Assessment
             {
                 DossierId = dossierId,
                 PatientId = dossier.Patient.Id,
                 PhysioId = dossier.Patient.PhysioId,
-                Date = DateTime.Today
+                Date = DateTime.Today,
+                RedFlagsPercentage = 0
             });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveRedFlagsPercentage(int assessmentId, string redFlagsPercentage)
+        {
+            var assessment = await _context.Assessments.FindAsync(assessmentId);
+
+            if (assessment == null)
+                return NotFound();
+
+            if (string.IsNullOrWhiteSpace(redFlagsPercentage))
+                redFlagsPercentage = "0";
+
+            redFlagsPercentage = redFlagsPercentage.Replace(',', '.');
+
+            if (!double.TryParse(
+                    redFlagsPercentage,
+                    NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture,
+                    out double value))
+            {
+                value = 0;
+            }
+
+
+            assessment.RedFlagsPercentage = value;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(
+                "AssessmentDetails",
+                "Assessments",
+                new { id = assessment.Id }
+            );
+        }
+
+
     }
 }
