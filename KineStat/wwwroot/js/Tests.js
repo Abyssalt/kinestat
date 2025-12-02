@@ -330,7 +330,6 @@ function loadExistingResponses(responses) {
         loadedCount++;
     });
 
-    console.log(`✓ ${loadedCount} réponses chargées`);
 
     // Affiche un message si des réponses ont été chargées
     if (loadedCount > 0) {

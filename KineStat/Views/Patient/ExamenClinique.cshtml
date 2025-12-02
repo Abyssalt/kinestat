@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <a asp-controller="Patient" asp-action="RedFlags" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Patient" asp-route-id="@patientId" asp-action="RedFlags" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -348,8 +348,7 @@
                 container.innerHTML = `
                     <div class="alert alert-info" role="alert">
                         <i class="bi bi-info-circle me-2"></i>
-                        Aucune question disponible pour cette catégorie.
-                        <br><small>Catégories disponibles: ${Object.keys(allQuestionsData).join(', ')}</small>
+                        Aucune question disponible pour cette catégorie.                    
                     </div>
                 `;
                 return;

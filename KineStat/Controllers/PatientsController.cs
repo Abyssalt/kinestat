@@ -190,9 +190,13 @@ namespace KineStat.Controllers
             }
 
 
-            var clusters = await _context.Cluster
+            var allClusters = await _context.Cluster
                 .Include(c => c.Questions)
                 .ToListAsync();
+
+            var clustersWithQuestions = allClusters
+                .Where(c => c.Questions != null && c.Questions.Count > 0)
+                .ToList();
 
 
             var today = DateTime.UtcNow.Date;
@@ -215,7 +219,7 @@ namespace KineStat.Controllers
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
             ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
-            ViewData["Clusters"] = clusters;
+            ViewData["Clusters"] = clustersWithQuestions;
             ViewData["ExistingResponses"] = latestResponses;  
             ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
                                       $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
@@ -223,7 +227,7 @@ namespace KineStat.Controllers
                                       $"<li class='breadcrumb-item active' aria-current='page'>Tests</li>";
 
 
-            return View("~/Views/Patient/Tests.cshtml", clusters);
+            return View("~/Views/Patient/Tests.cshtml", clustersWithQuestions);
         }
         [HttpPost]
         public async Task<IActionResult> SaveTestResults([FromBody] SaveTestResultsDTO dto)
