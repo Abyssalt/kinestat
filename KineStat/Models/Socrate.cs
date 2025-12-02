@@ -28,5 +28,7 @@ namespace KineStat.Models
         public string RelievingFactor { get; set; }
 
         public virtual Patient Patient { get; set; }
+
+        public virtual Assessment Assessment { get; set; }
     }
 }
