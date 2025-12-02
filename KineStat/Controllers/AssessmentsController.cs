@@ -96,30 +96,10 @@ namespace KineStat.Controllers
             return View(assessment);
         }
 
-        // GET: Assessments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var assessment = await _context.Assessments
-                .Include(a => a.Patient)
-                .Include(a => a.Physio)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (assessment == null)
-            {
-                return NotFound();
-            }
-
-            return View(assessment);
-        }
-
         // POST: Assessments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
         {
             var assessment = await _context.Assessments.FindAsync(id);
             if (assessment != null)
@@ -128,7 +108,9 @@ namespace KineStat.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(
+                "DossierDetails", "Folder",new { id = dossierId }
+            );
         }
 
         private bool AssessmentExists(int id)

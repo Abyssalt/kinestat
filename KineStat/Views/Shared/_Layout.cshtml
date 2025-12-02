@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/KineStat.styles.css" asp-append-version="true" />
+    <script src="~/js/redflags-store.js"></script>
+
     <script src="~/js/anamnese.js"></script>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -79,15 +81,30 @@
 
     @if (ViewData["PatientId"] != null && ViewData["HideFloatingEye"] == null)
     {
+
         <div class="position-fixed bottom-0 end-0 me-3 me-md-4 mb-5" style="z-index: 1030; margin-bottom: 100px !important;">
             <div class="collapse position-absolute bottom-100 end-0 mb-2" id="floatingInfoPanel">
                 <div class="card shadow-lg border-0" style="width: 90vw; max-width: 600px; height: 70vh; max-height: 500px;">
                     <div class="card-body d-flex flex-column p-3 p-md-4">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-activity text-danger me-2"></i>Probabilité
+                                </h6>
+                                <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#floatingInfoPanel" aria-label="Fermer"></button>
+                            </div>
+                            <div style="height: 35px;">
+                                <canvas id="redFlagsGaugeEye"></canvas>
+                            </div>
+
+                            <div class="text-center mt-2">
+                                <span id="redFlagsGaugeEyeValue" class="fw-bold text-primary">0%</span>
+                            </div>
+                        </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0 fw-bold">
                                 <i class="bi bi-bar-chart-line text-warning me-2"></i>Graphiques
                             </h6>
-                            <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#floatingInfoPanel" aria-label="Fermer"></button>
                         </div>
                         <hr class="my-2">
                         <div class="flex-grow-1 overflow-auto">
@@ -181,6 +198,67 @@
         });
     </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // ======================
+            // JAUGE DANS L'ŒIL
+            // ======================
+
+            const ctx = document.getElementById('redFlagsGaugeEye');
+            if (!ctx || !window.RedFlagsStore) return;
+
+            const getColor = (v) => {
+                if (v <= 33) return '#28a745';
+                if (v <= 66) return '#ffc107';
+                return '#dc3545';
+            };
+
+            const chart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [''],
+                    datasets: [
+                        {
+                            data: [RedFlagsStore.get()],
+                            backgroundColor: getColor(RedFlagsStore.get())
+                        },
+                        {
+                            data: [100 - RedFlagsStore.get()],
+                            backgroundColor: '#e9ecef'
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, display: false, max: 100 },
+                        y: { stacked: true, display: false }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+
+            const valueElem = document.getElementById("redFlagsGaugeEyeValue");
+
+    
+            RedFlagsStore.subscribe(value => {
+                chart.data.datasets[0].data[0] = value;
+                chart.data.datasets[1].data[0] = 100 - value;
+                chart.data.datasets[0].backgroundColor = getColor(value);
+                chart.update();
+
+                if (valueElem) {
+                    valueElem.textContent = value.toFixed(2) + "%";
+                }
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
