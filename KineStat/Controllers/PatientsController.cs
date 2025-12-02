@@ -470,5 +470,89 @@ namespace KineStat.Controllers
             return View("~/Views/Patient/ExamenClinique.cshtml");
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> SaveExamenClinique([FromBody] SaveExamenCliniqueDTO dto)
+        {
+            try
+            {
+                var dateResponse = DateTime.UtcNow;
+                var today = dateResponse.Date;
+
+                // Charger les réponses existantes du jour pour l'examen clinique
+                var existingResponses = await _context.PatientAnswerTests
+                    .Where(pr => pr.PatientId == dto.PatientId
+                              && pr.DateResponse.Date == today
+                              && !pr.IsCustomTest)
+                    .ToListAsync();
+
+                int savedCount = 0;
+                int updatedCount = 0;
+
+                foreach (var responseDto in dto.Responses)
+                {
+                    // Vérifier que la question existe et n'est pas un test physique
+                    var question = await _context.Questions
+                        .FirstOrDefaultAsync(q => q.Id == responseDto.QuestionId && q.ClusterId == null);
+
+                    if (question == null)
+                    {
+                        continue; // Ignorer si la question n'existe pas ou est un test physique
+                    }
+
+                    // Chercher si une réponse existe déjà pour cette question aujourd'hui
+                    var existingResponse = existingResponses
+                        .FirstOrDefault(r => r.QuestionId == responseDto.QuestionId);
+
+                    if (existingResponse != null)
+                    {
+                        // ✅ MISE À JOUR
+                        existingResponse.ResponseValue = responseDto.Response;
+                        existingResponse.Observations = responseDto.Notes;
+                        existingResponse.DateResponse = dateResponse;
+
+                        _context.PatientAnswerTests.Update(existingResponse);
+                        updatedCount++;
+                    }
+                    else
+                    {
+                        // ✅ CRÉATION
+                        var newResponse = new PatientAnswerTests()
+                        {
+                            PatientId = dto.PatientId,
+                            QuestionId = responseDto.QuestionId,
+                            ResponseValue = responseDto.Response,
+                            Observations = responseDto.Notes,
+                            DateResponse = dateResponse,
+                            IsCustomTest = false,
+                            AnswerId = null
+                        };
+
+                        _context.PatientAnswerTests.Add(newResponse);
+                        savedCount++;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Réponses enregistrées avec succès",
+                    savedCount = savedCount,
+                    updatedCount = updatedCount,
+                    totalCount = savedCount + updatedCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Erreur lors de l'enregistrement: {ex.Message}"
+                });
+            }
+        }
+
     }
 }
