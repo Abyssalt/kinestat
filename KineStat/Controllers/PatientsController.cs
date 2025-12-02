@@ -542,5 +542,40 @@ namespace KineStat.Controllers
             }
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetExistingResponses(int id)
+        {
+            try
+            {
+                var today = DateTime.UtcNow.Date;
+
+                var existingResponses = await _context.PatientAnswerTests
+                    .Include(pr => pr.Question)
+                    .ThenInclude(q => q.Category)
+                    .Where(pr => pr.PatientId == id
+                                 && pr.DateResponse.Date == today
+                                 && !pr.IsCustomTest
+                                 && pr.Question.ClusterId == null) 
+                    .OrderByDescending(pr => pr.DateResponse)
+                    .ToListAsync();
+
+
+                var formattedResponses = existingResponses.Select(pr => new
+                {
+                    questionId = pr.QuestionId,
+                    responseValue = pr.ResponseValue,
+                    observations = pr.Observations,
+                    categoryName = pr.Question?.Category?.Name ?? "Autre"
+                }).ToList();
+
+                return Json(formattedResponses);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>());
+            }
+        }
+
     }
 }
