@@ -28,6 +28,9 @@ namespace KineStat.Models
         public virtual Category? Category { get; set; }
 
         public virtual List<Pathology> ? Pathologies { get; set; } = new List<Pathology>();
+
+        public virtual ICollection<PatientAnswerTests>? PatientResponses { get; set; }
+
     }
 }
 
