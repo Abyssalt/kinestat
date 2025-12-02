@@ -89,7 +89,7 @@
                                                     <button type="button" class="btn btn-outline-warning"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#editPhysioModal"
-                                                            onclick="loadPhysioData(@physio.Id, '@physio.FirstName', '@physio.LastName', '@physio.Email', '@physio.PhoneNumber', '@physio.Password', @physio.INAMINumber)">
+                                                            onclick="loadPhysioData(@physio.Id, '@physio.FirstName', '@physio.LastName', '@physio.Email', '@physio.PhoneNumber', @physio.INAMINumber)">
                                                         <i class="bi bi-pencil-fill"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-outline-danger"
@@ -198,9 +198,9 @@
                             <label for="editPhoneNumber" class="form-label fw-medium">Téléphone</label>
                             <input type="tel" class="form-control" id="editPhoneNumber" name="PhoneNumber" required>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label for="editPassword" class="form-label fw-medium">Mot de passe</label>
-                            <input type="password" class="form-control" id="editPassword" name="Password" required>
+                        <div class="col-12">
+                            <label for="editPassword" class="form-label fw-medium">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="editPassword" name="Password" placeholder="Laisser vide pour ne pas modifier">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="editINAMI" class="form-label fw-medium">Numéro INAMI</label>
@@ -256,7 +256,7 @@
             document.getElementById('editLastName').value = lastName;
             document.getElementById('editEmail').value = email;
             document.getElementById('editPhoneNumber').value = phone;
-            document.getElementById('editPassword').value = password;
+            document.getElementById('editPassword').value = '';
             document.getElementById('editINAMI').value = inami;
         }
 
