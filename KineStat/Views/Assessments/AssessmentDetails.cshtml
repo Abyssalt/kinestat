@@ -305,11 +305,14 @@
     </div>
 </div>
 <script>
-        document.addEventListener("DOMContentLoaded", () => {
-
-        if (!window.RedFlagsStore) return;
+    document.addEventListener("DOMContentLoaded", () => {
 
         const ctx = document.getElementById("redFlagsGaugeDetails");
+        const valueElem = document.getElementById("redFlagsGaugeDetailsValue");
+
+        const redFlagsPercentage = @((Model.RedFlagsPercentage ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+
         if (!ctx) return;
 
         const getColor = v =>
@@ -317,13 +320,21 @@
             v <= 66 ? "#ffc107" :
                       "#dc3545";
 
-        let chart = new Chart(ctx.getContext("2d"), {
+        const value = redFlagsPercentage;
+
+        const chart = new Chart(ctx.getContext("2d"), {
             type: "bar",
             data: {
                 labels: [""],
                 datasets: [
-                    { data: [0], backgroundColor: "#e9ecef" },
-                    { data: [100], backgroundColor: "#e9ecef" }
+                    {
+                        data: [value],
+                        backgroundColor: getColor(value)
+                    },
+                    {
+                        data: [100 - value],
+                        backgroundColor: "#e9ecef"
+                    }
                 ]
             },
             options: {
@@ -341,20 +352,10 @@
             }
         });
 
-        const valueElem = document.getElementById("redFlagsGaugeDetailsValue");
-
-        RedFlagsStore.subscribe(value => {
-            chart.data.datasets[0].data[0] = value;
-            chart.data.datasets[1].data[0] = 100 - value;
-            chart.data.datasets[0].backgroundColor = getColor(value);
-            chart.update();
-
-            if (valueElem) {
-                valueElem.textContent = value.toFixed(2) + "%";
-            }
-        });
+        if (valueElem) {
+            valueElem.textContent = value.toFixed(2) + " %";
+        }
     });
-
 </script>
 
 <script>

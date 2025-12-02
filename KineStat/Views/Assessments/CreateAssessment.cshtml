@@ -180,3 +180,11 @@
         cursor: pointer;
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (window.RedFlagsStore) {
+            RedFlagsStore.set(0);
+        }
+    });
+</script>

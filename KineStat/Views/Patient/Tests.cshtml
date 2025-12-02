@@ -1,4 +1,4 @@
-﻿@using KineStat.Models
+﻿﻿@using KineStat.Models
 @{
     ViewData["Title"] = "Test Neurologique";
 
@@ -76,9 +76,6 @@
     <div class="card border-0 shadow mb-4">
         <div class="card-body p-3 p-md-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <a asp-controller="Patient" asp-action="ExamenClinique" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
-                    <i class="bi bi-arrow-left me-2"></i>Retour
-                </a>
                 <div>
                     <h1 class="h2 fw-bold text-primary mb-2">
                         <i class="bi bi-clipboard2-pulse me-2"></i>@cluster.Name
@@ -87,8 +84,8 @@
                         <i class="bi bi-person-badge me-1"></i>Patient : <strong>@patientNom</strong>
                     </p>
                 </div>
-                <a asp-controller="Patient" asp-action="Resultat" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
-                    <i class="bi bi-arrow me-2"></i>Terminé 
+                <a asp-controller="Patient" asp-action="ExamenClinique" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
+                    <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>
@@ -662,35 +659,35 @@
 
             @foreach (var q in cluster.Questions)
             {
-                    <text>
-                    const input@(q.Id) = document.querySelector('input[name="test-@q.Id-value"]:checked, input[name="test-@q.Id-value"]:not([type="radio"]), select[name="test-@q.Id-value"]');
-                    if (input@(q.Id) && input@(q.Id).value) {
-                        const value = input@(q.Id).value;
-                        let isPositive = false;
+                        <text>
+                        const input@(q.Id) = document.querySelector('input[name="test-@q.Id-value"]:checked, input[name="test-@q.Id-value"]:not([type="radio"]), select[name="test-@q.Id-value"]');
+                        if (input@(q.Id) && input@(q.Id).value) {
+                            const value = input@(q.Id).value;
+                            let isPositive = false;
 
-                        @if (q is QuestionBool)
-                        {
-                                <text>isPositive = value === 'true';</text>
-                        }
-                        else if (q is QuestionLadder)
-                        {
-                                <text>isPositive = parseInt(value) >= 3;</text>
-                        }
-                        else if (q is QuestionQCM)
-                        {
-                                <text>isPositive = value !== 'Démarche normale' && value !== '';</text>
-                        }
+                            @if (q is QuestionBool)
+                            {
+                                        <text>isPositive = value === 'true';</text>
+                            }
+                            else if (q is QuestionLadder)
+                            {
+                                        <text>isPositive = parseInt(value) >= 3;</text>
+                            }
+                            else if (q is QuestionQCM)
+                            {
+                                        <text>isPositive = value !== 'Démarche normale' && value !== '';</text>
+                            }
 
-                        if (isPositive) {
-                            scoreTotal += @q.RVPositive;
-                            testsEffectues.push({
-                                title: '@q.Title',
-                                score: @q.RVPositive,
-                                value: value
-                            });
+                            if (isPositive) {
+                                scoreTotal += @q.RVPositive;
+                                testsEffectues.push({
+                                    title: '@q.Title',
+                                    score: @q.RVPositive,
+                                    value: value
+                                });
+                            }
                         }
-                    }
-                    </text>
+                        </text>
             }
 
             const redFlags = [
@@ -790,16 +787,16 @@
 
             @foreach (var q in cluster.Questions)
             {
-                    <text>
-                    const value@(q.Id) = formData.get('test-@q.Id-value');
-                    if (value@(q.Id)) {
-                        data.tests.push({
-                            id: @q.Id,
-                            value: value@(q.Id),
-                            observations: formData.get('test-@q.Id-observations')
-                        });
-                    }
-                    </text>
+                        <text>
+                        const value@(q.Id) = formData.get('test-@q.Id-value');
+                        if (value@(q.Id)) {
+                            data.tests.push({
+                                id: @q.Id,
+                                value: value@(q.Id),
+                                observations: formData.get('test-@q.Id-observations')
+                            });
+                        }
+                        </text>
             }
 
             document.querySelectorAll('[data-custom="true"]').forEach(card => {

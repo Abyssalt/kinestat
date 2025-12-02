@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using KineStat.Data;
+using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using KineStat.Data;
-using KineStat.Models;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KineStat.Controllers
 {
@@ -174,8 +175,46 @@ namespace KineStat.Controllers
                 DossierId = dossierId,
                 PatientId = dossier.Patient.Id,
                 PhysioId = dossier.Patient.PhysioId,
-                Date = DateTime.Today
+                Date = DateTime.Today,
+                RedFlagsPercentage = 0
             });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveRedFlagsPercentage(int assessmentId, string redFlagsPercentage)
+        {
+            var assessment = await _context.Assessments.FindAsync(assessmentId);
+
+            if (assessment == null)
+                return NotFound();
+
+            if (string.IsNullOrWhiteSpace(redFlagsPercentage))
+                redFlagsPercentage = "0";
+
+            redFlagsPercentage = redFlagsPercentage.Replace(',', '.');
+
+            if (!double.TryParse(
+                    redFlagsPercentage,
+                    NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture,
+                    out double value))
+            {
+                value = 0;
+            }
+
+
+            assessment.RedFlagsPercentage = value;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(
+                "AssessmentDetails",
+                "Assessments",
+                new { id = assessment.Id }
+            );
+        }
+
+
     }
 }
