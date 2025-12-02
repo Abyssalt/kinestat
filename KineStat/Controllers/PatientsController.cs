@@ -372,8 +372,6 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
-            // Récupérer toutes les questions qui ne sont PAS des tests physiques
-            // c'est-à-dire les questions avec ClusterId = NULL
             var allQuestions = await _context.Questions
                 .Include(q => q.Category)
                 .Where(q => q.ClusterId == null) 
@@ -381,7 +379,6 @@ namespace KineStat.Controllers
                 .ThenBy(q => q.Title)
                 .ToListAsync();
 
-            // Grouper par catégorie
             var groupedQuestions = new Dictionary<string, List<object>>();
 
             foreach (var question in allQuestions)
@@ -393,7 +390,6 @@ namespace KineStat.Controllers
                     groupedQuestions[categoryName] = new List<object>();
                 }
 
-                // Créer l'objet question selon son type
                 object questionData;
 
                 if (question is QuestionBool qBool)
@@ -408,7 +404,7 @@ namespace KineStat.Controllers
                 }
                 else if (question is QuestionQCM qQcm)
                 {
-                    // Charger les réponses pour le QCM
+
                     var qcmWithAnswers = await _context.QuestionQCMs
                         .Include(q => q.Answers)
                         .FirstOrDefaultAsync(q => q.Id == question.Id);
@@ -428,7 +424,7 @@ namespace KineStat.Controllers
                         id = question.Id,
                         question = question.Title,
                         type = "ladder",
-                        options = Enumerable.Range(0, 11).Select(i => i.ToString()).ToArray() // 0-10
+                        options = Enumerable.Range(0, 11).Select(i => i.ToString()).ToArray() 
                     };
                 }
                 else
@@ -448,9 +444,6 @@ namespace KineStat.Controllers
             return Json(groupedQuestions);
         }
 
-        // ========================================
-        // ACTION ExamenClinique (GET) - Si elle n'existe pas déjà
-        // ========================================
 
         [HttpGet]
         public async Task<IActionResult> ExamenClinique(int id)
@@ -479,7 +472,6 @@ namespace KineStat.Controllers
                 var dateResponse = DateTime.UtcNow;
                 var today = dateResponse.Date;
 
-                // Charger les réponses existantes du jour pour l'examen clinique
                 var existingResponses = await _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
                               && pr.DateResponse.Date == today
@@ -491,22 +483,19 @@ namespace KineStat.Controllers
 
                 foreach (var responseDto in dto.Responses)
                 {
-                    // Vérifier que la question existe et n'est pas un test physique
                     var question = await _context.Questions
                         .FirstOrDefaultAsync(q => q.Id == responseDto.QuestionId && q.ClusterId == null);
 
                     if (question == null)
                     {
-                        continue; // Ignorer si la question n'existe pas ou est un test physique
+                        continue; 
                     }
 
-                    // Chercher si une réponse existe déjà pour cette question aujourd'hui
                     var existingResponse = existingResponses
                         .FirstOrDefault(r => r.QuestionId == responseDto.QuestionId);
 
                     if (existingResponse != null)
                     {
-                        // ✅ MISE À JOUR
                         existingResponse.ResponseValue = responseDto.Response;
                         existingResponse.Observations = responseDto.Notes;
                         existingResponse.DateResponse = dateResponse;
@@ -516,7 +505,6 @@ namespace KineStat.Controllers
                     }
                     else
                     {
-                        // ✅ CRÉATION
                         var newResponse = new PatientAnswerTests()
                         {
                             PatientId = dto.PatientId,

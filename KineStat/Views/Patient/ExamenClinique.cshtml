@@ -25,13 +25,13 @@
         </div>
     </div>
 
-    <!-- Tabs des catégories -->
+
     <div class="row mb-4">
         <div class="col-12">
-            <!-- Première ligne : Toutes + 7 catégories -->
+
             <div class="row g-2 mb-2">
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Articulaire / Structurel" style="min-height: 80px;">
+                    <button class="btn btn-primary w-100 h-100 py-3 fw-medium" data-category="Articulaire / Structurel" style="min-height: 80px;">
                         <div style="font-size: 0.9rem;">ARTICULAIRE<br />/<br />STRUCTUREL</div>
                     </button>
                 </div>
@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <!-- Deuxième ligne : 2 catégories -->
+
             <div class="row g-2">
                 <div class="col-6">
                     <button class="btn btn-outline-secondary w-100 py-3 fw-medium" data-category="Socio-environnemental" style="min-height: 80px;">
@@ -83,11 +83,11 @@
         </div>
     </div>
 
-    <!-- Conteneur des questions -->
+
     <div class="row">
         <div class="col-12">
             <div id="questionnaireContainer">
-                <!-- Les questions seront chargées ici dynamiquement -->
+
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Chargement...</span>
@@ -98,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Bouton Enregistrer -->
+
     <div class="row mt-4">
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
@@ -118,15 +118,14 @@
     <script>
         const patientId = @patientId;
         let allQuestionsData = {};
-        let currentCategory = 'Toutes';
+        let currentCategory = 'Articulaire / Structurel';
 
-        // Initialiser les onglets
+
         function initializeTabs() {
             document.querySelectorAll('button[data-category]').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
 
-                    // Changer le style des boutons
                     document.querySelectorAll('button[data-category]').forEach(el => {
                         if (el.dataset.category === 'Toutes') {
                             el.classList.remove('btn-dark');
@@ -137,7 +136,7 @@
                         }
                     });
 
-                    // Activer le bouton cliqué
+
                     if (this.dataset.category === 'Toutes') {
                         this.classList.remove('btn-outline-secondary');
                         this.classList.add('btn-dark');
@@ -146,7 +145,6 @@
                         this.classList.add('btn-primary');
                     }
 
-                    // Charger la catégorie sélectionnée
                     const category = this.dataset.category;
                     currentCategory = category;
                     displayQuestions(category);
@@ -154,7 +152,6 @@
             });
         }
 
-        // Charger les questions depuis le serveur
         async function loadQuestionnaire() {
             try {
                 const response = await fetch(`/Patients/GetQuestionsClinique/@patientId`);
@@ -179,7 +176,6 @@
             }
         }
 
-        // Afficher les questions selon la catégorie
         function displayQuestions(category) {
             const container = document.getElementById('questionnaireContainer');
             container.innerHTML = '';
@@ -187,12 +183,11 @@
             let questionsToDisplay = [];
 
             if (category === 'Toutes') {
-                // Afficher toutes les catégories
                 for (const subCategory in allQuestionsData) {
                     questionsToDisplay.push({ category: subCategory, questions: allQuestionsData[subCategory] });
                 }
             } else {
-                // Afficher seulement la catégorie sélectionnée
+
                 if (allQuestionsData[category]) {
                     questionsToDisplay.push({ category: category, questions: allQuestionsData[category] });
                 } else {
@@ -200,7 +195,6 @@
                 }
             }
 
-            // Si aucune question trouvée
             if (questionsToDisplay.length === 0) {
                 container.innerHTML = `
                     <div class="alert alert-info" role="alert">
@@ -212,9 +206,7 @@
                 return;
             }
 
-            // Afficher les questions
             questionsToDisplay.forEach(({ category: subCategory, questions }) => {
-                // Titre de la catégorie
                 const categoryTitle = document.createElement('div');
                 categoryTitle.className = 'mb-4';
                 categoryTitle.innerHTML = `
@@ -224,15 +216,12 @@
                 `;
                 container.appendChild(categoryTitle);
 
-                // Afficher chaque question
                 questions.forEach((q, index) => {
                     const questionCard = createQuestionCard(q, `${subCategory.replace(/\s+/g, '_')}_${index}`);
                     container.appendChild(questionCard);
                 });
             });
         }
-
-        // Créer une carte de question
         function createQuestionCard(question, uniqueId) {
             const card = document.createElement('div');
             card.className = 'card border-0 shadow-sm mb-3';
@@ -241,13 +230,11 @@
             const cardBody = document.createElement('div');
             cardBody.className = 'card-body p-3 p-md-4';
 
-            // Titre de la question
             const questionText = document.createElement('p');
             questionText.className = 'fw-medium mb-3';
             questionText.textContent = question.question;
             cardBody.appendChild(questionText);
 
-            // Options de réponse
             if (question.options && question.options.length > 0) {
                 const optionsDiv = document.createElement('div');
                 optionsDiv.className = 'd-flex flex-wrap gap-3 mb-3';
@@ -268,14 +255,12 @@
                 cardBody.appendChild(optionsDiv);
             }
 
-            // Bouton pour ajouter une note
             const toggleBtn = document.createElement('button');
             toggleBtn.type = 'button';
             toggleBtn.className = 'btn btn-sm btn-outline-secondary fw-medium';
             toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
             cardBody.appendChild(toggleBtn);
 
-            // Conteneur des notes (caché par défaut)
             const notesContainer = document.createElement('div');
             notesContainer.style.display = 'none';
             notesContainer.className = 'mt-3';
@@ -294,7 +279,6 @@
 
             cardBody.appendChild(notesContainer);
 
-            // Toggle des notes
             toggleBtn.addEventListener('click', () => {
                 if (notesContainer.style.display === 'none') {
                     notesContainer.style.display = 'block';
@@ -309,7 +293,6 @@
             return card;
         }
 
-        // Sauvegarder les réponses
         async function saveResponses() {
             const responses = [];
 
@@ -348,7 +331,6 @@
 
                 if (result.success) {
                     alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
-                    // Rediriger vers la page suivante
                     window.location.href = `/Patients/Tests/${patientId}`;
                 } else {
                     alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
@@ -358,8 +340,6 @@
                 alert('❌ Erreur de connexion au serveur');
             }
         }
-
-        // Initialisation au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
             initializeTabs();
             loadQuestionnaire();

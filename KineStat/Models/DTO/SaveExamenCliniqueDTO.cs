@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KineStat.Models.DTO
 {
-    // ========================================
-    // ACTION SaveExamenClinique - À AJOUTER DANS PatientsController.cs
-    // ========================================
 
     public class SaveExamenCliniqueDTO
     {
