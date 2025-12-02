@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
-    public class Answer //Answer of a QuestionQCM
+    public class Answer
     {
         [Key]
         public int Id { get; set; }

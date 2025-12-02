@@ -9,6 +9,6 @@ namespace KineStat.Models
     /// </summary>
     public class QuestionQCM : Question
     {
-        public virtual List<Answer> Choices { get; set; }
+        public virtual List<Answer> Answers { get; set; } = new List<Answer>();
     }
 }

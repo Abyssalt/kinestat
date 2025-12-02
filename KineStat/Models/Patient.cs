@@ -71,5 +71,7 @@ namespace KineStat.Models
         public ICollection<Dossier>? Dossiers { get; set; } = new List<Dossier>();
 
         public ICollection<Assessment>? Assessments { get; set; } = new List<Assessment>();
+
+        public virtual ICollection<PatientAnswerTests>? Responses { get; set; }
     }
 }
