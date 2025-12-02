@@ -125,15 +125,6 @@
             </button>
         </div>
     }
-    
-    @if (ViewData["AssessmentId"] != null)
-    {
-        <li><a asp-action="Socrate" asp-route-id="@ViewData["AssessmentId"]">SOCRATE</a></li>
-        <li><a asp-action="RedFlags" asp-route-id="@ViewData["AssessmentId"]">Red Flags</a></li>
-        <li><a asp-action="ExamenClinique" asp-route-id="@ViewData["AssessmentId"]">Examen</a></li>
-        <li><a asp-action="Tests" asp-route-id="@ViewData["AssessmentId"]">Tests</a></li>
-        <li><a asp-action="Resultat" asp-route-id="@ViewData["AssessmentId"]">Résultat</a></li>
-    }
 
     <footer class="border-top bg-light mt-auto">
         <div class="container">

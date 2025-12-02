@@ -119,10 +119,11 @@ namespace KineStat.Controllers
             return RedirectToAction("Anamnese", new { id = id });
         }
 
-        [Route("Patient/{id}/Socrate")]
-        public async Task<IActionResult> Socrate(int id)
+        [Route("Patient/{id}/Socrate/{assessmentId}")]
+        public async Task<IActionResult> Socrate(int id, int assessmentId)
         {
             var patient = await _context.Patients.FindAsync(id);
+            var assessment = await _context.Assessments.FindAsync(assessmentId);
 
             if (patient == null)
             {
@@ -130,17 +131,26 @@ namespace KineStat.Controllers
                 return RedirectToAction("Index", "Patients");
             }
 
+            if (assessment == null)
+            {
+                TempData["Error"] = "Bilan introuvable.";
+                return RedirectToAction("Anamnese", new { id });
+            }
+
             var socrate = await _context.Socrates
-                .FirstOrDefaultAsync(s => s.PatientId == id);
+                .FirstOrDefaultAsync(s => s.AssessmentId == assessmentId);
 
             if (socrate == null)
             {
                 socrate = new Socrate
                 {
-                    PatientId = id
+                    PatientId = id,
+                    AssessmentId = assessmentId,
                 };
             }
 
+            ViewData["FolderId"] = assessment.DossierId;
+            ViewData["AssessmentId"] = assessmentId;
             ViewBag.FirstName = patient.FirstName;
             ViewBag.LastName = patient.LastName;
 
@@ -154,15 +164,17 @@ namespace KineStat.Controllers
         {
             try
             {
-                var patient = _context.Patients.Find(socrate.PatientId);
-                if (patient == null)
+                var assessment = await _context.Assessments
+                    .FirstOrDefaultAsync(a => a.Id == socrate.AssessmentId);
+
+                if (assessment == null)
                 {
-                    TempData["Error"] = "Patient introuvable.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
+                    TempData["Error"] = "Assessment introuvable.";
+                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = assessment.Id });
                 }
 
-                var existingSocrate = _context.Socrates
-                    .FirstOrDefault(s => s.PatientId == socrate.PatientId);
+                var existingSocrate = await _context.Socrates
+                    .FirstOrDefaultAsync(s => s.AssessmentId == socrate.AssessmentId);
 
                 if (existingSocrate != null)
                 {
@@ -174,6 +186,7 @@ namespace KineStat.Controllers
                     existingSocrate.Timing = socrate.Timing;
                     existingSocrate.ExacerbatingFactor = socrate.ExacerbatingFactor;
                     existingSocrate.RelievingFactor = socrate.RelievingFactor;
+
                     _context.Update(existingSocrate);
                 }
                 else
@@ -182,29 +195,30 @@ namespace KineStat.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+
                 TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
 
-                return RedirectToAction(nameof(RedFlags), new { id = socrate.PatientId });
+                return RedirectToAction(nameof(RedFlags), new { id = socrate.PatientId, assessmentId = assessment.Id });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
                 return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId });
             }
-
-            return RedirectToAction("RedFlags", "Patient", new { id = socrate.PatientId }); ;
         }
 
-        [Route("Patient/{id}/RedFlags")]
-        public IActionResult RedFlags(int id)
+
+        [Route("Patient/{id}/RedFlags/{assessmentId}")]
+        public IActionResult RedFlags(int id, int assessmentId)
         {
             ViewData["PatientId"] = id.ToString();
+            ViewData["AssessmentId"] = assessmentId.ToString();
             return View();
         }
 
 
         [HttpGet]
-        [Route("Patient/{patientId}/RedFlags/{categoryId}")]
+        [Route("Patient/{patientId}/RedFlagsQuestions/{categoryId}")]
         public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
         {
             
