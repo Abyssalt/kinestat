@@ -114,7 +114,7 @@
                 </span>
 
                 <small class="text-muted mt-2">
-                    Probabilité de pathologie grave
+                    Probabilité 
                 </small>
             </div>
         </div>
@@ -175,6 +175,89 @@
     </div>
 </div>
 
+@{
+    var socrate = ViewBag.Socrate as KineStat.Models.Socrate;
+}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="accordion shadow-sm" id="socrateAccordion">
+
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingSocrate">
+                    <button class="accordion-button collapsed fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseSocrate">
+                        <i class="bi bi-clipboard-heart text-danger me-2"></i>
+                        SOCRATE – Anamnèse douleur
+                    </button>
+                </h2>
+
+                <div id="collapseSocrate"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#socrateAccordion">
+
+                    <div class="accordion-body">
+
+                        @if (socrate == null)
+                        {
+                            <p class="text-muted mb-0">
+                                Aucun SOCRATE enregistré pour ce bilan.
+                            </p>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <strong>Site :</strong>
+                                    <div class="text-muted">@socrate.Site</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Onset :</strong>
+                                    <div class="text-muted">@socrate.Onset</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Caractère :</strong>
+                                    <div class="text-muted">@socrate.Character</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Irradiation :</strong>
+                                    <div class="text-muted">@socrate.Radiation</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Association :</strong>
+                                    <div class="text-muted">@socrate.Association</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Temporalité :</strong>
+                                    <div class="text-muted">@socrate.Timing</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Facteurs aggravants :</strong>
+                                    <div class="text-muted">@socrate.ExacerbatingFactor</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <strong>Facteurs soulageants :</strong>
+                                    <div class="text-muted">@socrate.RelievingFactor</div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 
 
@@ -222,7 +305,7 @@
     </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
 
         if (!window.RedFlagsStore) return;
 
@@ -234,15 +317,13 @@
             v <= 66 ? "#ffc107" :
                       "#dc3545";
 
-        const value = RedFlagsStore.get();
-
-        const gauge = new Chart(ctx.getContext("2d"), {
+        let chart = new Chart(ctx.getContext("2d"), {
             type: "bar",
             data: {
                 labels: [""],
                 datasets: [
-                    { data: [value], backgroundColor: getColor(value) },
-                    { data: [100 - value], backgroundColor: "#e9ecef" }
+                    { data: [0], backgroundColor: "#e9ecef" },
+                    { data: [100], backgroundColor: "#e9ecef" }
                 ]
             },
             options: {
@@ -260,9 +341,20 @@
             }
         });
 
-        document.getElementById("redFlagsGaugeDetailsValue").textContent =
-            value.toFixed(2) + " %";
+        const valueElem = document.getElementById("redFlagsGaugeDetailsValue");
+
+        RedFlagsStore.subscribe(value => {
+            chart.data.datasets[0].data[0] = value;
+            chart.data.datasets[1].data[0] = 100 - value;
+            chart.data.datasets[0].backgroundColor = getColor(value);
+            chart.update();
+
+            if (valueElem) {
+                valueElem.textContent = value.toFixed(2) + "%";
+            }
+        });
     });
+
 </script>
 
 <script>

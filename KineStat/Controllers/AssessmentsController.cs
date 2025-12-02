@@ -39,6 +39,10 @@ namespace KineStat.Controllers
             if (assessment == null)
                 return NotFound();
 
+            var socrate = await _context.Set<Socrate>()
+                .FirstOrDefaultAsync(s => s.AssessmentId == id);
+
+            ViewBag.Socrate = socrate;
             return View(assessment);
         }
 

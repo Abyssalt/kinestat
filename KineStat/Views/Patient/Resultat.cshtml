@@ -51,11 +51,11 @@
                 <div class="card-body d-flex flex-column justify-content-center text-center px-4">
 
                     <div class="mb-3" style="height:45px;">
-                        <canvas id="redFlagsGaugeResult"></canvas>
+                        <canvas id="redFlagsGaugeEye"></canvas>
                     </div>
 
                     <div>
-                        <span id="redFlagsGaugeResultValue"
+                        <span id="redFlagsGaugeEyeValue"
                               class="fs-3 fw-bold text-primary">
                             0 %
                         </span>
@@ -255,60 +255,53 @@
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
 
-    if (!window.RedFlagsStore) return;
+        if (!window.RedFlagsStore) return;
 
-    const ctx = document.getElementById("redFlagsGaugeResult");
-    if (!ctx) return;
+        const ctx = document.getElementById("redFlagsGaugeEye");
+        if (!ctx) return;
 
-    const getColor = (v) => {
-        if (v <= 33) return "#28a745";
-        if (v <= 66) return "#ffc107";
-        return "#dc3545";
-    };
+        const getColor = v =>
+            v <= 33 ? "#28a745" :
+            v <= 66 ? "#ffc107" :
+                      "#dc3545";
 
-    const initialValue = RedFlagsStore.get();
-
-    const gauge = new Chart(ctx.getContext("2d"), {
-        type: "bar",
-        data: {
-            labels: [""],
-            datasets: [
-                {
-                    data: [initialValue],
-                    backgroundColor: getColor(initialValue)
-                },
-                {
-                    data: [100 - initialValue],
-                    backgroundColor: "#e9ecef"
-                }
-            ]
-        },
-        options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { stacked: true, max: 100, display: false },
-                y: { stacked: true, display: false }
+        const chart = new Chart(ctx.getContext("2d"), {
+            type: "bar",
+            data: {
+                labels: [""],
+                datasets: [
+                    { data: [0], backgroundColor: "#e9ecef" },
+                    { data: [100], backgroundColor: "#e9ecef" }
+                ]
             },
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false }
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, max: 100, display: false },
+                    y: { stacked: true, display: false }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
             }
-        }
-    });
+        });
 
-    const valueElem = document.getElementById("redFlagsGaugeResultValue");
-    valueElem.textContent = initialValue.toFixed(2) + "%";
-    RedFlagsStore.subscribe(value => {
-        gauge.data.datasets[0].data[0] = value;
-        gauge.data.datasets[1].data[0] = 100 - value;
-        gauge.data.datasets[0].backgroundColor = getColor(value);
-        gauge.update();
+        const valueElem = document.getElementById("redFlagsGaugeEyeValue");
 
-        valueElem.textContent = value.toFixed(2) + "%";
+        RedFlagsStore.subscribe(value => {
+            chart.data.datasets[0].data[0] = value;
+            chart.data.datasets[1].data[0] = 100 - value;
+            chart.data.datasets[0].backgroundColor = getColor(value);
+            chart.update();
+
+            if (valueElem) {
+                valueElem.textContent = value.toFixed(2) + "%";
+            }
+        });
     });
-});
 </script>

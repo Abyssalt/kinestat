@@ -136,7 +136,8 @@
         attachNoteToggleEvents();
         attachAnswerListeners();
         initializeTooltips();
-        updateGauge(lastSavedRedflagsPercentage);
+        updateGauge(RedFlagsStore.get());
+
     }
 
     function initializeTabs() {

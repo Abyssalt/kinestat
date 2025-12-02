@@ -41,7 +41,7 @@ namespace KineStat.Controllers
             }
 
             TempData["Success"] = "Dossier créé avec succès";
-            return RedirectToAction("Anamnese", "Patient", new { id = dossier.PatientId });
+            return RedirectToAction("DossierDetails", "Folder", new { id = dossier.Id });
         }
 
         [Route("Dossier/{id}/Details")]
