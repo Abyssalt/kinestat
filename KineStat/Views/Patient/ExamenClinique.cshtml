@@ -18,204 +18,351 @@
                     </h1>
                 </div>
                 <a asp-controller="Patients" asp-action="Tests" asp-route-id="@patientId" class="btn btn-outline-secondary fw-medium">
-                    <i class="bi bi-arrow-right me-2"></i>Suivant
+                    Suivant<i class="bi bi-arrow-right ms-2"></i>
                 </a>
             </div>
             <hr class="border-primary border-2 opacity-25 mt-3">
         </div>
     </div>
 
+    <!-- Tabs des catégories -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="row g-2" id="dimensionsTabs">
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-primary w-100 h-100 py-3" data-category="Toutes">Toutes</button>
+            <!-- Première ligne : Toutes + 7 catégories -->
+            <div class="row g-2 mb-2">
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Articulaire / Structurel" style="min-height: 80px;">
+                        <div style="font-size: 0.9rem;">ARTICULAIRE<br />/<br />STRUCTUREL</div>
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Articulaire/structurel">Articulaire / structurel</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Myofascial" style="min-height: 80px;">
+                        MYOFASCIAL
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Myofascial">Myofascial</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Nociceptive" style="min-height: 80px;">
+                        NOCICEPTIF
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Nociceptif">Nociceptif</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Neuropathique" style="min-height: 80px;">
+                        NEUROPATHIQUE
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Neuropathique">Neuropathique</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Nociplastique" style="min-height: 80px;">
+                        NOCIPLASTIQUE
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Nociplastique">Nociplastique</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Controle Sensorimoteur" style="min-height: 80px;">
+                        <div style="font-size: 0.9rem;">CONTRÔLE<br />SENSORIMOTEUR</div>
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Contrôle sensorimoteur">Contrôle sensorimoteur</button>
+                <div class="col-6 col-md-3 col-xl">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Croyances & Cognition" style="min-height: 80px;">
+                        <div style="font-size: 0.9rem;">CROYANCES<br />ET<br />COGNITION</div>
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Croyances et cognition">Croyances et cognition</button>
+            </div>
+
+            <!-- Deuxième ligne : 2 catégories -->
+            <div class="row g-2">
+                <div class="col-6">
+                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium" data-category="Socio-environnemental" style="min-height: 80px;">
+                        SOCIO-ENVIRONNEMENTAL
+                    </button>
                 </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Socio-environnemental">Socio-environnemental</button>
-                </div>
-                <div class="col-6 col-md-4 col-lg">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="Émotionnel/affectif">Émotionnel / affectif</button>
+                <div class="col-6">
+                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium" data-category="Emotionnel / Affectif" style="min-height: 80px;">
+                        ÉMOTIONNEL / AFFECTIF
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Conteneur des questions -->
     <div class="row">
-        <div id="questionnaireContainer" class="col-12 col-lg-8 mb-4 mb-lg-0"></div>
-        <div id="testsContainer" class="col-12 col-lg-4">
-            <div class="card border-0 shadow">
-                <div class="card-header bg-info text-white py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-list-check me-2"></i>Tests suggérés
-                    </h5>
+        <div class="col-12">
+            <div id="questionnaireContainer">
+                <!-- Les questions seront chargées ici dynamiquement -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p class="text-muted mt-3">Chargement des questions...</p>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de mobilité articulaire (amplitude active et passive)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de force musculaire (échelle MRC)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de sensibilité cutanée (tact, piqûre, température)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de réflexes ostéo-tendineux</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test d'équilibre et de coordination (Romberg / doigt-nez)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de contrôle moteur (stabilité lombo-pelvienne)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test palpatoire myofascial (points gâchettes, tonus musculaire)</a>
-                        </li>
-                        <li class="list-group-item py-3">
-                            <a href="#" class="text-decoration-none">Test de douleur provoquée (pression, étirement, mouvement)</a>
-                        </li>
-                    </ul>
-                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton Enregistrer -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/Patients/RedFlags/@patientId'">
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveResponses()">
+                    <i class="bi bi-save me-2"></i>Enregistrer les réponses
+                </button>
             </div>
         </div>
     </div>
 
 </div>
 
-<script>
-    const patientId = @patientId;
+@section Scripts {
+    <script>
+        const patientId = @patientId;
+        let allQuestionsData = {};
+        let currentCategory = 'Toutes';
 
-    function initializeTabs() {
-        document.querySelectorAll('#dimensionsTabs button[data-category]').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
+        // Initialiser les onglets
+        function initializeTabs() {
+            document.querySelectorAll('button[data-category]').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
 
-                document.querySelectorAll('#dimensionsTabs button')
-                    .forEach(el => {
-                        el.classList.remove('btn-primary');
-                        el.classList.add('btn-outline-primary');
+                    // Changer le style des boutons
+                    document.querySelectorAll('button[data-category]').forEach(el => {
+                        if (el.dataset.category === 'Toutes') {
+                            el.classList.remove('btn-dark');
+                            el.classList.add('btn-outline-secondary');
+                        } else {
+                            el.classList.remove('btn-primary');
+                            el.classList.add('btn-outline-secondary');
+                        }
                     });
-                this.classList.remove('btn-outline-primary');
-                this.classList.add('btn-primary');
 
-                const category = this.dataset.category;
-                loadQuestionnaire(category);
-            });
-        });
-    }
-
-    async function loadQuestionnaire(category) {
-        const response = await fetch(`/Patient/${patientId}/GetQuestionsClinique`);
-        const data = await response.json();
-        const container = document.getElementById('questionnaireContainer');
-        container.innerHTML = '';
-
-        for (const subCategory in data) {
-            if (category !== "Toutes" && subCategory !== category) continue;
-            const questions = data[subCategory];
-
-            const subCatDiv = document.createElement('div');
-            subCatDiv.classList.add('mb-4');
-
-            const title = document.createElement('h5');
-            title.classList.add('fw-bold', 'text-primary', 'mb-3');
-            title.textContent = subCategory;
-            subCatDiv.appendChild(title);
-
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.classList.add('card', 'border-0', 'shadow-sm', 'mb-3');
-
-                const cardBody = document.createElement('div');
-                cardBody.classList.add('card-body', 'p-3', 'p-md-4');
-
-                const questionText = document.createElement('p');
-                questionText.classList.add('fw-medium', 'mb-3');
-                questionText.innerHTML = `${q.question}`;
-                cardBody.appendChild(questionText);
-
-                if (q.options && q.options.length > 0) {
-                    const optionsDiv = document.createElement('div');
-                    optionsDiv.classList.add('d-flex', 'flex-wrap', 'gap-3', 'mb-3');
-                    q.options.forEach(opt => {
-                        const div = document.createElement('div');
-                        div.classList.add('form-check');
-                        div.innerHTML = `
-                            <input class="form-check-input" type="radio" name="q_${index}" value="${opt}">
-                            <label class="form-check-label">${opt}</label>
-                        `;
-                        optionsDiv.appendChild(div);
-                    });
-                    cardBody.appendChild(optionsDiv);
-                }
-
-                const toggleBtn = document.createElement('button');
-                toggleBtn.type = 'button';
-                toggleBtn.classList.add('btn', 'btn-sm', 'btn-outline-secondary', 'fw-medium');
-                toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
-                cardBody.appendChild(toggleBtn);
-
-                const notesContainer = document.createElement('div');
-                notesContainer.style.display = 'none';
-                notesContainer.classList.add('mt-3');
-
-                const notesLabel = document.createElement('label');
-                notesLabel.classList.add('form-label', 'fw-medium', 'small', 'text-secondary');
-                notesLabel.textContent = 'Notes';
-                notesContainer.appendChild(notesLabel);
-
-                const textarea = document.createElement('textarea');
-                textarea.classList.add('form-control');
-                textarea.name = `notes_${index}`;
-                textarea.rows = 3;
-                textarea.placeholder = 'Notes (optionnel)';
-                notesContainer.appendChild(textarea);
-
-                cardBody.appendChild(notesContainer);
-                questionDiv.appendChild(cardBody);
-
-                toggleBtn.addEventListener('click', () => {
-                    if (notesContainer.style.display === 'none') {
-                        notesContainer.style.display = 'block';
-                        toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer la note';
+                    // Activer le bouton cliqué
+                    if (this.dataset.category === 'Toutes') {
+                        this.classList.remove('btn-outline-secondary');
+                        this.classList.add('btn-dark');
                     } else {
-                        notesContainer.style.display = 'none';
-                        toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
+                        this.classList.remove('btn-outline-secondary');
+                        this.classList.add('btn-primary');
                     }
+
+                    // Charger la catégorie sélectionnée
+                    const category = this.dataset.category;
+                    currentCategory = category;
+                    displayQuestions(category);
+                });
+            });
+        }
+
+        // Charger les questions depuis le serveur
+        async function loadQuestionnaire() {
+            try {
+                const response = await fetch(`/Patients/GetQuestionsClinique/@patientId`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des questions');
+                }
+                allQuestionsData = await response.json();
+                console.log('=== Questions chargées ===');
+                console.log('Catégories disponibles:', Object.keys(allQuestionsData));
+                for (const cat in allQuestionsData) {
+                    console.log(`  ${cat}: ${allQuestionsData[cat].length} questions`);
+                }
+                displayQuestions('Toutes');
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('questionnaireContainer').innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Erreur lors du chargement des questions. Veuillez réessayer.
+                    </div>
+                `;
+            }
+        }
+
+        // Afficher les questions selon la catégorie
+        function displayQuestions(category) {
+            const container = document.getElementById('questionnaireContainer');
+            container.innerHTML = '';
+
+            let questionsToDisplay = [];
+
+            if (category === 'Toutes') {
+                // Afficher toutes les catégories
+                for (const subCategory in allQuestionsData) {
+                    questionsToDisplay.push({ category: subCategory, questions: allQuestionsData[subCategory] });
+                }
+            } else {
+                // Afficher seulement la catégorie sélectionnée
+                if (allQuestionsData[category]) {
+                    questionsToDisplay.push({ category: category, questions: allQuestionsData[category] });
+                } else {
+                    console.warn(`Catégorie "${category}" non trouvée. Catégories disponibles:`, Object.keys(allQuestionsData));
+                }
+            }
+
+            // Si aucune question trouvée
+            if (questionsToDisplay.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Aucune question disponible pour cette catégorie.
+                        <br><small>Catégories disponibles: ${Object.keys(allQuestionsData).join(', ')}</small>
+                    </div>
+                `;
+                return;
+            }
+
+            // Afficher les questions
+            questionsToDisplay.forEach(({ category: subCategory, questions }) => {
+                // Titre de la catégorie
+                const categoryTitle = document.createElement('div');
+                categoryTitle.className = 'mb-4';
+                categoryTitle.innerHTML = `
+                    <h4 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                        <i class="bi bi-chevron-right me-2"></i>${subCategory} (${questions.length} questions)
+                    </h4>
+                `;
+                container.appendChild(categoryTitle);
+
+                // Afficher chaque question
+                questions.forEach((q, index) => {
+                    const questionCard = createQuestionCard(q, `${subCategory.replace(/\s+/g, '_')}_${index}`);
+                    container.appendChild(questionCard);
+                });
+            });
+        }
+
+        // Créer une carte de question
+        function createQuestionCard(question, uniqueId) {
+            const card = document.createElement('div');
+            card.className = 'card border-0 shadow-sm mb-3';
+            card.dataset.questionId = question.id;
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body p-3 p-md-4';
+
+            // Titre de la question
+            const questionText = document.createElement('p');
+            questionText.className = 'fw-medium mb-3';
+            questionText.textContent = question.question;
+            cardBody.appendChild(questionText);
+
+            // Options de réponse
+            if (question.options && question.options.length > 0) {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'd-flex flex-wrap gap-3 mb-3';
+
+                question.options.forEach(opt => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check';
+                    const safeOpt = opt.replace(/"/g, '&quot;');
+                    div.innerHTML = `
+                        <input class="form-check-input" type="radio" name="q_${uniqueId}" id="q_${uniqueId}_${safeOpt}" value="${safeOpt}">
+                        <label class="form-check-label" for="q_${uniqueId}_${safeOpt}">
+                            ${opt}
+                        </label>
+                    `;
+                    optionsDiv.appendChild(div);
                 });
 
-                subCatDiv.appendChild(questionDiv);
+                cardBody.appendChild(optionsDiv);
+            }
+
+            // Bouton pour ajouter une note
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'btn btn-sm btn-outline-secondary fw-medium';
+            toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
+            cardBody.appendChild(toggleBtn);
+
+            // Conteneur des notes (caché par défaut)
+            const notesContainer = document.createElement('div');
+            notesContainer.style.display = 'none';
+            notesContainer.className = 'mt-3';
+
+            const notesLabel = document.createElement('label');
+            notesLabel.className = 'form-label fw-medium small text-secondary';
+            notesLabel.textContent = 'Notes';
+            notesContainer.appendChild(notesLabel);
+
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-control';
+            textarea.name = `notes_${uniqueId}`;
+            textarea.rows = 3;
+            textarea.placeholder = 'Notes (optionnel)';
+            notesContainer.appendChild(textarea);
+
+            cardBody.appendChild(notesContainer);
+
+            // Toggle des notes
+            toggleBtn.addEventListener('click', () => {
+                if (notesContainer.style.display === 'none') {
+                    notesContainer.style.display = 'block';
+                    toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer la note';
+                } else {
+                    notesContainer.style.display = 'none';
+                    toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
+                }
             });
 
-            container.appendChild(subCatDiv);
+            card.appendChild(cardBody);
+            return card;
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeTabs();
-        loadQuestionnaire('Toutes');
-    });
-</script>
+        // Sauvegarder les réponses
+        async function saveResponses() {
+            const responses = [];
+
+            document.querySelectorAll('.card[data-question-id]').forEach(card => {
+                const questionId = parseInt(card.dataset.questionId);
+                const selectedRadio = card.querySelector('input[type="radio"]:checked');
+                const notesTextarea = card.querySelector('textarea');
+
+                if (selectedRadio) {
+                    responses.push({
+                        questionId: questionId,
+                        response: selectedRadio.value,
+                        notes: notesTextarea?.value || null
+                    });
+                }
+            });
+
+            if (responses.length === 0) {
+                alert('Veuillez répondre à au moins une question avant d\'enregistrer.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/Patients/SaveExamenClinique', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        patientId: patientId,
+                        responses: responses
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
+                    // Rediriger vers la page suivante
+                    window.location.href = `/Patients/Tests/${patientId}`;
+                } else {
+                    alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de connexion au serveur');
+            }
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            loadQuestionnaire();
+        });
+    </script>
+}

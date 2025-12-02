@@ -376,7 +376,7 @@ namespace KineStat.Controllers
             // c'est-à-dire les questions avec ClusterId = NULL
             var allQuestions = await _context.Questions
                 .Include(q => q.Category)
-                .Where(q => q.ClusterId == null) // Seulement les questions de screening, pas les tests physiques
+                .Where(q => q.ClusterId == null) 
                 .OrderBy(q => q.CategoryId)
                 .ThenBy(q => q.Title)
                 .ToListAsync();
