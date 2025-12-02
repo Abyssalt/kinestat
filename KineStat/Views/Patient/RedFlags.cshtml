@@ -184,7 +184,9 @@
         initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
-        updateGauge(RedFlagsStore.get())
+        RedFlagsStore.subscribe(function(newValue) {
+        updateGauge(newValue);
+    });
         
     });
 

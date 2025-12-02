@@ -16,6 +16,15 @@
 
     subscribe(cb) {
         this.listeners.push(cb);
-        cb(this.get()); // ← synchro immédiate
+        cb(this.get()); 
     }
 };
+document.addEventListener("DOMContentLoaded", function () {
+    initializeTabs();
+    loadQuestionsByCategory(1);
+    initializeGauge();
+
+    RedFlagsStore.subscribe(function (newValue) {
+        updateGauge(newValue);
+    });
+});

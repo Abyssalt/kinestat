@@ -1,4 +1,5 @@
-﻿@using KineStat.Models
+﻿@model List<KineStat.Models.Cluster>
+@using KineStat.Models
 
 @{
     ViewData["Title"] = "Tests";
@@ -349,63 +350,25 @@
 
     <script>
         @{
-                    var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
-                    var responsesData = new List<object>();
+                        var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
+                        var responsesData = new List<object>();
 
-                        @if (q is QuestionBool)
+                        if (existingResponsesList != null)
                         {
-                                <text>isPositive = value === 'true';</text>
+                                        foreach (var r in existingResponsesList)
+                                        {
+                                                        responsesData.Add(new
+                                                        {
+                                                                        questionId = r.QuestionId,
+                                                                        answerId = r.AnswerId,
+                                                                        value = r.ResponseValue,
+                                                                        observations = r.Observations,
+                                                                        isCustom = r.IsCustomTest,
+                                                                        customName = r.CustomTestName,
+                                                                        customType = r.CustomTestType
+                                                        });
+                                        }
                         }
-                        else if (q is QuestionLadder)
-                        {
-                                <text>isPositive = parseInt(value) >= 3;</text>
-                        }
-                        else if (q is QuestionQCM)
-                        {
-                                <text>isPositive = value !== 'Démarche normale' && value !== '';</text>
-                        }
-
-                        if (isPositive) {
-                            scoreTotal += @q.RVPositive;
-                            testsEffectues.push({
-                                title: '@q.Title',
-                                score: @q.RVPositive,
-                                value: value
-                            });
-                        }
-                    }
-                    </text>
-            }
-
-            const redFlags = [
-                {
-                    nom: "Syndrome de la Queue de Cheval",
-                    seuil: 15,
-                    niveau: "Urgence",
-                    couleur: "danger",
-                    description: "Compression médullaire nécessitant une intervention chirurgicale urgente",
-                    action: "ORIENTATION IMMÉDIATE VERS LES URGENCES"
-                },
-                {
-                    nom: "Atteinte Neurologique Sévère",
-                    seuil: 10,
-                    niveau: "Critique",
-                    couleur: "warning",
-                    description: "Déficit neurologique significatif nécessitant une évaluation médicale",
-                    action: "Consultation neurologique urgente sous 24h"
-                },
-                {
-                    nom: "Déficit Neurologique Modéré",
-                    seuil: 5,
-                    niveau: "Élevé",
-                    couleur: "info",
-                    description: "Signes neurologiques nécessitant une surveillance",
-                    action: "Consultation médicale sous 48-72h"
-                }
-            ];
-
-            const redFlagsDetected = redFlags.filter(rf => scoreTotal >= rf.seuil);
-            displayRedFlags(redFlagsDetected, scoreTotal, testsEffectues);
         }
 
         var existingResponses = @Html.Raw(Json.Serialize(responsesData));
@@ -436,19 +399,19 @@
                 tests: []
             };
 
-            @foreach (var q in cluster.Questions)
-            {
-                    <text>
-                    const value@(q.Id) = formData.get('test-@q.Id-value');
-                    if (value@(q.Id)) {
-                        data.tests.push({
-                            id: @q.Id,
-                            value: value@(q.Id),
-                            observations: formData.get('test-@q.Id-observations')
-                        });
-                    }
-                    </text>
-            }
+            document.querySelectorAll('.test-card:not([data-custom="true"])').forEach(card => {
+                const testId = parseInt(card.getAttribute('data-test-id'));
+                const valueInput = formData.get('test-' + testId + '-value');
+
+                if (valueInput) {
+                    data.tests.push({
+                        id: testId,
+                        value: valueInput,
+                        observations: formData.get('test-' + testId + '-observations') || null,
+                        custom: false
+                    });
+                }
+            });
 
             document.querySelectorAll('[data-custom="true"]').forEach(card => {
                 const testId = card.getAttribute('data-test-id');
@@ -536,7 +499,7 @@
         }
 
         .accordion-button::after {
-            filter: brightness(0) invert(1); 
+            filter: brightness(0) invert(1);
         }
 
         .accordion-button:focus {
