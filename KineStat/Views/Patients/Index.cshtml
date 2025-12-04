@@ -46,7 +46,7 @@
                         <option value="Tous">Tous les statuts</option>
                         <option value="Actif">Actif</option>
                         <option value="Terminé">Terminé</option>
-                        <option value="Suspendu">Suspendu</option>
+                        <option value="Inactif">Inactif</option>
                         <option value="Abandonné">Abandonné</option>
                     </select>
                 </div>
@@ -99,8 +99,8 @@
                                             case PatientStatus.Terminé:
                                                 <span class="badge bg-secondary rounded-pill">Terminé</span>
                                                 break;
-                                            case PatientStatus.Suspendu:
-                                                <span class="badge bg-warning text-dark rounded-pill">Suspendu</span>
+                                            case PatientStatus.Inactif:
+                                                <span class="badge bg-dark rounded-pill">Suspendu</span>
                                                 break;
                                             case PatientStatus.Abandonné:
                                                 <span class="badge bg-danger rounded-pill">Abandonné</span>
@@ -180,8 +180,8 @@
                                             case PatientStatus.Terminé:
                                                 <span class="badge bg-secondary rounded-pill px-3 py-2">Terminé</span>
                                                 break;
-                                            case PatientStatus.Suspendu:
-                                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">Suspendu</span>
+                                            case PatientStatus.Inactif:
+                                                <span class="badge bg-muted text-dark rounded-pill px-3 py-2">Suspendu</span>
                                                 break;
                                             case PatientStatus.Abandonné:
                                                 <span class="badge bg-danger rounded-pill px-3 py-2">Abandonné</span>
@@ -571,7 +571,7 @@
         }
 
         function getStatusBadge(s, large) {
-            const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-secondary', 'Terminé'], 2: ['bg-warning text-dark', 'Suspendu'], 3: ['bg-danger', 'Abandonné'] };
+            const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-secondary', 'Terminé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Abandonné'] };
             return `<span class="badge ${labels[s][0]} rounded-pill ${cls}">${labels[s][1]}</span>`;
         }
 

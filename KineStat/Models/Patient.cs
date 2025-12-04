@@ -14,7 +14,7 @@ namespace KineStat.Models
     {
         Actif,
         Terminé,
-        Suspendu,
+        Inactif,
         Abandonné,
     }
 
