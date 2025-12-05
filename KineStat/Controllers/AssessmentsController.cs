@@ -1,13 +1,8 @@
 ﻿using KineStat.Data;
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace KineStat.Controllers
 {
@@ -20,12 +15,11 @@ namespace KineStat.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
-        {
-            var kineDbContext = _context.Assessments.Include(a => a.Patient).Include(a => a.Physio);
-            return View(await kineDbContext.ToListAsync());
-        }
-
+        /// <summary>
+        /// Sends the view showing the details of an assessment.
+        /// </summary>
+        /// <param name="id">The Id of the assessment.</param>
+        /// <returns>The view with the assessment's details.</returns>
         [Route("Assessment/{id}/Details")]
         public async Task<IActionResult> AssessmentDetails(int id)
         {
@@ -47,61 +41,126 @@ namespace KineStat.Controllers
             return View(assessment);
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        /// <summary>
+        /// Sends the view for the SOCRATE questionnaire and start creating the assessment.
+        /// </summary>
+        /// <param name="id">The Id of the patient.</param>
+        /// <param name="assessmentId">The Id of the assessment.</param>
+        /// <returns>The view of the SOCRATE questionnaire.</returns>
+        [Route("Patient/{id}/Socrate/{assessmentId}")]
+        public async Task<IActionResult> Socrate(int id, int assessmentId)
         {
-            if (id == null)
+            var patient = await _context.Patients.FindAsync(id);
+            var assessment = await _context.Assessments.FindAsync(assessmentId);
+
+            if (patient == null)
             {
-                return NotFound();
+                TempData["Error"] = "Patient introuvable.";
+                return RedirectToAction("Index", "Patients");
             }
 
-            var assessment = await _context.Assessments.FindAsync(id);
             if (assessment == null)
             {
-                return NotFound();
+                TempData["Error"] = "Bilan introuvable.";
+                return RedirectToAction("Anamnese","Patient", new { id });
             }
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Email", assessment.PatientId);
-            ViewData["PhysioId"] = new SelectList(_context.Physios, "Id", "Email", assessment.PhysioId);
-            return View(assessment);
+
+            var socrate = await _context.Socrates
+                .FirstOrDefaultAsync(s => s.AssessmentId == assessmentId);
+
+            if (socrate == null)
+            {
+                socrate = new Socrate
+                {
+                    PatientId = id,
+                    AssessmentId = assessmentId,
+                };
+            }
+
+            ViewData["FolderId"] = assessment.DossierId;
+            ViewData["AssessmentId"] = assessmentId;
+            ViewBag.FirstName = patient.FirstName;
+            ViewBag.LastName = patient.LastName;
+
+            return View(socrate);
         }
 
-        // POST: Assessments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Save the SOCRATE to the database.
+        /// </summary>
+        /// <param name="socrate">The SOCRATE questionnaire.</param>
+        /// <returns>A redirection to the redflags page.</returns>
         [HttpPost]
+        [Route("Patient/SaveSocrate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,PatientId,PhysioId")] Assessment assessment)
+        public async Task<IActionResult> SaveSocrate(Socrate socrate)
         {
-            if (id != assessment.Id)
+            try
             {
-                return NotFound();
-            }
+                bool hasAtLeastOneField = !string.IsNullOrWhiteSpace(socrate.Site) ||
+                                          !string.IsNullOrWhiteSpace(socrate.Onset) ||
+                                          !string.IsNullOrWhiteSpace(socrate.Character) ||
+                                          !string.IsNullOrWhiteSpace(socrate.Radiation) ||
+                                          !string.IsNullOrWhiteSpace(socrate.Association) ||
+                                          !string.IsNullOrWhiteSpace(socrate.Timing) ||
+                                          !string.IsNullOrWhiteSpace(socrate.ExacerbatingFactor) ||
+                                          !string.IsNullOrWhiteSpace(socrate.RelievingFactor);
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (!hasAtLeastOneField)
                 {
-                    _context.Update(assessment);
-                    await _context.SaveChangesAsync();
+                    TempData["Error"] = "Veuillez remplir au moins un champ du questionnaire SOCRATE.";
+                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
                 }
-                catch (DbUpdateConcurrencyException)
+
+                var assessment = await _context.Assessments
+                    .FirstOrDefaultAsync(a => a.Id == socrate.AssessmentId);
+
+                if (assessment == null)
                 {
-                    if (!AssessmentExists(assessment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["Error"] = "Assessment introuvable.";
+                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
                 }
-                return RedirectToAction(nameof(Index));
+
+                var existingSocrate = await _context.Socrates
+                    .FirstOrDefaultAsync(s => s.AssessmentId == socrate.AssessmentId);
+
+                if (existingSocrate != null)
+                {
+                    existingSocrate.Site = socrate.Site;
+                    existingSocrate.Onset = socrate.Onset;
+                    existingSocrate.Character = socrate.Character;
+                    existingSocrate.Radiation = socrate.Radiation;
+                    existingSocrate.Association = socrate.Association;
+                    existingSocrate.Timing = socrate.Timing;
+                    existingSocrate.ExacerbatingFactor = socrate.ExacerbatingFactor;
+                    existingSocrate.RelievingFactor = socrate.RelievingFactor;
+
+                    _context.Update(existingSocrate);
+                }
+                else
+                {
+                    _context.Socrates.Add(socrate);
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
+
+                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
             }
-            ViewData["PatientId"] = new SelectList(_context.Patients, "Id", "Email", assessment.PatientId);
-            ViewData["PhysioId"] = new SelectList(_context.Physios, "Id", "Email", assessment.PhysioId);
-            return View(assessment);
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
+                return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
+            }
         }
 
-        // POST: Assessments/Delete/5
+        /// <summary>
+        /// Delete an assessment.
+        /// </summary>
+        /// <param name="id">The Id of the assessment.</param>
+        /// <param name="dossierId">The Id of the Folder.</param>
+        /// <returns>A redirection to the folder's details.</returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
@@ -118,12 +177,14 @@ namespace KineStat.Controllers
             );
         }
 
-        private bool AssessmentExists(int id)
-        {
-            return _context.Assessments.Any(e => e.Id == id);
-        }
-
-
+        /// <summary>
+        /// Start a new assessment for a patient.
+        /// </summary>
+        /// <param name="PatientId">The Id of the patient.</param>
+        /// <param name="DossierId">The Id of the folder.</param>
+        /// <param name="PhysioId">The Id of the Physio.</param>
+        /// <param name="MedicalContextId">The Id of the chosen medical context.</param>
+        /// <returns>A redirection to the SOCRATE page.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartAssessment(int PatientId, int DossierId, int PhysioId, int MedicalContextId)
@@ -151,9 +212,20 @@ namespace KineStat.Controllers
             _context.Assessments.Add(assessment);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Socrate", "Patient", new { id = PatientId, assessmentId = assessment.Id });
+            return RedirectToAction("Socrate", new { id = PatientId, assessmentId = assessment.Id });
         }
 
+        /// <summary>
+        /// Displays the assessment creation view for the specified dossier, pre-populated with patient and
+        /// physiotherapist information.
+        /// </summary>
+        /// <remarks>The returned view is initialized with the current date and default values. If the
+        /// dossier or its associated patient cannot be found, a NotFound result is returned. The list of available
+        /// medical contexts is provided to the view via <c>ViewBag.MedicalContexts</c>.</remarks>
+        /// <param name="dossierId">The unique identifier of the dossier for which the assessment is to be created. Must correspond to an
+        /// existing dossier.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the assessment creation view if the dossier and patient exist;
+        /// otherwise, a NotFound result indicating the missing resource.</returns>
         [Route("Dossier/{dossierId}/CreateAssessment")]
         public async Task<IActionResult> CreateAssessment(int dossierId)
         {
@@ -180,41 +252,32 @@ namespace KineStat.Controllers
             });
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveRedFlagsPercentage(int assessmentId, string redFlagsPercentage)
+        /// <summary>
+        /// Returns a view displaying the assessment results for the specified patient and assessment identifiers.
+        /// </summary>
+        /// <param name="id">The unique identifier of the patient whose assessment is to be retrieved. Must match the patient associated
+        /// with the assessment.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment to retrieve for the specified patient.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the assessment's results view if found and associated with the patient;
+        /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
+        /// patient.</returns>
+        [Route("Patient/{id}/Resultat/{assessmentId}")]
+        public async Task<IActionResult> Resultat(int id, int assessmentId)
         {
-            var assessment = await _context.Assessments.FindAsync(assessmentId);
+            var assessment = await _context.Assessments
+                .Include(a => a.Patient)
+                .Include(a => a.Dossier)
+                .FirstOrDefaultAsync(a => a.Id == assessmentId);
 
             if (assessment == null)
-                return NotFound();
+                return NotFound("Aucun bilan trouvé");
 
-            if (string.IsNullOrWhiteSpace(redFlagsPercentage))
-                redFlagsPercentage = "0";
+            if (assessment.PatientId != id)
+                return BadRequest("Ce bilan n'appartient pas à ce patient.");
 
-            redFlagsPercentage = redFlagsPercentage.Replace(',', '.');
+            ViewData["AssessmentId"] = assessment.Id;
 
-            if (!double.TryParse(
-                    redFlagsPercentage,
-                    NumberStyles.AllowDecimalPoint,
-                    CultureInfo.InvariantCulture,
-                    out double value))
-            {
-                value = 0;
-            }
-
-
-            assessment.RedFlagsPercentage = value;
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(
-                "AssessmentDetails",
-                "Assessments",
-                new { id = assessment.Id }
-            );
+            return View(assessment);
         }
-
-
     }
 }

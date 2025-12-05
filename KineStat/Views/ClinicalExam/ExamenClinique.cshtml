@@ -10,7 +10,7 @@ var assessmentId = ViewData["AssessmentId"];
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <a asp-controller="Patient" asp-action="RedFlags" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -18,7 +18,7 @@ var assessmentId = ViewData["AssessmentId"];
                         <i class="bi bi-search me-2"></i>Examen clinique
                     </h1>
                 </div>
-                <a asp-controller="Patient" asp-action="Tests" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     Suivant<i class="bi bi-arrow-right ms-2"></i>
                 </a>
             </div>
@@ -116,7 +116,7 @@ var assessmentId = ViewData["AssessmentId"];
     <div class="row mt-4">
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/Patients/RedFlags/@patientId'">
+                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/Patients/@patientId/RedFlags/@assessmentId'">
                     Annuler
                 </button>
                 <button type="button" class="btn btn-primary" onclick="saveResponses()">
@@ -242,7 +242,7 @@ var assessmentId = ViewData["AssessmentId"];
 
         async function loadQuestionnaire() {
             try {
-                const response = await fetch(`/Patients/GetQuestionsClinique/@patientId`);
+                const response = await fetch(`/ClinicalExam/GetQuestionsClinique/@patientId`);
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des questions');
                 }
@@ -269,7 +269,7 @@ var assessmentId = ViewData["AssessmentId"];
 
         async function loadExistingResponses() {
             try {
-                const response = await fetch(`/Patients/GetExistingResponses/@patientId`);
+                const response = await fetch(`/ClinicalExam/GetExistingResponses/@patientId`);
                 if (!response.ok) return;
 
                 const existingData = await response.json();
@@ -312,7 +312,7 @@ var assessmentId = ViewData["AssessmentId"];
             if (responses.length === 0) return;
 
             try {
-                const response = await fetch('/Patients/SaveExamenClinique', {
+                const response = await fetch('/ClinicalExam/SaveExamenClinique', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -557,7 +557,7 @@ var assessmentId = ViewData["AssessmentId"];
             }
 
             try {
-                const response = await fetch('/Patients/SaveExamenClinique', {
+                const response = await fetch('/ClinicalExam/SaveExamenClinique', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -572,7 +572,7 @@ var assessmentId = ViewData["AssessmentId"];
 
                 if (result.success) {
                     alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
-                    window.location.href = `/Patients/Tests/${patientId}`;
+                    window.location.href = `/ClinicalExam/Tests/${patientId}`;
                 } else {
                     alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
                 }

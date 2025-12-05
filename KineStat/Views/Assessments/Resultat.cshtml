@@ -19,7 +19,7 @@ var assessmentId = ViewData["AssessmentId"];
                          <i class="bi bi-graph-up me-2"></i>Résultat
                      </h1>
                  </div>
-                <a asp-controller="Patient" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                      <i class="bi bi-arrow-left me-2"></i>Retour 
                  </a>
              </div>
@@ -194,7 +194,7 @@ var assessmentId = ViewData["AssessmentId"];
                      Annuler
                  </button>
 
-                 <form asp-controller="Assessments"
+                 <form asp-controller="RedFlags"
                        asp-action="SaveRedFlagsPercentage"
                        method="post">
 

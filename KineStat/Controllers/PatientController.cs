@@ -11,13 +11,19 @@ namespace KineStat.Controllers
     public class PatientController : Controller
     {
         private readonly KineDbContext _context;
-        private readonly BayesCalculator _bayesCalculator;
         public PatientController(KineDbContext context)
         {
             _context = context;
-            _bayesCalculator = new BayesCalculator();
         }
 
+        /// <summary>
+        /// Handles the HTTP GET request to display the anamnesis view for a specified patient.
+        /// </summary>
+        /// <remarks>The returned view includes the patient's dossier information and a list of
+        /// physiotherapists ordered by last name, available via <see cref="ViewBag.Physios"/>.</remarks>
+        /// <param name="id">The unique identifier of the patient whose anamnesis information is to be displayed.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the anamnesis view for the patient if found; otherwise, a
+        /// NotFound result if the patient does not exist.</returns>
         [Route("Patient/{id}/Anamnese")]
         public async Task<IActionResult> Anamnese(int id)
         {
@@ -35,6 +41,18 @@ namespace KineStat.Controllers
             return View(patient);
         }
 
+        /// <summary>
+        /// Processes a POST request to update an existing patient's information. Redirects to the patient's anamnesis
+        /// view upon completion.
+        /// </summary>
+        /// <remarks>This action requires a valid anti-forgery token and is accessible via the
+        /// 'Patient/Edit' route. If the patient does not exist or validation fails, the user is redirected with an
+        /// appropriate error message. Concurrency and other exceptions are handled and reported through
+        /// TempData.</remarks>
+        /// <param name="patient">The patient entity containing updated information. The patient's Id must correspond to an existing record.
+        /// All required fields must be valid; otherwise, the update will not be performed.</param>
+        /// <returns>An <see cref="IActionResult"/> that redirects to the anamnesis view for the patient. If the update is
+        /// successful, a success message is provided; otherwise, an error message is displayed.</returns>
         [HttpPost]
         [Route("Patient/Edit")]
         [ValidateAntiForgeryToken]
@@ -89,6 +107,19 @@ namespace KineStat.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates the medical information for the specified patient and redirects to the patient's anamnesis view.
+        /// </summary>
+        /// <remarks>This action sets a success or error message in <see cref="TempData"/> depending on
+        /// whether the update was successful. The method requires a valid patient identifier; if the patient does not
+        /// exist, no changes are made.</remarks>
+        /// <param name="PatientId">The unique identifier of the patient whose medical information is to be updated.</param>
+        /// <param name="Profession">The patient's current profession. Can be null to leave unchanged.</param>
+        /// <param name="ActivitesPhysiques">A description of the patient's physical activities. Can be null to leave unchanged.</param>
+        /// <param name="AntecedentsMedicaux">A summary of the patient's medical history or antecedents. Can be null to leave unchanged.</param>
+        /// <param name="MedicationActuelle">Details of the patient's current medication. Can be null to leave unchanged.</param>
+        /// <returns>An <see cref="IActionResult"/> that redirects to the patient's anamnesis view. If the patient is not found,
+        /// redirects with an error message.</returns>
         [HttpPost]
         public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
         {
@@ -111,345 +142,19 @@ namespace KineStat.Controllers
             return RedirectToAction("Anamnese", new { id = PatientId });
         }
 
-
+        /// <summary>
+        /// Handles the HTTP POST request to save the anamnese data for the specified patient and redirects to the
+        /// anamnese view.
+        /// </summary>
+        /// <remarks>This action does not persist any data directly. It performs a redirect to the
+        /// "Anamnese" view, passing the patient identifier as a route value.</remarks>
+        /// <param name="id">The unique identifier of the patient whose anamnese data is being saved.</param>
+        /// <returns>A redirect result to the anamnese view for the specified patient.</returns>
         [HttpPost]
         [Route("Patient/{id}/SaveAnamnese")]
         public IActionResult SaveAnamnese(int id)
         {
             return RedirectToAction("Anamnese", new { id = id });
-        }
-
-        [Route("Patient/{id}/Socrate/{assessmentId}")]
-        public async Task<IActionResult> Socrate(int id, int assessmentId)
-        {
-            var patient = await _context.Patients.FindAsync(id);
-            var assessment = await _context.Assessments.FindAsync(assessmentId);
-
-            if (patient == null)
-            {
-                TempData["Error"] = "Patient introuvable.";
-                return RedirectToAction("Index", "Patients");
-            }
-
-            if (assessment == null)
-            {
-                TempData["Error"] = "Bilan introuvable.";
-                return RedirectToAction("Anamnese", new { id });
-            }
-
-            var socrate = await _context.Socrates
-                .FirstOrDefaultAsync(s => s.AssessmentId == assessmentId);
-
-            if (socrate == null)
-            {
-                socrate = new Socrate
-                {
-                    PatientId = id,
-                    AssessmentId = assessmentId,
-                };
-            }
-
-            ViewData["FolderId"] = assessment.DossierId;
-            ViewData["AssessmentId"] = assessmentId;
-            ViewBag.FirstName = patient.FirstName;
-            ViewBag.LastName = patient.LastName;
-
-            return View(socrate);
-        }
-
-        [HttpPost]
-        [Route("Patient/SaveSocrate")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveSocrate(Socrate socrate)
-        {
-            try
-            {
-                bool hasAtLeastOneField = !string.IsNullOrWhiteSpace(socrate.Site) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Onset) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Character) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Radiation) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Association) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Timing) ||
-                                          !string.IsNullOrWhiteSpace(socrate.ExacerbatingFactor) ||
-                                          !string.IsNullOrWhiteSpace(socrate.RelievingFactor);
-
-                if (!hasAtLeastOneField)
-                {
-                    TempData["Error"] = "Veuillez remplir au moins un champ du questionnaire SOCRATE.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
-                }
-
-                var assessment = await _context.Assessments
-                    .FirstOrDefaultAsync(a => a.Id == socrate.AssessmentId);
-
-                if (assessment == null)
-                {
-                    TempData["Error"] = "Assessment introuvable.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
-                }
-
-                var existingSocrate = await _context.Socrates
-                    .FirstOrDefaultAsync(s => s.AssessmentId == socrate.AssessmentId);
-
-                if (existingSocrate != null)
-                {
-                    existingSocrate.Site = socrate.Site;
-                    existingSocrate.Onset = socrate.Onset;
-                    existingSocrate.Character = socrate.Character;
-                    existingSocrate.Radiation = socrate.Radiation;
-                    existingSocrate.Association = socrate.Association;
-                    existingSocrate.Timing = socrate.Timing;
-                    existingSocrate.ExacerbatingFactor = socrate.ExacerbatingFactor;
-                    existingSocrate.RelievingFactor = socrate.RelievingFactor;
-
-                    _context.Update(existingSocrate);
-                }
-                else
-                {
-                    _context.Socrates.Add(socrate);
-                }
-
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
-
-                return RedirectToAction(nameof(RedFlags), new { id = socrate.PatientId, assessmentId = assessment.Id });
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = $"Erreur lors de l'enregistrement : {ex.Message}";
-                return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
-            }
-        }
-
-
-        [Route("Patient/{id}/RedFlags/{assessmentId}")]
-        public IActionResult RedFlags(int id, int assessmentId)
-        {
-            ViewData["PatientId"] = id.ToString();
-            ViewData["AssessmentId"] = assessmentId.ToString();
-            return View();
-        }
-
-
-        [HttpGet]
-        [Route("Patient/{patientId}/RedFlagsQuestions/{categoryId}")]
-        public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
-        {
-            
-            var patient = _context.Patients.Find(patientId);
-            if (patient == null) return NotFound();
-            var boolQuestions = _context.Questions
-                            .OfType<QuestionBool>()
-                            .Where(q => q.CategoryId == categoryId)
-                            .ToList();
-            var lastAssessment = _context.Assessments
-                .Where(a => a.PatientId == patientId)
-                .OrderByDescending(a => a.Date)
-                .ThenByDescending(a => a.Id)
-                .FirstOrDefault();
-            if (lastAssessment == null) return NotFound();
-            var boolAnswers = _context.PatientAnswers
-                .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId && a.AssessmentId == lastAssessment.Id)
-                .ToList();
-
-            var questionAndAnswers = boolQuestions.Select(q => new QuestionPatientAnswerVM
-            {
-                PatientId = patientId,
-                Question = q,
-                Answer = boolAnswers.FirstOrDefault(ba => ba.QuestionId == q.Id)
-            })
-            .ToList();
-
-            return PartialView("_QuestionsPartial", questionAndAnswers);
-
-        }
-
-        //Return the patient in database with the specified Id 
-        //if there is no patient return null
-        private Patient FindPatientById(int patientId)
-        {
-            var patient = _context.Patients
-                .Where(p => p.Id == patientId)
-                .FirstOrDefault();
-            return patient;
-        }
-
-        [HttpPost]
-        [Route("Patient/SaveOrUpdateAnswer")]
-        public async Task<IActionResult> SaveOrUpdateAnswer([FromBody] SavePatientAnswerDTO answerDto)
-        {
-            try
-            {
-              
-                var patient = FindPatientById(answerDto.PatientId);
-                if (patient == null)
-                {
-                    return NotFound(new { success = false, message = "Le patient n'existe pas" });
-                }
-
-                var dossier = _context.Dossiers
-                    .Where(d => d.PatientId == answerDto.PatientId)
-                    .OrderByDescending(d => d.DateOuverture)
-                    .ThenByDescending(d => d.Id)
-                    .FirstOrDefault();
-                if (dossier == null)
-                {
-                    return StatusCode(400, new
-                    {
-                        success = false,
-                        message = "Ce patient ne possède aucun dossier."
-                    });
-                }
-
-                var assessment = _context.Assessments
-                    .Where(a => a.PatientId == answerDto.PatientId && a.DossierId == dossier.Id)
-                    .OrderByDescending(a => a.Date)
-                    .ThenByDescending(a => a.Id)
-                    .FirstOrDefault();
-                if (assessment == null)
-                {
-                    return StatusCode(400, new
-                    {
-                        success = false,
-                        message = "Erreur aucun bilan existant"
-                    });
-                }
-                var savedAnswer = _context.PatientAnswers
-                    .OfType<PatientAnswerBool>()
-                    .FirstOrDefault(a => a.PatientId == answerDto.PatientId && a.QuestionId == answerDto.QuestionId && a.AssessmentId == assessment.Id);
-                if (savedAnswer == null)
-                {
-                    savedAnswer = new PatientAnswerBool { PatientId = answerDto.PatientId, QuestionId = answerDto.QuestionId, Value = answerDto.BoolValue.Value, Comment = answerDto.Comment, AssessmentId = assessment.Id };
-                    _context.PatientAnswers.Add(savedAnswer);
-                }
-                else
-                {
-                    savedAnswer = savedAnswer as PatientAnswerBool;
-                    if (answerDto.BoolValue != null)
-                    {
-                        savedAnswer.Value = answerDto.BoolValue.Value;
-
-                    }
-                    savedAnswer.Comment = answerDto.Comment;
-                }
-             
-                await _context.SaveChangesAsync();
-
-                double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
-  
-                return Ok(new { success = true, redflags = redflagsPercentage});
-            }
-            catch (DbUpdateException dbEx)
-            {
-                return StatusCode(500, new { success = false, message = "Erreur lors de la sauvegarde en base", details = dbEx.InnerException?.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = "Une erreur inattendue est survenue", details = ex.Message });
-            }
-
-        }
-
-        private async Task<Dictionary<int, double>> GetAllCategoriesProbability(int patientId, int assessmentId)
-        {
-            Dictionary<int, double> CategoryRedFlags = new Dictionary<int, double>();
-            var categoryIds = _context.Categories
-                .Select(c => c.Id)
-                .ToList();
-            foreach (var id in categoryIds)
-            {
-                double result = await CalculateRedFlagCategory(patientId, assessmentId, id);
-                CategoryRedFlags[id] = result;
-            }
-            return CategoryRedFlags;
-        }
-
-        //This method return the sum off all redflags percentage from every category
-        //This is not a probability but a sum of all percentage of every category used to indicate the level of redflags 
-        public async Task<double> GetSumRedflagsPercentage(int patientId, int assessmentId) {
-            var categoryIds = _context.Categories
-                .Where (c=> c.Id <=6) 
-                .Select(c => c.Id) 
-                .ToList();
-            double result = 0;
-            foreach (var id in categoryIds)
-            {
-                result += await CalculateRedFlagCategory(patientId, assessmentId, id) * 100;
-               
-            }
-            return result;
-        }
-        private async Task<double> CalculateRedFlagCategory(int patientId, int assessmentId, int categoryId)
-        {
-            var answersForCategory = _context.PatientAnswers
-                .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Question.CategoryId == categoryId)
-                .Include(a => a.Question)
-                .ToList();
-
-            var assessment = await  _context.Assessments.FindAsync(assessmentId);
-            var priorContext = _context.PriorContexts
-                .FirstOrDefault(p => p.MedicalContextId == assessment.MedicalContextId && p.CategoryId == categoryId);
-
-            if (priorContext == null)
-            {
-                throw new InvalidOperationException(
-                    $"Aucun prior défini pour le contexte médical {assessment.MedicalContextId} et la catégorie {categoryId}");
-            }
-
-            if (priorContext.Value <= 0 || priorContext.Value >= 1)
-            {
-                throw new InvalidOperationException(
-                    $"Le prior ({priorContext.Value}) doit être strictement entre 0 et 1.");
-            }
-            double categoryPrior = priorContext.Value;
-            double posterior = _bayesCalculator.CalculateCategoryProbability(answersForCategory, categoryPrior);
-
-            return posterior;
-        }
-
-
-        [Route("Patient/{id}/ExamenClinique/{assessmentId}")]
-        public IActionResult ExamenClinique(int id, int assessmentId)
-        {
-            ViewData["AssessmentId"] = assessmentId.ToString();
-            ViewData["PatientId"] = id.ToString();
-            return View();
-        }
-
-        [Route("Patient/{id}/Tests/{assessmentId}")]
-        public IActionResult Tests(int id, int assessmentId)
-        {
-            var clusters = _context.Cluster
-                .Include(c => c.Questions)
-                .ToList();
-
-            ViewData["PatientId"] = id.ToString();
-            ViewData["AssessmentId"] = assessmentId;
-
-            return View(clusters); 
-        }
-
-
-        [Route("Patient/{id}/Resultat/{assessmentId}")]
-        public async Task<IActionResult> Resultat(int id, int assessmentId)
-        {
-            var assessment = await _context.Assessments
-                .Include(a => a.Patient)
-                .Include(a => a.Dossier)
-                .FirstOrDefaultAsync(a => a.Id == assessmentId);
-
-            if (assessment == null)
-                return NotFound("Aucun bilan trouvé");
-
-            if (assessment.PatientId != id)
-                return BadRequest("Ce bilan n'appartient pas à ce patient.");
-
-            ViewData["AssessmentId"] = assessment.Id;
-
-            return View(assessment);
         }
     }
 }

@@ -15,6 +15,11 @@ namespace KineStat.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Handles HTTP GET requests and returns a view displaying a list of physiotherapists, including their
+        /// associated patients, ordered by last name.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> that renders the view with the list of physiotherapists and their patients.</returns>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -26,6 +31,16 @@ namespace KineStat.Controllers
             return View(physios);
         }
 
+        /// <summary>
+        /// Handles HTTP POST requests to create a new physio record using the provided data.
+        /// </summary>
+        /// <remarks>This action requires a valid anti-forgery token and expects model validation to be
+        /// performed prior to creation. Success and error messages are stored in TempData for display after
+        /// redirection.</remarks>
+        /// <param name="physio">The physio entity containing the details to be created. Must have valid model state; required fields should
+        /// be populated.</param>
+        /// <returns>A redirect to the index view upon successful creation or if an error occurs. If the model state is invalid,
+        /// redirects to the index view with an error message.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Physio physio)
@@ -52,6 +67,16 @@ namespace KineStat.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        /// <summary>
+        /// Processes a POST request to update the details of an existing physiotherapist.
+        /// </summary>
+        /// <remarks>This action requires a valid anti-forgery token and model state. If the
+        /// physiotherapist does not exist or the model is invalid, the user is redirected with an error message.
+        /// Handles concurrency and general exceptions by displaying appropriate error messages.</remarks>
+        /// <param name="physio">The physiotherapist entity containing the updated information. Must have a valid identifier and pass model
+        /// validation.</param>
+        /// <returns>A redirect to the index view. If the update is successful, a success message is displayed; otherwise, an
+        /// error message is shown.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Physio physio)
@@ -101,6 +126,14 @@ namespace KineStat.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes the specified physiotherapist from the database.
+        /// </summary>
+        /// <remarks>If the physiotherapist with the specified identifier does not exist, no deletion
+        /// occurs and an error message is displayed. Success or error messages are provided via TempData for display in
+        /// the redirected view.</remarks>
+        /// <param name="id">The unique identifier of the physiotherapist to delete.</param>
+        /// <returns>A redirect to the index view after the deletion attempt completes.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
