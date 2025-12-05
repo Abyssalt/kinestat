@@ -10,6 +10,16 @@ namespace KineStat.Controllers
             new QuestionBool { Id = 1, Title = "Test", CategoryId = 1 } // Test question, used to test GetQuestions (at https://localhost:7133/Question/GetQuestions)
         };
 
+        /// <summary>
+        /// Create a questions.
+        /// </summary>
+        /// <param name="questionType">The type of the question.</param>
+        /// <param name="title">The title of the question.</param>
+        /// <param name="rvPositif">The positive RV of the question.</param>
+        /// <param name="rvNegatif">The negative RV of the question.</param>
+        /// <param name="clusterId">The Id of the question's cluster.</param>
+        /// <param name="bilanId">The Id of the question's assessment.</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(string questionType, string title, double rvPositif, double rvNegatif, int? clusterId, int bilanId)
@@ -60,6 +70,11 @@ namespace KineStat.Controllers
             return View();  // If it fail, reload the page
         }
 
+        /// <summary>
+        /// Edit a question.
+        /// </summary>
+        /// <param name="id">The Id of the question.</param>
+        /// <returns></returns>
         public IActionResult Edit(int id)
         {
             var question = _questions.FirstOrDefault(q => q.Id == id);
@@ -70,6 +85,16 @@ namespace KineStat.Controllers
             return View(question);
         }
 
+        /// <summary>
+        /// Edit a questions.
+        /// </summary>
+        /// <param name="id">The Id of the question.</param>
+        /// <param name="title">The title of the question.</param>
+        /// <param name="rvPositif">The positive RV of the question.</param>
+        /// <param name="rvNegatif">The negative RV of the question.</param>
+        /// <param name="clusterId">The Id of the question's cluster.</param>
+        /// <param name="bilanId">The Id of the question's assessment.</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, string title, double rvPositif, double rvNegatif, int? clusterId, int bilanId)
@@ -99,6 +124,11 @@ namespace KineStat.Controllers
             return View(question);  // Display a warning page "Etes-vous sur?"
         }
 
+        /// <summary>
+        /// Delete a question.
+        /// </summary>
+        /// <param name="id">The Id of the question.</param>
+        /// <returns></returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
@@ -111,6 +141,11 @@ namespace KineStat.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Get the details of a question.
+        /// </summary>
+        /// <param name="id">The Id of the question.</param>
+        /// <returns></returns>
         public IActionResult Details(int id)    // Give a readonly view of the selected question, don't know if it's useful, delete if it isn't
         {
             var question = _questions.FirstOrDefault(q => q.Id == id);
@@ -121,6 +156,11 @@ namespace KineStat.Controllers
             return View(question);
         }
 
+        /// <summary>
+        /// Get the questions filtered by bilanId.
+        /// </summary>
+        /// <param name="bilanId">The Id of the assessment.</param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GetQuestions(int? bilanId) // I based this on the same thing in PatientController.cs, don't know if it's useful
         {

@@ -20,7 +20,7 @@
                     </h5>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-controller="Patient" asp-action="SaveDossier" method="post">
+                    <form asp-controller="Folder" asp-action="SaveFolder" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="PatientId" />
                         <div class="mb-4">
