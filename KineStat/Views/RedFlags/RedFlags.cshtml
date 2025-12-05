@@ -173,8 +173,9 @@
     function showCriticalRedFlagModal(patientId) {
         if (hasDisplayedCriticalModal) return;
         hasDisplayedCriticalModal = true;
+        const assessmentId = @assessmentId;
         const btn = document.getElementById("redirectToSummaryBtn");
-        btn.href = `/Assessments/${patientId}/Resultat`;
+        btn.href = `/Patient/${patientId}/Resultat/${assessmentId}`;
 
         const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
         modal.show();
