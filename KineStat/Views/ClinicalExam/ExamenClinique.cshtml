@@ -572,7 +572,6 @@ var assessmentId = ViewData["AssessmentId"];
 
                 if (result.success) {
                     alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
-                    window.location.href = `/ClinicalExam/Tests/${patientId}`;
                 } else {
                     alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
                 }
