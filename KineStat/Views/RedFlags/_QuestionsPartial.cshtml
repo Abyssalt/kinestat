@@ -19,27 +19,30 @@
             @if (question is QuestionBool qb)
             {
                 var boolAnswer = qa.Answer as PatientAnswerBool;
-                <div class="d-flex flex-wrap gap-3 mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="radio"
-                               name="q_@question.Id"
-                               id="q_@(question.Id)_yes"
-                               value="true"
-                               data-question-id="@question.Id"
-                               @(boolAnswer != null && boolAnswer.Value ? "checked" : "")>
-                        <label class="form-check-label" for="q_@(question.Id)_yes">Oui</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="radio"
-                               name="q_@question.Id"
-                               id="q_@(question.Id)_no"
-                               value="false"
-                               data-question-id="@question.Id"
-                               @(boolAnswer != null && !boolAnswer.Value ? "checked" : "")>
-                        <label class="form-check-label" for="q_@(question.Id)_no">Non</label>
-                    </div>
+                <div class="btn-group w-100 mb-3" role="group">
+                    <input type="radio"
+                           class="btn-check"
+                           name="q_@question.Id"
+                           id="q_@(question.Id)_yes"
+                           value="true"
+                           data-question-id="@question.Id"
+                           autocomplete="off"
+                           @(boolAnswer != null && boolAnswer.Value ? "checked" : "")>
+                    <label class="btn btn-outline-success fw-bold" for="q_@(question.Id)_yes">
+                        <i class="bi bi-check-circle me-2"></i>OUI
+                    </label>
+
+                    <input type="radio"
+                           class="btn-check"
+                           name="q_@question.Id"
+                           id="q_@(question.Id)_no"
+                           value="false"
+                           data-question-id="@question.Id"
+                           autocomplete="off"
+                           @(boolAnswer != null && !boolAnswer.Value ? "checked" : "")>
+                    <label class="btn btn-outline-danger fw-bold" for="q_@(question.Id)_no">
+                        <i class="bi bi-x-circle me-2"></i>NON
+                    </label>
                 </div>
             }
 
