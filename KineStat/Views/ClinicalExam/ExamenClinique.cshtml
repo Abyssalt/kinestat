@@ -381,38 +381,47 @@ var assessmentId = ViewData["AssessmentId"];
 
             if (question.options && question.options.length > 0) {
                 const optionsDiv = document.createElement('div');
-                optionsDiv.className = 'd-flex flex-wrap gap-3 mb-3';
+                optionsDiv.className = 'btn-group w-100 mb-3';
+                optionsDiv.setAttribute('role', 'group');
 
                 question.options.forEach(opt => {
-                    const div = document.createElement('div');
-                    div.className = 'form-check';
                     const safeOpt = opt.replace(/"/g, '&quot;');
-                    div.innerHTML = `
-                        <input class="form-check-input" type="radio" name="q_${uniqueId}" id="q_${uniqueId}_${safeOpt}" value="${safeOpt}">
-                        <label class="form-check-label" for="q_${uniqueId}_${safeOpt}">
-                            ${opt}
+
+                    let iconClass = 'bi-circle';
+                    let btnColor = 'secondary';
+
+                    if (opt === 'Oui') {
+                        iconClass = 'bi-check-circle';
+                        btnColor = 'success';
+                    } else if (opt === 'Non') {
+                        iconClass = 'bi-x-circle';
+                        btnColor = 'danger';
+                    }
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex-fill';
+                    wrapper.innerHTML = `
+                        <input type="radio" class="btn-check" name="q_${uniqueId}" id="q_${uniqueId}_${safeOpt}" value="${safeOpt}" autocomplete="off">
+                        <label class="btn btn-outline-${btnColor} fw-bold w-100" for="q_${uniqueId}_${safeOpt}">
+                            <i class="bi ${iconClass} me-2"></i>${opt.toUpperCase()}
                         </label>
                     `;
 
-                    const radioInput = div.querySelector('input[type="radio"]');
+                    const radioInput = wrapper.querySelector('input[type="radio"]');
 
-
-                    if (userResponses[category] && userResponses[category][question.id] === opt) {
+                    if (userResponses[category] && userResponses[category][question.id] === opt)
                         radioInput.checked = true;
-                    }
-
 
                     radioInput.addEventListener('change', function() {
                         updateSuggestions(category, opt, question.id);
-
                         saveResponseLocally(question.id, opt, category);
                     });
 
-                    optionsDiv.appendChild(div);
-                });
+                optionsDiv.appendChild(wrapper);
+            });
 
-                cardBody.appendChild(optionsDiv);
-            }
+            cardBody.appendChild(optionsDiv);
+        }
 
             const toggleBtn = document.createElement('button');
             toggleBtn.type = 'button';
