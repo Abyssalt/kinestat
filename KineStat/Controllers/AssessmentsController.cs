@@ -39,7 +39,7 @@ namespace KineStat.Controllers
 
             ViewBag.Socrate = socrate;
             var tintivData = await _context.ClinicalDatas
-                .Where(cd => cd.PatientId == assessment.PatientId && cd.CategoryId <= 6)
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.AssessmentId == assessment.Id && cd.CategoryId <= 6)
                 .OrderBy(cd => cd.CategoryId)
                 .Select(cd => cd.Value)
                 .ToListAsync();
