@@ -196,7 +196,7 @@ namespace KineStat.Controllers
                     savedAnswer.Comment = answerDto.Comment;
                 }
 
-                await _context.SaveChangesAsync();
+                
 
                 double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
 
@@ -209,6 +209,32 @@ namespace KineStat.Controllers
                     categoryPercentages.Add(radarValue);
                 }
 
+                foreach (var (radarValue, index) in categoryPercentages.Select((v, i) => (v, i)))
+                {
+                    int categoryId = index + 1;
+
+                    var existingData = _context.ClinicalDatas
+                        .FirstOrDefault(cd =>
+                            cd.PatientId == answerDto.PatientId && cd.AssessmentId == assessment.Id &&
+                            cd.CategoryId == categoryId);
+
+                    if (existingData == null)
+                    {
+                        _context.ClinicalDatas.Add(new ClinicalData
+                        {
+                            PatientId = answerDto.PatientId,
+                            AssessmentId = assessment.Id,
+                            CategoryId = categoryId,
+                            Value = radarValue
+                        });
+                    }
+                    else
+                    {
+                        existingData.AssessmentId = assessment.Id;
+                        existingData.Value = radarValue;
+                    }
+                }
+                await _context.SaveChangesAsync();
 
                 return Ok(new { success = true, redflags = redflagsPercentage, categories = categoryPercentages });
             }

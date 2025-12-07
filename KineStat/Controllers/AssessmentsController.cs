@@ -38,6 +38,14 @@ namespace KineStat.Controllers
                 .FirstOrDefaultAsync(s => s.AssessmentId == id);
 
             ViewBag.Socrate = socrate;
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.AssessmentId == assessment.Id && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.TintivValues = tintivData;
+
             return View(assessment);
         }
 
@@ -268,6 +276,17 @@ namespace KineStat.Controllers
                 .Include(a => a.Patient)
                 .Include(a => a.Dossier)
                 .FirstOrDefaultAsync(a => a.Id == assessmentId);
+
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId
+                             && cd.AssessmentId == assessment.Id
+                             && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.TintivValues = tintivData;
+
 
             if (assessment == null)
                 return NotFound("Aucun bilan trouvé");
