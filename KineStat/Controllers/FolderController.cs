@@ -52,8 +52,6 @@ namespace KineStat.Controllers
                 TempData["Error"] = $"Erreur: {ex.InnerException?.Message ?? ex.Message}";
                 return RedirectToAction("Anamnese", "Patient", new { id = dossier.PatientId });
             }
-
-            TempData["Success"] = "Dossier créé avec succès";
             return RedirectToAction("DossierDetails", "Folder", new { id = dossier.Id });
         }
 

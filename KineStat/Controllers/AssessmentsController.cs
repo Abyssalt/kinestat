@@ -152,8 +152,6 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Questionnaire SOCRATE enregistré avec succès.";
-
                 return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
             }
             catch (Exception ex)
