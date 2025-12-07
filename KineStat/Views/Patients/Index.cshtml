@@ -223,6 +223,10 @@
             <div class="modal-body">
                 <form id="addPatientForm" asp-controller="Patients" asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
+                    
+                    <input type="hidden" id="newDoctorLastName_hidden" name="NewDoctorLastName" value="">
+                    <input type="hidden" id="newDoctorFirstName_hidden" name="NewDoctorFirstName" value="">
+                    <input type="hidden" id="newDoctorINAMI_hidden" name="NewDoctorINAMI" value="">
 
                     <div class="row g-4">
                         <div class="col-12">
@@ -293,13 +297,54 @@
                             <label class="form-label small text-uppercase text-muted">Taille (cm)</label>
                             <input type="number" class="form-control cache-field" name="Height" data-field="Height" data-validation="decimal" min="0">
                         </div>
-                        <div class="col-12 col-md-6 col-xl-3">
-                            <label class="form-label small text-uppercase text-muted">Nom du médecin</label>
-                            <input type="text" class="form-control cache-field" name="DoctorName" data-field="DoctorName">
+                        
+                        <div class="col-12 col-md-6">
+                            <label class="form-label small text-uppercase text-muted">Médecin traitant</label>
+                            <select class="form-select cache-field" name="DoctorId" id="doctorSelect" data-field="DoctorId">
+                                <option value="">-- Aucun médecin --</option>
+                                @if (ViewBag.Doctors != null)
+                                {
+                                    @foreach (var doctor in ViewBag.Doctors)
+                                    {
+                                        <option value="@doctor.Id" data-inami="@doctor.NumeroINAMI">
+                                            Dr. @doctor.FirstName @doctor.LastName (INAMI: @doctor.NumeroINAMI)
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <div class="mt-2" id="addDoctorBtnContainer" style="display: none;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addDoctorBtn">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-12 col-md-6 col-xl-3">
-                            <label class="form-label small text-uppercase text-muted">N° INAMI du médecin</label>
-                            <input type="text" class="form-control cache-field" name="DoctorINAMI" data-field="DoctorINAMI">
+
+                        <div class="col-12 collapse" id="addDoctorSection">
+                            <div class="card mt-2 border-primary">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-muted small fw-semibold mb-3">
+                                        <i class="bi bi-person-plus me-2"></i>Nouveau médecin
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">Nom *</label>
+                                            <input type="text" class="form-control" id="newDoctorLastName" required>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">Prénom *</label>
+                                            <input type="text" class="form-control" id="newDoctorFirstName" required>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">N° INAMI *</label>
+                                            <input type="text" class="form-control" id="newDoctorINAMI" 
+                                                   placeholder="Ex: 12345678901" 
+                                                   pattern="^\d{11}$|^\d-\d{5}-\d{2}-\d{3}$"
+                                                   required>
+                                            <small class="text-muted">11 chiffres (ex: 12345678901)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-12 mt-4">
@@ -621,9 +666,64 @@
             attachRowEvents();
             attachCardEvents();
             document.querySelectorAll('.cache-field').forEach(input => ['input', 'blur', 'change'].forEach(evt => input.addEventListener(evt, () => saveField(input))));
-            document.getElementById('createPatientBtn').addEventListener('click', () => { localStorage.removeItem(ADD_STORAGE_KEY); document.getElementById('addPatientForm').submit(); });
+            
+            document.getElementById('createPatientBtn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const selectedDoctorId = document.getElementById('doctorSelect').value;
+                
+                if (selectedDoctorId === '') {
+                    document.getElementById('newDoctorLastName_hidden').value = 
+                        document.getElementById('newDoctorLastName').value.trim();
+                    document.getElementById('newDoctorFirstName_hidden').value = 
+                        document.getElementById('newDoctorFirstName').value.trim();
+                    document.getElementById('newDoctorINAMI_hidden').value = 
+                        document.getElementById('newDoctorINAMI').value.trim();
+                } else {
+                    document.getElementById('newDoctorLastName_hidden').value = '';
+                    document.getElementById('newDoctorFirstName_hidden').value = '';
+                    document.getElementById('newDoctorINAMI_hidden').value = '';
+                }
+                
+                localStorage.removeItem(ADD_STORAGE_KEY);
+                document.getElementById('addPatientForm').submit();
+            });
+            
             document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(performSearch, 300); });
             document.getElementById('statusFilter').addEventListener('change', performSearch);
+            
+            const doctorSelect = document.getElementById('doctorSelect');
+            const addDoctorBtnContainer = document.getElementById('addDoctorBtnContainer');
+            const addDoctorBtn = document.getElementById('addDoctorBtn');
+            const addDoctorSection = document.getElementById('addDoctorSection');
+            
+            function updateAddDoctorButtonVisibility() {
+                const selectedValue = doctorSelect.value;
+                
+                if (selectedValue === '') {
+                    addDoctorBtnContainer.style.display = 'block';
+                } else {
+                    addDoctorBtnContainer.style.display = 'none';
+                    
+                    const bsCollapse = bootstrap.Collapse.getInstance(addDoctorSection);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                    
+                    document.getElementById('newDoctorLastName').value = '';
+                    document.getElementById('newDoctorFirstName').value = '';
+                    document.getElementById('newDoctorINAMI').value = '';
+                }
+            }
+            
+            doctorSelect.addEventListener('change', updateAddDoctorButtonVisibility);
+            
+            updateAddDoctorButtonVisibility();
+            
+            addDoctorBtn.addEventListener('click', function() {
+                const bsCollapse = new bootstrap.Collapse(addDoctorSection, { toggle: true });
+            });
+            
             performSearch();
         });
 
