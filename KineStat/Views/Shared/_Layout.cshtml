@@ -1,10 +1,18 @@
 ﻿<!DOCTYPE html>
 <html lang="fr">
 
+
+
+
 <head>
 
     <meta charset="utf-8" />
-    
+
+    @if (ViewData["PatientId"] != null && ViewData["AssessmentId"] != null)
+    {
+        <meta name="patient-id" content="@ViewData["PatientId"]" />
+        <meta name="assessment-id" content="@ViewData["AssessmentId"]" />
+    }
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <title>@ViewData["Title"] - KineStat</title>
@@ -116,7 +124,7 @@
                             </div>
                             <hr class="my-2">
                             <div class="flex-grow-1 overflow-auto">
-                                <canvas id="radarChart9"></canvas>
+                                <canvas id="radarChart6Eye"></canvas>
                             </div>
                         </div>
                     </div>
@@ -147,32 +155,111 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", () => {
+            let radarChart6Instance = null;
+            let radarChart9Instance = null;
+            let radarChart6EyeInstance = null; // 
 
-                const canvas = document.getElementById("radarChart9");
+            function initOrUpdateRadarChart6() {
+                const ctx = document.getElementById("radarChart6");
+                if (!ctx) return;
 
-                if (!canvas) {
-                    return;
+                const categoriesArray = window.RedFlagsStore ? RedFlagsStore.getCategories() : [0, 0, 0, 0, 0, 0];
+                const data = categoriesArray.length === 6 ? categoriesArray : [0, 0, 0, 0, 0, 0];
+
+                if (radarChart6Instance) {
+                    radarChart6Instance.data.datasets[0].data = data;
+                    radarChart6Instance.update();
+                } else {
+                    radarChart6Instance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
+                            datasets: [{
+                                label: "Profil TINTIV",
+                                data: data,
+                                backgroundColor: "rgba(255,99,132,0.25)",
+                                borderColor: "rgb(255,99,132)",
+                                borderWidth: 3,
+                                pointBackgroundColor: "rgb(255,99,132)",
+                                pointBorderColor: "#fff"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    min: 0,
+                                    max: 10,
+                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
                 }
+            }
+            function initOrUpdateRadarChart6Eye() {
+                const ctx = document.getElementById("radarChart6Eye");
+                if (!ctx) return;
 
-                new Chart(canvas, {
+                const categoriesArray = window.RedFlagsStore ? RedFlagsStore.getCategories() : [0, 0, 0, 0, 0, 0];
+                const data = categoriesArray.length === 6 ? categoriesArray : [0, 0, 0, 0, 0, 0];
+
+                if (radarChart6EyeInstance) {
+                    radarChart6EyeInstance.data.datasets[0].data = data;
+                    radarChart6EyeInstance.update();
+                } else {
+                    radarChart6EyeInstance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
+                            datasets: [{
+                                label: "Profil TINTIV",
+                                data: data,
+                                backgroundColor: "rgba(255,99,132,0.25)",
+                                borderColor: "rgb(255,99,132)",
+                                borderWidth: 3,
+                                pointBackgroundColor: "rgb(255,99,132)",
+                                pointBorderColor: "#fff"
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    min: 0,
+                                    max: 10,
+                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }
+
+            function initRadarChart9() {
+                const ctx = document.getElementById("radarChart9");
+                if (!ctx || radarChart9Instance) return;
+
+                radarChart9Instance = new Chart(ctx, {
                     type: 'radar',
                     data: {
                         labels: [
-                            "Tumeur",
-                            "Infection",
-                            "Neurologique",
-                            "Traumatisme",
-                            "Inflammatoire",
-                            "Vasculaire"
+                            "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
+                            "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
+                            "Socio-environnemental", "Émotionnel/Affectif"
                         ],
                         datasets: [{
-                            label: "Profil TINTIV",
-                            data: [3, 10, 2, 8, 7, 1],
-                            backgroundColor: "rgba(255,99,132,0.25)",
-                            borderColor: "rgb(255,99,132)",
+                            label: "Profil clinique",
+                            data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
+                            backgroundColor: "rgba(13,110,253,0.25)",
+                            borderColor: "rgb(13,110,253)",
                             borderWidth: 3,
-                            pointBackgroundColor: "rgb(255,99,132)",
+                            pointBackgroundColor: "rgb(13,110,253)",
                             pointBorderColor: "#fff"
                         }]
                     },
@@ -183,19 +270,74 @@
                             r: {
                                 min: 0,
                                 max: 10,
-                                ticks: {
-                                    stepSize: 2,
-                                    backdropColor: "transparent"
-                                }
+                                ticks: { stepSize: 2, backdropColor: "transparent" }
                             }
                         },
-                        plugins: {
-                            legend: { display: false }
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            function updatePathologiesList(categoriesArray) {
+                const pathologies = [
+                    { name: "Tumoral", index: 0 },
+                    { name: "Infectieux", index: 1 },
+                    { name: "Neurologique", index: 2 },
+                    { name: "Traumatique", index: 3 },
+                    { name: "Inflammatoire", index: 4 },
+                    { name: "Vasculaire", index: 5 }
+                ];
+
+                const listContainer = document.querySelector('.card-header.bg-info + ul.list-group');
+                if (!listContainer) return;
+
+                const listItems = listContainer.querySelectorAll('.list-group-item');
+                pathologies.forEach((p, index) => {
+                    if (listItems[index]) {
+                        const badge = listItems[index].querySelector('.badge');
+                        if (badge) {
+                            const percentage = Math.round((categoriesArray[p.index] || 0) * 10);
+                            badge.textContent = `${percentage}%`;
                         }
                     }
                 });
-            });
-        </script>
+            }
+
+       
+            initRadarChart9();
+            initOrUpdateRadarChart6();
+            initOrUpdateRadarChart6Eye(); 
+
+            if (window.RedFlagsStore) {
+                RedFlagsStore.subscribeCategories(categoriesArray => {
+                    initOrUpdateRadarChart6();
+                    initOrUpdateRadarChart6Eye();
+                    updatePathologiesList(categoriesArray);
+                });
+            }
+
+            const assessmentIdMeta = document.querySelector('meta[name="assessment-id"]');
+            const patientIdMeta = document.querySelector('meta[name="patient-id"]');
+
+            if (assessmentIdMeta && patientIdMeta) {
+                const assessmentId = assessmentIdMeta.content;
+                const patientId = patientIdMeta.content;
+
+                fetch(`/Patient/${patientId}/Assessment/${assessmentId}/CategoryPercentages`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.categories) {
+                            if (window.RedFlagsStore) {
+                                RedFlagsStore.setCategories(data.categories);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors du chargement des catégories:", error);
+                    });
+            }
+        });
+    </script>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
@@ -246,6 +388,7 @@
                     }
                 });
             });
+
         </script>
 
     @await RenderSectionAsync("Scripts", required: false)

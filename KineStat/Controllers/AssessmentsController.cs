@@ -274,7 +274,7 @@ namespace KineStat.Controllers
 
             if (assessment.PatientId != id)
                 return BadRequest("Ce bilan n'appartient pas à ce patient.");
-
+            ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessment.Id;
 
             return View(assessment);
