@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class initalDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,6 +40,21 @@ namespace KineStat.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Doctors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    NumeroINAMI = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Doctors", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -169,14 +184,18 @@ namespace KineStat.Migrations
                     AntecedentsMedicaux = table.Column<string>(type: "text", nullable: true),
                     MedicationActuelle = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    DoctorName = table.Column<string>(type: "text", nullable: true),
-                    DoctorINAMI = table.Column<string>(type: "text", nullable: true),
+                    DoctorId = table.Column<int>(type: "integer", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     PhysioId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Patients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Patients_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Patients_Physios_PhysioId",
                         column: x => x.PhysioId,
@@ -362,14 +381,14 @@ namespace KineStat.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AssessmentId = table.Column<int>(type: "integer", nullable: false),
                     PatientId = table.Column<int>(type: "integer", nullable: false),
-                    Site = table.Column<string>(type: "text", nullable: false),
-                    Onset = table.Column<string>(type: "text", nullable: false),
-                    Character = table.Column<string>(type: "text", nullable: false),
-                    Radiation = table.Column<string>(type: "text", nullable: false),
-                    Association = table.Column<string>(type: "text", nullable: false),
-                    Timing = table.Column<string>(type: "text", nullable: false),
-                    ExacerbatingFactor = table.Column<string>(type: "text", nullable: false),
-                    RelievingFactor = table.Column<string>(type: "text", nullable: false)
+                    Site = table.Column<string>(type: "text", nullable: true),
+                    Onset = table.Column<string>(type: "text", nullable: true),
+                    Character = table.Column<string>(type: "text", nullable: true),
+                    Radiation = table.Column<string>(type: "text", nullable: true),
+                    Association = table.Column<string>(type: "text", nullable: true),
+                    Timing = table.Column<string>(type: "text", nullable: true),
+                    ExacerbatingFactor = table.Column<string>(type: "text", nullable: true),
+                    RelievingFactor = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -652,6 +671,11 @@ namespace KineStat.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Patients_DoctorId",
+                table: "Patients",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Patients_PhysioId",
                 table: "Patients",
                 column: "PhysioId");
@@ -766,6 +790,9 @@ namespace KineStat.Migrations
 
             migrationBuilder.DropTable(
                 name: "Patients");
+
+            migrationBuilder.DropTable(
+                name: "Doctors");
 
             migrationBuilder.DropTable(
                 name: "Physios");

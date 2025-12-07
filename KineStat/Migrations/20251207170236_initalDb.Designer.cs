@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    [Migration("20251202200510_initialCreate")]
-    partial class initialCreate
+    [Migration("20251207170236_initalDb")]
+    partial class initalDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,6 +200,34 @@ namespace KineStat.Migrations
                     b.ToTable("Cluster");
                 });
 
+            modelBuilder.Entity("KineStat.Models.Doctor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NumeroINAMI")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Doctors");
+                });
+
             modelBuilder.Entity("KineStat.Models.Dossier", b =>
                 {
                     b.Property<int>("Id")
@@ -317,11 +345,8 @@ namespace KineStat.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("DoctorINAMI")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DoctorName")
-                        .HasColumnType("text");
+                    b.Property<int?>("DoctorId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -365,6 +390,8 @@ namespace KineStat.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
 
                     b.HasIndex("PhysioId");
 
@@ -637,38 +664,30 @@ namespace KineStat.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Association")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Character")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ExacerbatingFactor")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Onset")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Radiation")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RelievingFactor")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Site")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Timing")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -866,11 +885,17 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.Patient", b =>
                 {
+                    b.HasOne("KineStat.Models.Doctor", "Doctor")
+                        .WithMany("Patients")
+                        .HasForeignKey("DoctorId");
+
                     b.HasOne("KineStat.Models.Physio", "Physio")
                         .WithMany("Patients")
                         .HasForeignKey("PhysioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Doctor");
 
                     b.Navigation("Physio");
                 });
@@ -1052,6 +1077,11 @@ namespace KineStat.Migrations
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("KineStat.Models.Doctor", b =>
+                {
+                    b.Navigation("Patients");
                 });
 
             modelBuilder.Entity("KineStat.Models.Dossier", b =>

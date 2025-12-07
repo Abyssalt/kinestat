@@ -200,7 +200,17 @@ namespace KineStat.Controllers
 
                 double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
 
-                return Ok(new { success = true, redflags = redflagsPercentage });
+                var categoryPercentages = new List<double>();
+
+                for (int categoryId = 1; categoryId <= 6; categoryId++)
+                {
+                    double probability = await CalculateRedFlagCategory(answerDto.PatientId, assessment.Id, categoryId);
+                    double radarValue = (probability * 100) / 10;
+                    categoryPercentages.Add(radarValue);
+                }
+
+
+                return Ok(new { success = true, redflags = redflagsPercentage, categories = categoryPercentages });
             }
             catch (DbUpdateException dbEx)
             {
@@ -313,6 +323,34 @@ namespace KineStat.Controllers
                 CategoryRedFlags[id] = result;
             }
             return CategoryRedFlags;
+        }
+
+
+        /// <summary>
+        /// Retrieves the red flags percentages for all TINTIV categories (categories 1-6)
+        /// Returns values scaled for radar chart (0-10 scale)
+        /// </summary>
+        [HttpGet]
+        [Route("Patient/{patientId}/Assessment/{assessmentId}/CategoryPercentages")]
+        public async Task<IActionResult> GetCategoryPercentages(int patientId, int assessmentId)
+        {
+            try
+            {
+                var categoryPercentages = new List<double>();
+
+                for (int categoryId = 1; categoryId <= 6; categoryId++)
+                {
+                    double probability = await CalculateRedFlagCategory(patientId, assessmentId, categoryId);
+                    double radarValue = (probability * 100) / 10;
+                    categoryPercentages.Add(radarValue);
+                }
+
+                return Ok(new { success = true, categories = categoryPercentages });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Erreur lors du calcul des catégories", details = ex.Message });
+            }
         }
     }
 }

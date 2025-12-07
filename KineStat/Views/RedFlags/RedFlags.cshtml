@@ -246,7 +246,9 @@
         console.log("Saved:", data);
 
         RedFlagsStore.set(data.redflags);
-
+        if (data.categories) {
+            RedFlagsStore.setCategories(data.categories);
+        }
         if (data.redflags >= criticalRedflagThreshold) {
             showCriticalRedFlagModal(patientId);
         }
