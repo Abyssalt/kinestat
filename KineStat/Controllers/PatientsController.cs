@@ -53,6 +53,11 @@ namespace KineStat.Controllers
                 .OrderBy(p => p.LastName)
                 .ToListAsync();
 
+            ViewBag.Doctors = await _context.Doctors
+                .OrderBy(d => d.LastName)
+                .ThenBy(d => d.FirstName)
+                .ToListAsync();
+
             ViewBag.SearchTerm = search;
             ViewBag.StatusFilter = status;
 
@@ -133,10 +138,12 @@ namespace KineStat.Controllers
         /// displayed; otherwise, an error message is shown.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Patient patient)
+        public async Task<IActionResult> Create(Patient patient, string? NewDoctorLastName, string? NewDoctorFirstName, string? NewDoctorINAMI)
         {
             if (ModelState.IsValid)
             {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                
                 try
                 {
                     var existingPatientByNiss = await _context.Patients
@@ -145,6 +152,7 @@ namespace KineStat.Controllers
                     if (existingPatientByNiss != null)
                     {
                         TempData["Error"] = $"Un patient avec ce numéro de sécurité sociale existe déjà : {existingPatientByNiss.FirstName} {existingPatientByNiss.LastName}";
+                        await transaction.RollbackAsync();
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -154,17 +162,64 @@ namespace KineStat.Controllers
                     if (existingPatientByPhone != null)
                     {
                         TempData["Error"] = $"Un patient avec ce numéro de téléphone existe déjà : {existingPatientByPhone.FirstName} {existingPatientByPhone.LastName}";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(NewDoctorLastName) && 
+                        !string.IsNullOrWhiteSpace(NewDoctorFirstName) && 
+                        !string.IsNullOrWhiteSpace(NewDoctorINAMI))
+                    {
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(NewDoctorINAMI, @"^\d{11}$|^\d-\d{5}-\d{2}-\d{3}$"))
+                        {
+                            TempData["Error"] = "Le numéro INAMI du médecin doit contenir 11 chiffres.";
+                            await transaction.RollbackAsync();
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                        var existingDoctor = await _context.Doctors
+                            .FirstOrDefaultAsync(d => d.NumeroINAMI == NewDoctorINAMI);
+
+                        if (existingDoctor != null)
+                        {
+                            TempData["Error"] = $"Un médecin avec ce numéro INAMI existe déjà : Dr. {existingDoctor.FirstName} {existingDoctor.LastName}";
+                            await transaction.RollbackAsync();
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                        var newDoctor = new Doctor
+                        {
+                            LastName = NewDoctorLastName,
+                            FirstName = NewDoctorFirstName,
+                            NumeroINAMI = NewDoctorINAMI
+                        };
+
+                        _context.Doctors.Add(newDoctor);
+                        await _context.SaveChangesAsync();
+
+                        patient.DoctorId = newDoctor.Id;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(NewDoctorLastName) || 
+                             !string.IsNullOrWhiteSpace(NewDoctorFirstName) || 
+                             !string.IsNullOrWhiteSpace(NewDoctorINAMI))
+                    {
+                        TempData["Error"] = "Si vous souhaitez ajouter un nouveau médecin, tous les champs (Nom, Prénom, INAMI) doivent être remplis.";
+                        await transaction.RollbackAsync();
                         return RedirectToAction(nameof(Index));
                     }
 
                     patient.Status = PatientStatus.Actif;
                     _context.Add(patient);
                     await _context.SaveChangesAsync();
+                    
+                    await transaction.CommitAsync();
+                    
                     TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} créé avec succès !";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     TempData["Error"] = $"Erreur lors de la création : {ex.Message}";
 
                     if (ex.InnerException != null)
