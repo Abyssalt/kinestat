@@ -153,7 +153,7 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AssessmentId")
+                    b.Property<int?>("AssessmentId")
                         .HasColumnType("integer");
 
                     b.Property<int>("CategoryId")
@@ -839,9 +839,7 @@ namespace KineStat.Migrations
                 {
                     b.HasOne("KineStat.Models.Assessment", "Assessment")
                         .WithMany()
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssessmentId");
 
                     b.HasOne("KineStat.Models.Category", "Category")
                         .WithMany()

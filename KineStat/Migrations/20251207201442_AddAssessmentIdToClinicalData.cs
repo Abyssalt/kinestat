@@ -14,8 +14,7 @@ namespace KineStat.Migrations
                 name: "AssessmentId",
                 table: "ClinicalDatas",
                 type: "integer",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ClinicalDatas_AssessmentId",
@@ -27,8 +26,7 @@ namespace KineStat.Migrations
                 table: "ClinicalDatas",
                 column: "AssessmentId",
                 principalTable: "Assessments",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
