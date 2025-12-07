@@ -34,6 +34,7 @@ namespace KineStat.Data
         public DbSet<Dossier> Dossiers { get; set; }
         public DbSet<Administrator> Administrators { get; set; }
         public DbSet<PatientAnswerTests> PatientAnswerTests { get; set; }
+        public DbSet<Doctor> Doctors { get; set; }
 
     }
 }
