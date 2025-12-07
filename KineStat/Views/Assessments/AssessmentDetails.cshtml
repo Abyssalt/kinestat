@@ -360,7 +360,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-
+        const tintivValues = @Html.Raw(Json.Serialize(ViewBag.TintivValues ?? new List<double> { 0, 0, 0, 0, 0, 0 }));
         const defaultOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -444,7 +444,7 @@
                 ],
                 datasets: [{
                     label: "Profil TINTIV",
-                    data: [3, 10, 2, 8, 7, 1],
+                    data: tintivValues,
                     backgroundColor: "rgba(255,99,132,0.25)",
                     borderColor: "rgb(255,99,132)",
                     borderWidth: 3,

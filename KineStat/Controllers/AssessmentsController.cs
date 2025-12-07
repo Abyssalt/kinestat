@@ -38,6 +38,14 @@ namespace KineStat.Controllers
                 .FirstOrDefaultAsync(s => s.AssessmentId == id);
 
             ViewBag.Socrate = socrate;
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.TintivValues = tintivData;
+
             return View(assessment);
         }
 
