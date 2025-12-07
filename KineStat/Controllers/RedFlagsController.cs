@@ -215,7 +215,7 @@ namespace KineStat.Controllers
 
                     var existingData = _context.ClinicalDatas
                         .FirstOrDefault(cd =>
-                            cd.PatientId == answerDto.PatientId &&
+                            cd.PatientId == answerDto.PatientId && cd.AssessmentId == assessment.Id &&
                             cd.CategoryId == categoryId);
 
                     if (existingData == null)
