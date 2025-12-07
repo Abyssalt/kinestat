@@ -65,8 +65,7 @@
                         data-physioid="@(Model.PhysioId)"
                         data-weight="@(Model.Weight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-height="@(Model.Height?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
-                        data-doctorname="@(Model.DoctorName ?? "")"
-                        data-doctorinami="@(Model.DoctorINAMI ?? "")"
+                        data-doctorid="@(Model.DoctorId?.ToString() ?? "")"
                         data-address="@(Model.Address ?? "")">
                     <i class="bi bi-pencil me-1"></i>Modifier
                 </button>
@@ -146,11 +145,20 @@
                     </div>
                     <div class="col-12 col-md-4 mb-3">
                         <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Médecin traitant</label>
-                        <p class="form-control-plaintext mb-0">@(Model.DoctorName ?? "Non renseigné")</p>
+                        <p class="form-control-plaintext mb-0">
+                            @if (Model.Doctor != null)
+                            {
+                                <text>Dr. @Model.Doctor.FirstName @Model.Doctor.LastName</text>
+                            }
+                            else
+                            {
+                                <text>Non renseigné</text>
+                            }
+                        </p>
                     </div>
                     <div class="col-12 col-md-4 mb-3">
                         <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">N° INAMI du médecin</label>
-                        <p class="form-control-plaintext mb-0">@(Model.DoctorINAMI ?? "Non renseigné")</p>
+                        <p class="form-control-plaintext mb-0">@(Model.Doctor?.NumeroINAMI ?? "Non renseigné")</p>
                     </div>
                 </div>
             </div>
@@ -307,6 +315,10 @@
                 <form id="editPatientForm" asp-controller="Patient" asp-action="Edit" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="edit_Id" name="Id">
+                    
+                    <input type="hidden" id="edit_newDoctorLastName_hidden" name="NewDoctorLastName" value="">
+                    <input type="hidden" id="edit_newDoctorFirstName_hidden" name="NewDoctorFirstName" value="">
+                    <input type="hidden" id="edit_newDoctorINAMI_hidden" name="NewDoctorINAMI" value="">
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -376,13 +388,57 @@
                             <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Taille (cm)</label>
                             <input type="number" step="0.1" class="form-control edit-field" id="edit_Height" name="Height" data-validation="decimal">
                         </div>
-                        <div class="col-12 col-md-6">
+                        
+                        <div class="col-12">
                             <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Médecin traitant</label>
-                            <input type="text" class="form-control edit-field" id="edit_DoctorName" name="DoctorName">
+                            <select class="form-select edit-field" name="DoctorId" id="edit_DoctorSelect">
+                                <option value="">-- Aucun médecin --</option>
+                                @if (ViewBag.Doctors != null)
+                                {
+                                    @foreach (var doctor in ViewBag.Doctors)
+                                    {
+                                        <option value="@doctor.Id" data-inami="@doctor.NumeroINAMI">
+                                            Dr. @doctor.FirstName @doctor.LastName (INAMI: @doctor.NumeroINAMI)
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <div class="mt-2" id="edit_addDoctorBtnContainer" style="display: none;">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="edit_addDoctorBtn">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">N° INAMI du médecin</label>
-                            <input type="text" class="form-control edit-field" id="edit_DoctorINAMI" name="DoctorINAMI" data-validation="inami">
+
+                        <div class="col-12 collapse" id="editAddDoctorSection">
+                            <div class="card mt-2 border-primary">
+                                <div class="card-body">
+                                    <h6 class="text-uppercase text-muted small fw-semibold mb-3">
+                                        <i class="bi bi-person-plus me-2"></i>Nouveau médecin
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">Nom *</label>
+                                            <input type="text" class="form-control" id="edit_newDoctorLastName" required>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">Prénom *</label>
+                                            <input type="text" class="form-control" id="edit_newDoctorFirstName" required>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small">N° INAMI *</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="edit_newDoctorINAMI"
+                                                   placeholder="Ex: 12345678901"
+                                                   pattern="^\d{11}$"
+                                                   required>
+
+                                            <small class="text-muted">11 chiffres (ex: 12345678901)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -610,8 +666,25 @@
                 });
             });
 
-            document.getElementById('saveEditBtn').addEventListener('click', function() {
+            document.getElementById('saveEditBtn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                
                 if (areEditRequiredFieldsFilled()) {
+                    const selectedDoctorId = document.getElementById('edit_DoctorSelect').value;
+                    
+                    if (selectedDoctorId === '') {
+                        document.getElementById('edit_newDoctorLastName_hidden').value = 
+                            document.getElementById('edit_newDoctorLastName').value.trim();
+                        document.getElementById('edit_newDoctorFirstName_hidden').value = 
+                            document.getElementById('edit_newDoctorFirstName').value.trim();
+                        document.getElementById('edit_newDoctorINAMI_hidden').value = 
+                            document.getElementById('edit_newDoctorINAMI').value.trim();
+                    } else {
+                        document.getElementById('edit_newDoctorLastName_hidden').value = '';
+                        document.getElementById('edit_newDoctorFirstName_hidden').value = '';
+                        document.getElementById('edit_newDoctorINAMI_hidden').value = '';
+                    }
+                    
                     document.getElementById('editPatientForm').submit();
                 }
             });
@@ -633,8 +706,7 @@
                     document.getElementById('edit_PhysioId').value = data.physioid;
                     document.getElementById('edit_Weight').value = data.weight;
                     document.getElementById('edit_Height').value = data.height;
-                    document.getElementById('edit_DoctorName').value = data.doctorname || '';
-                    document.getElementById('edit_DoctorINAMI').value = data.doctorinami || '';
+                    document.getElementById('edit_DoctorSelect').value = data.doctorid || '';
 
                     const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
                     editModal.show();
@@ -646,8 +718,39 @@
                             }
                         });
                         updateEditButton();
+                        updateEditAddDoctorButtonVisibility();
                     }, 150);
                 });
+            });
+            
+            const editDoctorSelect = document.getElementById('edit_DoctorSelect');
+            const editAddDoctorBtnContainer = document.getElementById('edit_addDoctorBtnContainer');
+            const editAddDoctorBtn = document.getElementById('edit_addDoctorBtn');
+            const editAddDoctorSection = document.getElementById('editAddDoctorSection');
+            
+            function updateEditAddDoctorButtonVisibility() {
+                const selectedValue = editDoctorSelect.value;
+                
+                if (selectedValue === '') {
+                    editAddDoctorBtnContainer.style.display = 'block';
+                } else {
+                    editAddDoctorBtnContainer.style.display = 'none';
+                    
+                    const bsCollapse = bootstrap.Collapse.getInstance(editAddDoctorSection);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                    
+                    document.getElementById('edit_newDoctorLastName').value = '';
+                    document.getElementById('edit_newDoctorFirstName').value = '';
+                    document.getElementById('edit_newDoctorINAMI').value = '';
+                }
+            }
+            
+            editDoctorSelect.addEventListener('change', updateEditAddDoctorButtonVisibility);
+            
+            editAddDoctorBtn.addEventListener('click', function() {
+                const bsCollapse = new bootstrap.Collapse(editAddDoctorSection, { toggle: true });
             });
         });
 

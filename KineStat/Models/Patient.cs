@@ -57,9 +57,8 @@ namespace KineStat.Models
 
         public PatientStatus Status { get; set; }
 
-        public string? DoctorName { get; set; }
-
-        public string? DoctorINAMI { get; set; }
+        public int? DoctorId { get; set; }
+        public Doctor? Doctor { get; set; }
 
         public string? Address { get; set; }
 
