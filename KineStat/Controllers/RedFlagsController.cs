@@ -223,12 +223,14 @@ namespace KineStat.Controllers
                         _context.ClinicalDatas.Add(new ClinicalData
                         {
                             PatientId = answerDto.PatientId,
+                            AssessmentId = assessment.Id,
                             CategoryId = categoryId,
                             Value = radarValue
                         });
                     }
                     else
                     {
+                        existingData.AssessmentId = assessment.Id;
                         existingData.Value = radarValue;
                     }
                 }
