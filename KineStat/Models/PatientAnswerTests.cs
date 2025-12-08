@@ -32,7 +32,7 @@ namespace KineStat.Models
 
         [MaxLength(2000)]
         public string? Observations { get; set; }
-
+        public int? AssessmentId { get; set; }
         public bool IsCustomTest { get; set; } = false;
 
         [MaxLength(200)]

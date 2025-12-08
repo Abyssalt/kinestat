@@ -45,6 +45,7 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
+            // Récupérer les questions de screening (ClusterId = NULL)
             var allQuestions = await _context.Questions
                 .Include(q => q.Category)
                 .Where(q => q.ClusterId == null)
@@ -77,7 +78,6 @@ namespace KineStat.Controllers
                 }
                 else if (question is QuestionQCM qQcm)
                 {
-
                     var qcmWithAnswers = await _context.QuestionQCMs
                         .Include(q => q.Answers)
                         .FirstOrDefaultAsync(q => q.Id == question.Id);
@@ -92,12 +92,13 @@ namespace KineStat.Controllers
                 }
                 else if (question is QuestionLadder qLadder)
                 {
+                    // ✅ NOUVEAU : Support des questions à échelle
                     questionData = new
                     {
                         id = question.Id,
                         question = question.Title,
                         type = "ladder",
-                        options = Enumerable.Range(0, 11).Select(i => i.ToString()).ToArray()
+                        options = Enumerable.Range(qLadder.Min, qLadder.Max - qLadder.Min + 1).Select(i => i.ToString()).ToArray()
                     };
                 }
                 else
@@ -114,7 +115,12 @@ namespace KineStat.Controllers
                 groupedQuestions[categoryName].Add(questionData);
             }
 
-            return Json(groupedQuestions);
+            // Filtrer les catégories vides
+            var filteredQuestions = groupedQuestions
+                .Where(kvp => kvp.Value.Count > 0)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            return Json(filteredQuestions);
         }
 
 
@@ -134,19 +140,25 @@ namespace KineStat.Controllers
             try
             {
                 var dateResponse = DateTime.UtcNow;
-                var today = dateResponse.Date;
 
-                var existingResponses = await _context.PatientAnswerTests
+                // ✅ IMPORTANT : Filtrer par assessmentId si présent
+                var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
-                              && pr.DateResponse.Date == today
-                              && !pr.IsCustomTest)
-                    .ToListAsync();
+                              && !pr.IsCustomTest);
+
+                if (dto.AssessmentId.HasValue)
+                {
+                    query = query.Where(pr => pr.AssessmentId == dto.AssessmentId.Value);
+                }
+
+                var existingResponses = await query.ToListAsync();
 
                 int savedCount = 0;
                 int updatedCount = 0;
 
                 foreach (var responseDto in dto.Responses)
                 {
+                    // Vérifier que la question est bien de screening
                     var question = await _context.Questions
                         .FirstOrDefaultAsync(q => q.Id == responseDto.QuestionId && q.ClusterId == null);
 
@@ -160,6 +172,7 @@ namespace KineStat.Controllers
 
                     if (existingResponse != null)
                     {
+                        // UPDATE
                         existingResponse.ResponseValue = responseDto.Response;
                         existingResponse.Observations = responseDto.Notes;
                         existingResponse.DateResponse = dateResponse;
@@ -169,9 +182,11 @@ namespace KineStat.Controllers
                     }
                     else
                     {
+                        // INSERT
                         var newResponse = new PatientAnswerTests()
                         {
                             PatientId = dto.PatientId,
+                            AssessmentId = dto.AssessmentId, 
                             QuestionId = responseDto.QuestionId,
                             ResponseValue = responseDto.Response,
                             Observations = responseDto.Notes,
@@ -214,24 +229,28 @@ namespace KineStat.Controllers
         /// category names.</remarks>
         /// <param name="id">The unique identifier of the patient whose responses are to be retrieved.</param>
         /// <returns>A JSON result containing a list of response objects for the patient. If no responses are found or an error
-        /// occurs, returns an empty list.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetExistingResponses(int id)
+        public async Task<IActionResult> GetExistingResponses(int id, int? assessmentId)
         {
             try
             {
-                var today = DateTime.UtcNow.Date;
-
-                var existingResponses = await _context.PatientAnswerTests
+                // ✅ Charger UNIQUEMENT les réponses pour ce patient ET ce bilan
+                var query = _context.PatientAnswerTests
                     .Include(pr => pr.Question)
                     .ThenInclude(q => q.Category)
                     .Where(pr => pr.PatientId == id
-                                 && pr.DateResponse.Date == today
                                  && !pr.IsCustomTest
-                                 && pr.Question.ClusterId == null)
+                                 && pr.Question.ClusterId == null); // Seulement screening
+
+                // ✅ Filtrer par assessmentId si fourni
+                if (assessmentId.HasValue)
+                {
+                    query = query.Where(pr => pr.AssessmentId == assessmentId.Value);
+                }
+
+                var existingResponses = await query
                     .OrderByDescending(pr => pr.DateResponse)
                     .ToListAsync();
-
 
                 var formattedResponses = existingResponses.Select(pr => new
                 {
@@ -245,6 +264,7 @@ namespace KineStat.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Erreur GetExistingResponses: {ex.Message}");
                 return Json(new List<object>());
             }
         }
