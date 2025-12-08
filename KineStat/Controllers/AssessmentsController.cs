@@ -285,6 +285,16 @@ namespace KineStat.Controllers
 
             ViewBag.TintivValues = tintivData;
 
+            var tests = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .Where(t =>
+                    t.PatientId == id &&
+                    t.AssessmentId == assessmentId)
+                .OrderBy(t => t.DateResponse)
+                .OrderBy(t => t.Question.Cluster.Name)
+                .ToListAsync();
+
+            ViewBag.Tests = tests;
 
             if (assessment == null)
                 return NotFound("Aucun bilan trouvé");

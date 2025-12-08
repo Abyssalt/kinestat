@@ -3,6 +3,7 @@
     public class SaveTestResultsDTO
     {
         public int PatientId { get; set; }
+        public int AssessmentId { get; set; }
         public List<TestResponseDTO> Tests { get; set; } = new List<TestResponseDTO>();
     }
 
