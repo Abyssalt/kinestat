@@ -287,6 +287,7 @@ namespace KineStat.Controllers
 
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
+                .ThenInclude(q=> q.Cluster)
                 .Where(t =>
                     t.PatientId == id &&
                     t.AssessmentId == assessmentId)
