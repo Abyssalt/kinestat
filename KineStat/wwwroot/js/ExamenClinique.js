@@ -146,6 +146,9 @@ async function loadQuestionnaire() {
         // Trouver la première catégorie disponible
         const firstCategory = Object.keys(allQuestionsData)[0] || 'Articulaire / Structurel';
 
+        // ✅ Mettre à jour la catégorie courante
+        currentCategory = firstCategory;
+
         // Activer le bouton de la première catégorie
         document.querySelectorAll('button[data-category]').forEach(btn => {
             if (btn.dataset.category === firstCategory) {
@@ -155,6 +158,14 @@ async function loadQuestionnaire() {
         });
 
         displayQuestions(firstCategory);
+
+        // ✅ SOLUTION : Forcer le refresh après que le DOM soit complètement rendu
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                console.log('=== Refresh forcé après rendu DOM ===');
+                refreshSuggestionsForCategory(currentCategory);
+            });
+        });
     } catch (error) {
         console.error('Erreur:', error);
         document.getElementById('questionnaireContainer').innerHTML = `
@@ -176,10 +187,13 @@ async function loadExistingResponses() {
         const existingData = await response.json();
         console.log('=== Réponses existantes chargées ===', existingData);
         console.log('AssessmentId:', globalAssessmentId);
+        console.log('Nombre de réponses:', existingData.length);
 
         // Organiser les réponses par catégorie
         existingData.forEach(resp => {
             const category = resp.categoryName;
+            console.log(`Chargement réponse: QuestionId=${resp.questionId}, Catégorie="${category}", Valeur="${resp.responseValue}"`);
+
             if (!userResponses[category]) {
                 userResponses[category] = {};
             }
@@ -190,6 +204,7 @@ async function loadExistingResponses() {
         });
 
         console.log('Réponses organisées par catégorie:', userResponses);
+        console.log('Catégories avec réponses:', Object.keys(userResponses));
     } catch (error) {
         console.warn('Impossible de charger les réponses existantes:', error);
     }
@@ -349,6 +364,8 @@ async function saveResponses() {
 // ========================================
 
 function displayQuestions(category) {
+    console.log(`=== displayQuestions appelée avec: "${category}" ===`);
+
     const container = document.getElementById('questionnaireContainer');
     container.innerHTML = '';
 
@@ -377,6 +394,9 @@ function displayQuestions(category) {
             container.appendChild(questionCard);
         });
     });
+
+    console.log('Questions affichées, userResponses avant refresh:', userResponses);
+    console.log('userResponses pour cette catégorie:', userResponses[category]);
 
     // Recharger les suggestions pour cette catégorie
     refreshSuggestionsForCategory(category);
@@ -457,13 +477,17 @@ function createQuestionCard(question, uniqueId, category) {
         inputElem.addEventListener('input', function () {
             rangeElem.value = this.value;
             displayElem.textContent = this.value;
-            saveResponseLocally(question.id, this.value, category);
+            // ✅ FIX FINAL: Capturer depuis le DOM
+            const cardCategory = card.dataset.category;
+            saveResponseLocally(question.id, this.value, cardCategory);
         });
 
         rangeElem.addEventListener('input', function () {
             inputElem.value = this.value;
             displayElem.textContent = this.value;
-            saveResponseLocally(question.id, this.value, category);
+            // ✅ FIX FINAL: Capturer depuis le DOM
+            const cardCategory = card.dataset.category;
+            saveResponseLocally(question.id, this.value, cardCategory);
         });
 
     } else if (question.options && question.options.length > 0) {
@@ -506,8 +530,12 @@ function createQuestionCard(question, uniqueId, category) {
 
             // Ajouter event listener
             radioInput.addEventListener('change', function () {
-                updateSuggestions(category, opt, question.id);
-                saveResponseLocally(question.id, opt, category);
+                // ✅ FIX FINAL: Capturer la catégorie depuis la carte elle-même
+                const cardCategory = card.dataset.category;
+                console.log('Radio button changé, catégorie de la carte:', cardCategory);
+                console.log('currentCategory globale:', currentCategory);
+                updateSuggestions(cardCategory, opt, question.id);
+                saveResponseLocally(question.id, opt, cardCategory);
             });
 
             optionsDiv.appendChild(wrapper);
@@ -592,32 +620,60 @@ function saveResponseLocally(questionId, response, category) {
 // ========================================
 
 function updateSuggestions(category, response, questionId) {
+    console.log(`=== updateSuggestions appelée ===`);
+    console.log('Catégorie:', category);
+    console.log('Réponse:', response);
+    console.log('QuestionId:', questionId);
+    console.log('currentCategory (globale):', currentCategory);
+
     if (!userResponses[category]) {
         userResponses[category] = {};
     }
     userResponses[category][questionId] = response;
 
-    const yesCount = Object.values(userResponses[category])
-        .filter(r => typeof r === 'string' && r === 'Oui').length;
+    console.log('userResponses après sauvegarde:', userResponses[category]);
 
+    // Compter uniquement les "Oui" (exclure les notes)
+    const yesCount = Object.entries(userResponses[category])
+        .filter(([key, value]) => !key.includes('_notes'))
+        .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
+        .length;
+
+    console.log('Nombre de "Oui" calculé:', yesCount);
     displaySuggestions(category, yesCount);
 }
 
 function refreshSuggestionsForCategory(category) {
+    console.log(`=== Refresh suggestions pour: ${category} ===`);
+    console.log('userResponses[category]:', userResponses[category]);
+
     if (userResponses[category]) {
-        const yesCount = Object.values(userResponses[category])
-            .filter(r => typeof r === 'string' && r === 'Oui').length;
+        // Filtrer les réponses (exclure les clés "_notes")
+        const yesCount = Object.entries(userResponses[category])
+            .filter(([key, value]) => !key.includes('_notes')) // Exclure les notes
+            .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
+            .length;
+
+        console.log('Nombre de "Oui":', yesCount);
         displaySuggestions(category, yesCount);
     } else {
+        console.log('Aucune réponse trouvée pour cette catégorie');
         displaySuggestions(category, 0);
     }
 }
 
 function displaySuggestions(category, yesCount) {
+    console.log(`=== displaySuggestions appelée ===`);
+    console.log('Catégorie:', category);
+    console.log('YesCount:', yesCount);
+    console.log('testSuggestions pour cette catégorie:', testSuggestions[category]);
+
     const container = document.getElementById('suggestedTestsContainer');
 
     if (yesCount > 0 && testSuggestions[category] && testSuggestions[category]['Oui']) {
         const tests = testSuggestions[category]['Oui'];
+
+        console.log('✅ Affichage des suggestions:', tests.length, 'tests');
 
         container.innerHTML = `
             <div class="mb-3">
@@ -642,6 +698,11 @@ function displaySuggestions(category, yesCount) {
             </div>
         `;
     } else {
+        console.log('❌ Pas de suggestions à afficher');
+        if (yesCount === 0) console.log('Raison: yesCount = 0');
+        if (!testSuggestions[category]) console.log('Raison: testSuggestions[category] undefined');
+        if (testSuggestions[category] && !testSuggestions[category]['Oui']) console.log('Raison: testSuggestions[category]["Oui"] undefined');
+
         container.innerHTML = `
             <p class="text-muted small mb-0">
                 <i class="bi bi-info-circle me-2"></i>
@@ -659,10 +720,6 @@ window.ExamenClinique = {
     init: function (patientId, assessmentId) {
         globalPatientId = patientId;
         globalAssessmentId = assessmentId;
-
-        console.log('=== Initialisation ===');
-        console.log('PatientId:', globalPatientId);
-        console.log('AssessmentId:', globalAssessmentId);
 
         document.addEventListener('DOMContentLoaded', function () {
             initializeTabs();

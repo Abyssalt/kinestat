@@ -45,10 +45,13 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
-            // Récupérer les questions de screening (ClusterId = NULL)
+
+
+            var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
+
             var allQuestions = await _context.Questions
                 .Include(q => q.Category)
-                .Where(q => q.ClusterId == null)
+                .Where(q => q.ClusterId == null && examCliniqueCategories.Contains(q.CategoryId))
                 .OrderBy(q => q.CategoryId)
                 .ThenBy(q => q.Title)
                 .ToListAsync();
@@ -92,7 +95,6 @@ namespace KineStat.Controllers
                 }
                 else if (question is QuestionLadder qLadder)
                 {
-                    // ✅ NOUVEAU : Support des questions à échelle
                     questionData = new
                     {
                         id = question.Id,
@@ -115,7 +117,6 @@ namespace KineStat.Controllers
                 groupedQuestions[categoryName].Add(questionData);
             }
 
-            // Filtrer les catégories vides
             var filteredQuestions = groupedQuestions
                 .Where(kvp => kvp.Value.Count > 0)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -141,7 +142,6 @@ namespace KineStat.Controllers
             {
                 var dateResponse = DateTime.UtcNow;
 
-                // ✅ IMPORTANT : Filtrer par assessmentId si présent
                 var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
                               && !pr.IsCustomTest);
@@ -158,7 +158,6 @@ namespace KineStat.Controllers
 
                 foreach (var responseDto in dto.Responses)
                 {
-                    // Vérifier que la question est bien de screening
                     var question = await _context.Questions
                         .FirstOrDefaultAsync(q => q.Id == responseDto.QuestionId && q.ClusterId == null);
 
@@ -172,7 +171,6 @@ namespace KineStat.Controllers
 
                     if (existingResponse != null)
                     {
-                        // UPDATE
                         existingResponse.ResponseValue = responseDto.Response;
                         existingResponse.Observations = responseDto.Notes;
                         existingResponse.DateResponse = dateResponse;
@@ -182,7 +180,6 @@ namespace KineStat.Controllers
                     }
                     else
                     {
-                        // INSERT
                         var newResponse = new PatientAnswerTests()
                         {
                             PatientId = dto.PatientId,
@@ -234,15 +231,13 @@ namespace KineStat.Controllers
         {
             try
             {
-                // ✅ Charger UNIQUEMENT les réponses pour ce patient ET ce bilan
                 var query = _context.PatientAnswerTests
                     .Include(pr => pr.Question)
                     .ThenInclude(q => q.Category)
                     .Where(pr => pr.PatientId == id
                                  && !pr.IsCustomTest
-                                 && pr.Question.ClusterId == null); // Seulement screening
+                                 && pr.Question.ClusterId == null);
 
-                // ✅ Filtrer par assessmentId si fourni
                 if (assessmentId.HasValue)
                 {
                     query = query.Where(pr => pr.AssessmentId == assessmentId.Value);
@@ -264,7 +259,6 @@ namespace KineStat.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur GetExistingResponses: {ex.Message}");
                 return Json(new List<object>());
             }
         }
