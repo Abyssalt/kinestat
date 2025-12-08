@@ -106,7 +106,7 @@
         </div>
     </div>
 
-    <form id="formTests" asp-controller="Patients" asp-action="SaveTestResults" method="post" onsubmit="return handleSubmit(event)">
+    <form id="formTests" asp-controller="Tests" asp-action="SaveTestResults" method="post" onsubmit="return handleSubmit(event)">
         <input type="hidden" name="patientId" value="@patientId">
 
         @{
