@@ -427,14 +427,10 @@
                                         </div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small">N° INAMI *</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   id="edit_newDoctorINAMI"
-                                                   placeholder="Ex: 12345678901"
-                                                   pattern="^\d{11}$"
-                                                   required>
-
-                                            <small class="text-muted">11 chiffres (ex: 12345678901)</small>
+                                            <input type="text" class="form-control" id="edit_newDoctorINAMI" 
+                                                   placeholder="11 chiffres sans tirets" 
+                                                   maxlength="11"
+                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                         </div>
                                     </div>
                                 </div>
@@ -666,28 +662,43 @@
                 });
             });
 
-            document.getElementById('saveEditBtn').addEventListener('click', async function(e) {
-                e.preventDefault();
-                
-                if (areEditRequiredFieldsFilled()) {
-                    const selectedDoctorId = document.getElementById('edit_DoctorSelect').value;
-                    
-                    if (selectedDoctorId === '') {
-                        document.getElementById('edit_newDoctorLastName_hidden').value = 
-                            document.getElementById('edit_newDoctorLastName').value.trim();
-                        document.getElementById('edit_newDoctorFirstName_hidden').value = 
-                            document.getElementById('edit_newDoctorFirstName').value.trim();
-                        document.getElementById('edit_newDoctorINAMI_hidden').value = 
-                            document.getElementById('edit_newDoctorINAMI').value.trim();
-                    } else {
-                        document.getElementById('edit_newDoctorLastName_hidden').value = '';
-                        document.getElementById('edit_newDoctorFirstName_hidden').value = '';
-                        document.getElementById('edit_newDoctorINAMI_hidden').value = '';
+        document.getElementById('saveEditBtn').addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            if (areEditRequiredFieldsFilled()) {
+                const selectedDoctorId = document.getElementById('edit_DoctorSelect').value;
+
+                if (selectedDoctorId === '') {
+                    const dLastName = document.getElementById('edit_newDoctorLastName').value.trim();
+                    const dFirstName = document.getElementById('edit_newDoctorFirstName').value.trim();
+                    const dInami = document.getElementById('edit_newDoctorINAMI').value.trim();
+
+                    if (dLastName || dFirstName || dInami) {
+                        if (!dLastName || !dFirstName || !dInami) {
+                            alert("Veuillez remplir tous les champs pour le nouveau médecin (Nom, Prénom et INAMI).");
+                            return;
+                        }
+                        if (!/^\d{11}$/.test(dInami)) {
+                            alert("Le numéro INAMI doit contenir exactement 11 chiffres.");
+                            const inamiInput = document.getElementById('edit_newDoctorINAMI');
+                            inamiInput.classList.add('is-invalid-custom');
+                            inamiInput.focus();
+                            return;
+                        }
                     }
-                    
-                    document.getElementById('editPatientForm').submit();
+
+                    document.getElementById('edit_newDoctorLastName_hidden').value = dLastName;
+                    document.getElementById('edit_newDoctorFirstName_hidden').value = dFirstName;
+                    document.getElementById('edit_newDoctorINAMI_hidden').value = dInami;
+                } else {
+                    document.getElementById('edit_newDoctorLastName_hidden').value = '';
+                    document.getElementById('edit_newDoctorFirstName_hidden').value = '';
+                    document.getElementById('edit_newDoctorINAMI_hidden').value = '';
                 }
-            });
+
+                document.getElementById('editPatientForm').submit();
+            }
+        });
 
             document.querySelectorAll('.edit-patient-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -722,6 +733,19 @@
                     }, 150);
                 });
             });
+
+            document.getElementById('edit_newDoctorINAMI').addEventListener('input', function(e) {
+                const val = e.target.value;
+                e.target.classList.remove('is-valid-custom', 'is-invalid-custom');
+    
+                if (val.length === 0) return;
+
+                if (/^\d{11}$/.test(val)) {
+                    e.target.classList.add('is-valid-custom');
+                } else {
+                    e.target.classList.add('is-invalid-custom');
+                }
+                    });
             
             const editDoctorSelect = document.getElementById('edit_DoctorSelect');
             const editAddDoctorBtnContainer = document.getElementById('edit_addDoctorBtnContainer');
