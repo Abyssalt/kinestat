@@ -44,6 +44,18 @@ namespace KineStat.Controllers
                 .Select(cd => cd.Value)
                 .ToListAsync();
 
+            var tests = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Cluster)
+                .Where(t => t.PatientId == assessment.PatientId && t.AssessmentId == assessment.Id)
+                .OrderBy(t => t.IsCustomTest
+                    ? "Tests personnalisés"
+                    : t.Question!.Cluster!.Name)
+                .ThenBy(t => t.DateResponse)
+                .ToListAsync();
+
+            ViewBag.Tests = tests;
+
             ViewBag.TintivValues = tintivData;
 
             return View(assessment);
@@ -285,6 +297,17 @@ namespace KineStat.Controllers
 
             ViewBag.TintivValues = tintivData;
 
+            var tests = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q=> q.Cluster)
+                .Where(t =>
+                    t.PatientId == id &&
+                    t.AssessmentId == assessmentId)
+                .OrderBy(t => t.DateResponse)
+                .OrderBy(t => t.Question.Cluster.Name)
+                .ToListAsync();
+
+            ViewBag.Tests = tests;
 
             if (assessment == null)
                 return NotFound("Aucun bilan trouvé");

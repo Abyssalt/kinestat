@@ -23,6 +23,9 @@ namespace KineStat.Models
         [ForeignKey("AnswerId")]
         public virtual Answer? Answer { get; set; }
 
+        [ForeignKey("AssessmentId")]
+        public Assessment Assessment { get; set; }
+
         [Required]
         public DateTime DateResponse { get; set; }
 

@@ -43,10 +43,20 @@ namespace KineStat.Controllers
 
 
             var today = DateTime.UtcNow.Date;
+
             var existingResponses = await _context.PatientAnswerTests
                 .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId)
                 .ToListAsync();
 
+
+            //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
+            //if (latestSessionDate.HasValue)
+            //{
+              //  latestResponses = latestResponses
+                //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+                  //  .ToList();
+
+            //}
 
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
@@ -103,6 +113,7 @@ namespace KineStat.Controllers
                 }
 
                 var existingResponses = await query.ToListAsync();
+
 
                 int savedCount = 0;
                 int updatedCount = 0;
@@ -192,12 +203,12 @@ namespace KineStat.Controllers
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId,
                                 DateResponse = dateResponse,
                                 QuestionId = test.Id,
                                 ResponseValue = test.Value,
                                 Observations = test.Observations,
                                 IsCustomTest = false,
-                                AssessmentId = dto.AssessmentId
                             };
 
                             var qcm = await _context.QuestionQCMs

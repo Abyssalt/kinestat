@@ -28,22 +28,80 @@ var assessmentId = ViewData["AssessmentId"];
              <hr class="border-primary border-2 opacity-25 mt-3">
          </div>
      </div>
-
-     <div class="row">
-         <div class="col-12 col-lg-4 mb-4">
-             <div class="card border-0 shadow h-100">
-                 <div class="card-header bg-primary text-white py-3">
-                     <h5 class="mb-0 fw-bold"><i class="bi bi-list-check me-2"></i>Tests effectués</h5>
-                 </div>
-                 <div class="list-group list-group-flush">
-                     <a class="list-group-item py-3">Test Lasègue</a>
-                     <a class="list-group-item py-3">Test Schober</a>
-                     <a class="list-group-item py-3">Test Slump</a>
-                     <a class="list-group-item py-3">Question 1</a>
-                     <a class="list-group-item py-3">Question 2</a>
-                 </div>
+     <div class="row"> 
+     <div class="col-12 col-lg-4 mb-4">
+         <div class="card border-0 shadow h-100">
+             <div class="card-header bg-primary text-white py-3">
+                 <h5 class="mb-0 fw-bold">
+                     <i class="bi bi-list-check me-2"></i>Tests effectués
+                 </h5>
              </div>
+
+                <ul class="list-group list-group-flush">
+
+                    @if (ViewBag.Tests != null && ((List<PatientAnswerTests>)ViewBag.Tests).Any())
+                    {
+                        var testsByCluster = ((List<PatientAnswerTests>)ViewBag.Tests)
+                        .GroupBy(t => t.IsCustomTest
+                        ? "Tests personnalisés"
+                        : t.Question?.Cluster?.Name ?? "Autres");
+
+                        int index = 0;
+
+                        foreach (var clusterGroup in testsByCluster)
+                        {
+                            var collapseId = $"cluster-collapse-{index++}";
+
+                            <li class="list-group-item px-2">
+                                <button class="btn btn-link text-decoration-none fw-bold w-100 text-start"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#@collapseId"
+                                        aria-expanded="false">
+                                    <i class="bi bi-folder2-open me-2"></i>
+                                    @clusterGroup.Key
+                                    <span class="badge bg-primary ms-2">
+                                        @clusterGroup.Count()
+                                    </span>
+                                </button>
+
+                                <div class="collapse mt-2" id="@collapseId">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var test in clusterGroup)
+                                        {
+                                            <li class="list-group-item">
+                                                <strong>
+                                                    @(test.IsCustomTest ? test.CustomTestName : test.Question?.Title)
+                                        </strong>
+
+                                                <div class="text-muted small">
+                                                    Résultat : @test.ResponseValue
+                                                </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(test.Observations))
+                                                {
+                                                    <div class="fst-italic text-secondary small">
+                                                        💬 @test.Observations
+                                                    </div>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">
+                            Aucun test enregistré
+                        </li>
+                    }
+
+                </ul>
+
          </div>
+     </div>
+
 
          <div class="col-12 col-lg-4 mb-4">
              <div class="card border-0 shadow h-100 d-flex">

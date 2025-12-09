@@ -349,9 +349,6 @@
 
 @section Scripts {
     <script src="~/js/Tests.js"></script>
-    
-       
-
     <script>
         globalPatientId = @patientId;
         globalAssessmentId = @assessmentId;
@@ -381,7 +378,10 @@
             }
         }
 
-    var existingResponses = @Html.Raw(Json.Serialize(responsesData));
+
+        const assessmentId = @assessmentId;
+
+        var existingResponses = @Html.Raw(Json.Serialize(responsesData));
 
     document.addEventListener('DOMContentLoaded', function() {
         loadExistingResponses(existingResponses);
@@ -401,7 +401,6 @@
                 bsCollapse.hide();
             });
         }
-
     </script>
 
     <style>
