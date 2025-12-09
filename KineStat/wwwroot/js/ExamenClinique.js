@@ -481,6 +481,21 @@ function createQuestionCard(question, uniqueId, category) {
         userResponses[category][question.id + '_notes'] = this.value;
     });
 
+    textarea.addEventListener('input', function () {
+        if (!userResponses[category]) {
+            userResponses[category] = {};
+        }
+        userResponses[category][question.id + '_notes'] = this.value;
+
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+
+        saveTimeout = setTimeout(() => {
+            autoSaveResponses();
+        }, 1000);
+    });
+
     cardBody.appendChild(notesContainer);
 
     toggleBtn.addEventListener('click', () => {
