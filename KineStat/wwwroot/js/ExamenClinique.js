@@ -1,15 +1,9 @@
-﻿// ========================================
-// EXAMEN CLINIQUE - JavaScript Complet
-// Support : assessmentId + QuestionLadder avec slider
-// ========================================
-
-let allQuestionsData = {};
+﻿let allQuestionsData = {};
 let currentCategory = 'Articulaire / Structurel';
 let userResponses = {};
 let globalPatientId = null;
 let globalAssessmentId = null;
 
-// Mapping des suggestions de tests selon les réponses
 const testSuggestions = {
     'Articulaire / Structurel': {
         'Oui': [
@@ -92,19 +86,12 @@ const testSuggestions = {
     }
 };
 
-// ========================================
-// INITIALISATION DES ONGLETS
-// ========================================
-
 function initializeTabs() {
     document.querySelectorAll('button[data-category]').forEach(btn => {
         btn.addEventListener('click', async function (e) {
             e.preventDefault();
-
-            // Sauvegarder automatiquement avant de changer de catégorie
             await autoSaveResponses();
 
-            // Changer le style des boutons
             document.querySelectorAll('button[data-category]').forEach(el => {
                 el.classList.remove('btn-primary');
                 el.classList.add('btn-outline-secondary');
@@ -120,10 +107,6 @@ function initializeTabs() {
     });
 }
 
-// ========================================
-// CHARGEMENT DES DONNÉES
-// ========================================
-
 async function loadQuestionnaire() {
     try {
         const response = await fetch(`/ClinicalExam/GetQuestionsClinique/${globalPatientId}`);
@@ -131,25 +114,13 @@ async function loadQuestionnaire() {
             throw new Error('Erreur lors du chargement des questions');
         }
         allQuestionsData = await response.json();
-        console.log('=== Questions chargées ===');
-        console.log('Catégories disponibles:', Object.keys(allQuestionsData));
-        for (const cat in allQuestionsData) {
-            console.log(`  ${cat}: ${allQuestionsData[cat].length} questions`);
-        }
 
-        // Charger les réponses existantes pour ce bilan (assessmentId)
         await loadExistingResponses();
-
-        // Masquer les catégories vides
         hideEmptyCategories();
 
-        // Trouver la première catégorie disponible
         const firstCategory = Object.keys(allQuestionsData)[0] || 'Articulaire / Structurel';
-
-        // ✅ Mettre à jour la catégorie courante
         currentCategory = firstCategory;
 
-        // Activer le bouton de la première catégorie
         document.querySelectorAll('button[data-category]').forEach(btn => {
             if (btn.dataset.category === firstCategory) {
                 btn.classList.remove('btn-outline-secondary');
@@ -159,10 +130,8 @@ async function loadQuestionnaire() {
 
         displayQuestions(firstCategory);
 
-        // ✅ SOLUTION : Forcer le refresh après que le DOM soit complètement rendu
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                console.log('=== Refresh forcé après rendu DOM ===');
                 refreshSuggestionsForCategory(currentCategory);
             });
         });
@@ -179,20 +148,14 @@ async function loadQuestionnaire() {
 
 async function loadExistingResponses() {
     try {
-        // ✅ Charger les réponses pour ce patient ET ce bilan spécifique
         const url = `/ClinicalExam/GetExistingResponses/${globalPatientId}?assessmentId=${globalAssessmentId}`;
         const response = await fetch(url);
         if (!response.ok) return;
 
         const existingData = await response.json();
-        console.log('=== Réponses existantes chargées ===', existingData);
-        console.log('AssessmentId:', globalAssessmentId);
-        console.log('Nombre de réponses:', existingData.length);
 
-        // Organiser les réponses par catégorie
         existingData.forEach(resp => {
             const category = resp.categoryName;
-            console.log(`Chargement réponse: QuestionId=${resp.questionId}, Catégorie="${category}", Valeur="${resp.responseValue}"`);
 
             if (!userResponses[category]) {
                 userResponses[category] = {};
@@ -202,19 +165,13 @@ async function loadExistingResponses() {
                 userResponses[category][resp.questionId + '_notes'] = resp.observations;
             }
         });
-
-        console.log('Réponses organisées par catégorie:', userResponses);
-        console.log('Catégories avec réponses:', Object.keys(userResponses));
     } catch (error) {
         console.warn('Impossible de charger les réponses existantes:', error);
     }
 }
 
 function hideEmptyCategories() {
-    console.log('=== Masquage des catégories vides ===');
-
     const loadedCategories = Object.keys(allQuestionsData);
-    console.log('Catégories avec questions:', loadedCategories);
 
     document.querySelectorAll('button[data-category]').forEach(btn => {
         const category = btn.dataset.category;
@@ -223,21 +180,15 @@ function hideEmptyCategories() {
             const parentCol = btn.closest('.col-6, .col-md-3, .col-xl');
             if (parentCol) {
                 parentCol.style.display = 'none';
-                console.log(`Catégorie "${category}" masquée (aucune question)`);
             }
         } else {
             const parentCol = btn.closest('.col-6, .col-md-3, .col-xl');
             if (parentCol) {
                 parentCol.style.display = '';
-                console.log(`Catégorie "${category}" affichée (${allQuestionsData[category].length} questions)`);
             }
         }
     });
 }
-
-// ========================================
-// SAUVEGARDE AUTOMATIQUE
-// ========================================
 
 async function autoSaveResponses() {
     const responses = [];
@@ -250,12 +201,9 @@ async function autoSaveResponses() {
 
         let responseValue = null;
 
-        // Vérifier d'abord si c'est un radio button (bool/qcm)
         if (selectedRadio) {
             responseValue = selectedRadio.value;
-        }
-        // Sinon vérifier si c'est un input numérique (ladder)
-        else if (numberInput && numberInput.value !== '') {
+        } else if (numberInput && numberInput.value !== '') {
             responseValue = numberInput.value;
         }
 
@@ -278,24 +226,16 @@ async function autoSaveResponses() {
             },
             body: JSON.stringify({
                 patientId: globalPatientId,
-                assessmentId: globalAssessmentId,  // ✅ Inclure assessmentId
+                assessmentId: globalAssessmentId,
                 responses: responses
             })
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            console.log(`✓ ${responses.length} réponse(s) sauvegardée(s) automatiquement`);
-        }
+        await response.json();
     } catch (error) {
         console.error('Erreur sauvegarde automatique:', error);
     }
 }
-
-// ========================================
-// SAUVEGARDE MANUELLE
-// ========================================
 
 async function saveResponses() {
     const responses = [];
@@ -308,12 +248,9 @@ async function saveResponses() {
 
         let responseValue = null;
 
-        // Vérifier d'abord si c'est un radio button (bool/qcm)
         if (selectedRadio) {
             responseValue = selectedRadio.value;
-        }
-        // Sinon vérifier si c'est un input numérique (ladder)
-        else if (numberInput && numberInput.value !== '') {
+        } else if (numberInput && numberInput.value !== '') {
             responseValue = numberInput.value;
         }
 
@@ -339,7 +276,7 @@ async function saveResponses() {
             },
             body: JSON.stringify({
                 patientId: globalPatientId,
-                assessmentId: globalAssessmentId,  // ✅ Inclure assessmentId
+                assessmentId: globalAssessmentId,
                 responses: responses
             })
         });
@@ -348,7 +285,6 @@ async function saveResponses() {
 
         if (result.success) {
             alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
-            // Redirection avec assessmentId
             window.location.href = `/Tests/Tests/${globalPatientId}?assessmentId=${globalAssessmentId}`;
         } else {
             alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
@@ -359,13 +295,7 @@ async function saveResponses() {
     }
 }
 
-// ========================================
-// AFFICHAGE DES QUESTIONS
-// ========================================
-
 function displayQuestions(category) {
-    console.log(`=== displayQuestions appelée avec: "${category}" ===`);
-
     const container = document.getElementById('questionnaireContainer');
     container.innerHTML = '';
 
@@ -373,8 +303,6 @@ function displayQuestions(category) {
 
     if (allQuestionsData[category]) {
         questionsToDisplay.push({ category: category, questions: allQuestionsData[category] });
-    } else {
-        console.warn(`Catégorie "${category}" non trouvée. Catégories disponibles:`, Object.keys(allQuestionsData));
     }
 
     if (questionsToDisplay.length === 0) {
@@ -382,7 +310,6 @@ function displayQuestions(category) {
             <div class="alert alert-info" role="alert">
                 <i class="bi bi-info-circle me-2"></i>
                 Aucune question disponible pour cette catégorie.
-                <br><small>Catégories disponibles: ${Object.keys(allQuestionsData).join(', ')}</small>
             </div>
         `;
         return;
@@ -395,16 +322,8 @@ function displayQuestions(category) {
         });
     });
 
-    console.log('Questions affichées, userResponses avant refresh:', userResponses);
-    console.log('userResponses pour cette catégorie:', userResponses[category]);
-
-    // Recharger les suggestions pour cette catégorie
     refreshSuggestionsForCategory(category);
 }
-
-// ========================================
-// CRÉATION DES CARTES DE QUESTIONS
-// ========================================
 
 function createQuestionCard(question, uniqueId, category) {
     const card = document.createElement('div');
@@ -415,17 +334,12 @@ function createQuestionCard(question, uniqueId, category) {
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body p-3 p-md-4';
 
-    // Titre de la question
     const questionText = document.createElement('p');
     questionText.className = 'fw-medium mb-3';
     questionText.textContent = question.question;
     cardBody.appendChild(questionText);
 
-    // ✅ NOUVEAU : Détection du type de question
     if (question.type === 'ladder') {
-        // ========================================
-        // QUESTION À ÉCHELLE (SLIDER)
-        // ========================================
         const min = parseInt(question.options[0]) || 0;
         const max = parseInt(question.options[question.options.length - 1]) || 10;
 
@@ -461,12 +375,10 @@ function createQuestionCard(question, uniqueId, category) {
         cardBody.appendChild(ladderContainer);
         card.appendChild(cardBody);
 
-        // Event listeners pour synchroniser input et slider
         const inputElem = card.querySelector(`#input_${uniqueId}`);
         const rangeElem = card.querySelector(`#range_${uniqueId}`);
         const displayElem = card.querySelector(`#display_${uniqueId}`);
 
-        // Vérifier si une réponse existe déjà
         if (userResponses[category] && userResponses[category][question.id]) {
             const savedValue = userResponses[category][question.id];
             inputElem.value = savedValue;
@@ -477,7 +389,6 @@ function createQuestionCard(question, uniqueId, category) {
         inputElem.addEventListener('input', function () {
             rangeElem.value = this.value;
             displayElem.textContent = this.value;
-            // ✅ FIX FINAL: Capturer depuis le DOM
             const cardCategory = card.dataset.category;
             saveResponseLocally(question.id, this.value, cardCategory);
         });
@@ -485,15 +396,11 @@ function createQuestionCard(question, uniqueId, category) {
         rangeElem.addEventListener('input', function () {
             inputElem.value = this.value;
             displayElem.textContent = this.value;
-            // ✅ FIX FINAL: Capturer depuis le DOM
             const cardCategory = card.dataset.category;
             saveResponseLocally(question.id, this.value, cardCategory);
         });
 
     } else if (question.options && question.options.length > 0) {
-        // ========================================
-        // QUESTIONS OUI/NON OU QCM (BOUTONS)
-        // ========================================
         const optionsDiv = document.createElement('div');
         optionsDiv.className = 'btn-group w-100 mb-3';
         optionsDiv.setAttribute('role', 'group');
@@ -523,17 +430,12 @@ function createQuestionCard(question, uniqueId, category) {
 
             const radioInput = wrapper.querySelector('input[type="radio"]');
 
-            // Vérifier si cette question a déjà une réponse stockée
             if (userResponses[category] && userResponses[category][question.id] === opt) {
                 radioInput.checked = true;
             }
 
-            // Ajouter event listener
             radioInput.addEventListener('change', function () {
-                // ✅ FIX FINAL: Capturer la catégorie depuis la carte elle-même
                 const cardCategory = card.dataset.category;
-                console.log('Radio button changé, catégorie de la carte:', cardCategory);
-                console.log('currentCategory globale:', currentCategory);
                 updateSuggestions(cardCategory, opt, question.id);
                 saveResponseLocally(question.id, opt, cardCategory);
             });
@@ -544,14 +446,12 @@ function createQuestionCard(question, uniqueId, category) {
         cardBody.appendChild(optionsDiv);
     }
 
-    // Bouton pour ajouter une note
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
     toggleBtn.className = 'btn btn-sm btn-outline-secondary fw-medium';
     toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
     cardBody.appendChild(toggleBtn);
 
-    // Conteneur des notes
     const notesContainer = document.createElement('div');
     notesContainer.style.display = 'none';
     notesContainer.className = 'mt-3';
@@ -568,14 +468,12 @@ function createQuestionCard(question, uniqueId, category) {
     textarea.placeholder = 'Notes (optionnel)';
     notesContainer.appendChild(textarea);
 
-    // Pré-remplir les notes si elles existent
     if (userResponses[category] && userResponses[category][question.id + '_notes']) {
         textarea.value = userResponses[category][question.id + '_notes'];
         notesContainer.style.display = 'block';
         toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer la note';
     }
 
-    // Sauvegarder les notes lors de la saisie
     textarea.addEventListener('input', function () {
         if (!userResponses[category]) {
             userResponses[category] = {};
@@ -585,7 +483,6 @@ function createQuestionCard(question, uniqueId, category) {
 
     cardBody.appendChild(notesContainer);
 
-    // Toggle des notes
     toggleBtn.addEventListener('click', () => {
         if (notesContainer.style.display === 'none') {
             notesContainer.style.display = 'block';
@@ -596,17 +493,12 @@ function createQuestionCard(question, uniqueId, category) {
         }
     });
 
-    // Si la carte n'a pas encore été ajoutée (pour les types non-ladder)
     if (!card.contains(cardBody)) {
         card.appendChild(cardBody);
     }
 
     return card;
 }
-
-// ========================================
-// GESTION DES RÉPONSES LOCALES
-// ========================================
 
 function saveResponseLocally(questionId, response, category) {
     if (!userResponses[category]) {
@@ -615,65 +507,38 @@ function saveResponseLocally(questionId, response, category) {
     userResponses[category][questionId] = response;
 }
 
-// ========================================
-// SUGGESTIONS DE TESTS
-// ========================================
-
 function updateSuggestions(category, response, questionId) {
-    console.log(`=== updateSuggestions appelée ===`);
-    console.log('Catégorie:', category);
-    console.log('Réponse:', response);
-    console.log('QuestionId:', questionId);
-    console.log('currentCategory (globale):', currentCategory);
-
     if (!userResponses[category]) {
         userResponses[category] = {};
     }
     userResponses[category][questionId] = response;
 
-    console.log('userResponses après sauvegarde:', userResponses[category]);
-
-    // Compter uniquement les "Oui" (exclure les notes)
     const yesCount = Object.entries(userResponses[category])
         .filter(([key, value]) => !key.includes('_notes'))
         .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
         .length;
 
-    console.log('Nombre de "Oui" calculé:', yesCount);
     displaySuggestions(category, yesCount);
 }
 
 function refreshSuggestionsForCategory(category) {
-    console.log(`=== Refresh suggestions pour: ${category} ===`);
-    console.log('userResponses[category]:', userResponses[category]);
-
     if (userResponses[category]) {
-        // Filtrer les réponses (exclure les clés "_notes")
         const yesCount = Object.entries(userResponses[category])
-            .filter(([key, value]) => !key.includes('_notes')) // Exclure les notes
+            .filter(([key, value]) => !key.includes('_notes'))
             .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
             .length;
 
-        console.log('Nombre de "Oui":', yesCount);
         displaySuggestions(category, yesCount);
     } else {
-        console.log('Aucune réponse trouvée pour cette catégorie');
         displaySuggestions(category, 0);
     }
 }
 
 function displaySuggestions(category, yesCount) {
-    console.log(`=== displaySuggestions appelée ===`);
-    console.log('Catégorie:', category);
-    console.log('YesCount:', yesCount);
-    console.log('testSuggestions pour cette catégorie:', testSuggestions[category]);
-
     const container = document.getElementById('suggestedTestsContainer');
 
     if (yesCount > 0 && testSuggestions[category] && testSuggestions[category]['Oui']) {
         const tests = testSuggestions[category]['Oui'];
-
-        console.log('✅ Affichage des suggestions:', tests.length, 'tests');
 
         container.innerHTML = `
             <div class="mb-3">
@@ -698,11 +563,6 @@ function displaySuggestions(category, yesCount) {
             </div>
         `;
     } else {
-        console.log('❌ Pas de suggestions à afficher');
-        if (yesCount === 0) console.log('Raison: yesCount = 0');
-        if (!testSuggestions[category]) console.log('Raison: testSuggestions[category] undefined');
-        if (testSuggestions[category] && !testSuggestions[category]['Oui']) console.log('Raison: testSuggestions[category]["Oui"] undefined');
-
         container.innerHTML = `
             <p class="text-muted small mb-0">
                 <i class="bi bi-info-circle me-2"></i>
@@ -711,10 +571,6 @@ function displaySuggestions(category, yesCount) {
         `;
     }
 }
-
-// ========================================
-// EXPORT ET INITIALISATION
-// ========================================
 
 window.ExamenClinique = {
     init: function (patientId, assessmentId) {
@@ -726,7 +582,6 @@ window.ExamenClinique = {
             loadQuestionnaire();
         });
 
-        // Exposer les fonctions pour les boutons HTML
         window.saveResponses = saveResponses;
         window.autoSaveResponses = autoSaveResponses;
     }
