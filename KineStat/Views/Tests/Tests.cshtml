@@ -206,7 +206,7 @@
                                                 <div class="mb-2">
                                                     <button type="button"
                                                             class="btn btn-sm btn-outline-primary fw-medium"
-                                                            onclick="toggleObservations(@question.Id)" oninput="autoSaveTest(@question.Id)">
+                                                            onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
                                                 </div>
@@ -217,10 +217,11 @@
                                                             <label class="form-label fw-medium">
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
-                                                            <textarea class="form-control"
+                                                        <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                          placeholder="Notez ici vos observations..." onchange="autoSaveTest(@question.Id)"></textarea>
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -237,9 +238,9 @@
                                                            min="@ladder.Min"
                                                            max="@ladder.Max"
                                                            placeholder="Entrez la valeur"
-                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')" oninput="autoSaveTest(@question.Id)"
-                                                           id="input-@question.Id">
-
+                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')" id="input-@question.Id"
+                                                            oninput="autoSaveTest(@question.Id)"
+                                                            id="input-@question.Id">
                                                     <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
                                                     <input type="range"
                                                            class="form-range"
@@ -248,7 +249,7 @@
                                                            max="@ladder.Max"
                                                            value="@ladder.Min"
                                                            step="1"
-                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id')" />
+                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
                                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                                         <small class="text-secondary fw-semibold">@ladder.Min</small>
                                                         <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.Min</span>
@@ -259,7 +260,7 @@
                                                 <div class="mb-2">
                                                     <button type="button"
                                                             class="btn btn-sm btn-outline-primary fw-medium"
-                                                            onclick="toggleObservations(@question.Id)" oninput="autoSaveTest(@question.Id)">
+                                                            onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
                                                 </div>
@@ -271,9 +272,11 @@
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
                                                             <textarea class="form-control"
-                                                          name="test-@question.Id-observations"
-                                                          rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                              name="test-@question.Id-observations"
+                                                              rows="3"
+                                                              placeholder="Notez ici vos observations..."
+                                                            oninput="autoSaveTest(@question.Id)"></textarea>
+                                                                
                                                         </div>
                                                     </div>
                                                 </div>
@@ -292,7 +295,7 @@
                                                 <div class="mb-2">
                                                     <button type="button"
                                                             class="btn btn-sm btn-outline-primary fw-medium"
-                                                            onclick="toggleObservations(@question.Id)" oninput="autoSaveTest(@question.Id)">
+                                                            onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
                                                 </div>
@@ -306,7 +309,8 @@
                                                             <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                          placeholder="Notez ici vos observations..."
+                                                          oninput="autoSaveTest(@question.Id)"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

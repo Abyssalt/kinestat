@@ -29,6 +29,9 @@ async function saveTestData(questionId) {
         document.querySelector(`[name="test-${questionId}-value"]`);
     const observationsInput = document.querySelector(`[name="test-${questionId}-observations"]`);
 
+    const hasValue = valueInput && valueInput.value;
+    const hasObservations = observationsInput && observationsInput.value.trim();
+
     if (!valueInput || !valueInput.value) {
         return;
     }
@@ -38,7 +41,7 @@ async function saveTestData(questionId) {
         AssessmentId: globalAssessmentId,
         Tests: [{
             Id: questionId,
-            Value: valueInput.value,
+            Value: hasValue ? valueInput.value : '',
             Observations: observationsInput?.value || null,
             Custom: isCustom
         }]
