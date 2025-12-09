@@ -3,6 +3,7 @@ let currentCategory = 'Articulaire / Structurel';
 let userResponses = {};
 let globalPatientId = null;
 let globalAssessmentId = null;
+let saveTimeout = null;
 
 const testSuggestions = {
     'Articulaire / Structurel': {
@@ -90,7 +91,6 @@ function initializeTabs() {
     document.querySelectorAll('button[data-category]').forEach(btn => {
         btn.addEventListener('click', async function (e) {
             e.preventDefault();
-            await autoSaveResponses();
 
             document.querySelectorAll('button[data-category]').forEach(el => {
                 el.classList.remove('btn-primary');
@@ -505,6 +505,15 @@ function saveResponseLocally(questionId, response, category) {
         userResponses[category] = {};
     }
     userResponses[category][questionId] = response;
+
+
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+
+    saveTimeout = setTimeout(() => {
+        autoSaveResponses();
+    }, 500);
 }
 
 function updateSuggestions(category, response, questionId) {
@@ -519,6 +528,8 @@ function updateSuggestions(category, response, questionId) {
         .length;
 
     displaySuggestions(category, yesCount);
+
+    autoSaveResponses();
 }
 
 function refreshSuggestionsForCategory(category) {
