@@ -102,7 +102,7 @@
 
 <script>
     let hasDisplayedCriticalModal = false;
-    let criticalRedflagThreshold= 50; //unsure
+    let criticalRedflagThreshold= 20; //unsure
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
         const response = await fetch(`/RedFlags/${patientId}/RedFlagsQuestions/${categoryId}`);
