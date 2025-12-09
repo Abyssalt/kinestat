@@ -106,7 +106,7 @@
         </div>
     </div>
 
-    <form id="formTests" asp-controller="Patients" asp-action="SaveTestResults" method="post" onsubmit="return handleSubmit(event)">
+    <div id="formTests">
         <input type="hidden" name="patientId" value="@patientId">
 
         @{
@@ -186,7 +186,7 @@
                                                                name="test-@question.Id-value"
                                                                id="oui-@question.Id"
                                                                value="true"
-                                                               onchange="markAsAnswered(@question.Id)">
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
                                                         <label class="btn btn-outline-success btn-lg fw-medium" for="oui-@question.Id">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Positif
                                                         </label>
@@ -196,7 +196,7 @@
                                                                name="test-@question.Id-value"
                                                                id="non-@question.Id"
                                                                value="false"
-                                                               onchange="markAsAnswered(@question.Id)">
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
                                                         <label class="btn btn-outline-secondary btn-lg fw-medium" for="non-@question.Id">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Négatif
                                                         </label>
@@ -217,10 +217,11 @@
                                                             <label class="form-label fw-medium">
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
-                                                            <textarea class="form-control"
+                                                        <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                          placeholder="Notez ici vos observations..." onchange="autoSaveTest(@question.Id)"></textarea>
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -237,9 +238,9 @@
                                                            min="@ladder.Min"
                                                            max="@ladder.Max"
                                                            placeholder="Entrez la valeur"
-                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
-                                                           id="input-@question.Id">
-
+                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')" id="input-@question.Id"
+                                                            oninput="autoSaveTest(@question.Id)"
+                                                            id="input-@question.Id">
                                                     <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
                                                     <input type="range"
                                                            class="form-range"
@@ -248,7 +249,7 @@
                                                            max="@ladder.Max"
                                                            value="@ladder.Min"
                                                            step="1"
-                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id')">
+                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
                                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                                         <small class="text-secondary fw-semibold">@ladder.Min</small>
                                                         <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.Min</span>
@@ -271,9 +272,11 @@
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
                                                             <textarea class="form-control"
-                                                          name="test-@question.Id-observations"
-                                                          rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                              name="test-@question.Id-observations"
+                                                              rows="3"
+                                                              placeholder="Notez ici vos observations..."
+                                                            oninput="autoSaveTest(@question.Id)"></textarea>
+                                                                
                                                         </div>
                                                     </div>
                                                 </div>
@@ -284,7 +287,7 @@
                                                     <label class="form-label fw-medium">Observation</label>
                                                     <select class="form-select form-select-lg"
                                                             name="test-@question.Id-value"
-                                                            onchange="markAsAnswered(@question.Id)">
+                                                            onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)">
                                                         <option value="">-- Sélectionnez une observation --</option>
                                                     </select>
                                                 </div>
@@ -306,7 +309,8 @@
                                                             <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
-                                                          placeholder="Notez ici vos observations..."></textarea>
+                                                          placeholder="Notez ici vos observations..."
+                                                          oninput="autoSaveTest(@question.Id)"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -331,55 +335,57 @@
                     </button>
 
                     <div class="d-flex gap-2 w-100 w-sm-auto">
-                        <button type="button"
-                                class="btn btn-primary btn-lg fw-medium flex-fill"
-                                onclick="saveData()">
-                            <i class="bi bi-cloud-arrow-up me-2"></i>Enregistrer le brouillon
-                        </button>
-                        <button type="submit"
-                                class="btn btn-success btn-lg fw-medium flex-fill">
-                            <i class="bi bi-check-circle-fill me-2"></i>Valider l'évaluation
-                        </button>
+                        <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                            <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-    </form>
+    </div>
 
 </div>
 
 @section Scripts {
     <script src="~/js/Tests.js"></script>
-
     <script>
-        @{
-                        var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<dynamic>;
-                        var responsesData = new List<object>();
+        globalPatientId = @patientId;
+        globalAssessmentId = @assessmentId;
 
-                        if (existingResponsesList != null)
-                        {
-                                        foreach (var r in existingResponsesList)
-                                        {
-                                                        responsesData.Add(new
-                                                        {
-                                                                        questionId = r.QuestionId,
-                                                                        answerId = r.AnswerId,
-                                                                        value = r.ResponseValue,
-                                                                        observations = r.Observations,
-                                                                        isCustom = r.IsCustomTest,
-                                                                        customName = r.CustomTestName,
-                                                                        customType = r.CustomTestType
-                                                        });
-                                        }
-                        }
+
+
+        @{
+            var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<PatientAnswerTests>;
+            var responsesData = new List<object>();
+
+            if (existingResponsesList != null)
+            {
+                foreach (var r in existingResponsesList)
+                {
+                    responsesData.Add(new
+                    {
+                        questionId = r.QuestionId,
+                        answerId = r.AnswerId,
+                        assessmentId = r.AssessmentId,
+                        value = r.ResponseValue,
+                        observations = r.Observations,
+                        isCustom = r.IsCustomTest,
+                        customName = r.CustomTestName,
+                        customType = r.CustomTestType
+                    });
+                }
+            }
         }
+
+
+        const assessmentId = @assessmentId;
 
         var existingResponses = @Html.Raw(Json.Serialize(responsesData));
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadExistingResponses(existingResponses);
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExistingResponses(existingResponses);
+    });
 
 
         function expandAllClusters() {
@@ -393,71 +399,6 @@
             document.querySelectorAll('.accordion-collapse').forEach(collapse => {
                 const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
                 bsCollapse.hide();
-            });
-        }
-
-        function saveData() {
-            const formData = new FormData(document.getElementById('formTests'));
-            const data = {
-                patientId: parseInt(formData.get('patientId')),
-                tests: []
-            };
-
-            document.querySelectorAll('.test-card:not([data-custom="true"])').forEach(card => {
-                const testId = parseInt(card.getAttribute('data-test-id'));
-                const valueInput = formData.get('test-' + testId + '-value');
-
-                if (valueInput) {
-                    data.tests.push({
-                        id: testId,
-                        value: valueInput,
-                        observations: formData.get('test-' + testId + '-observations') || null,
-                        custom: false
-                    });
-                }
-            });
-
-            document.querySelectorAll('[data-custom="true"]').forEach(card => {
-                const testId = card.getAttribute('data-test-id');
-                const testName = card.querySelector('h5').textContent.replace(/\d+/, '').replace('Personnalisé', '').trim();
-                const valueInput = formData.get('test-' + testId + '-value');
-
-                if (valueInput) {
-                    let testType = 'text';
-                    const radioInput = card.querySelector('input[type="radio"]');
-                    const numberInput = card.querySelector('input[type="number"]');
-
-                    if (radioInput) testType = 'bool';
-                    else if (numberInput) testType = 'scale';
-
-                    data.tests.push({
-                        id: parseInt(testId),
-                        name: testName,
-                        type: testType,
-                        value: valueInput,
-                        observations: formData.get('test-' + testId + '-observations') || null,
-                        custom: true
-                    });
-                }
-            });
-
-            fetch('/Patients/SaveTestResults', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log('Succès:', result);
-                } else {
-                    console.error('Erreur:', result);
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
             });
         }
     </script>

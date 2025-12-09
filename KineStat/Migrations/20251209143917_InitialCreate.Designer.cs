@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    [Migration("20251207170236_initalDb")]
-    partial class initalDb
+    [Migration("20251209143917_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,9 @@ namespace KineStat.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AssessmentId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
@@ -166,6 +169,8 @@ namespace KineStat.Migrations
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId");
 
                     b.HasIndex("CategoryId");
 
@@ -449,6 +454,9 @@ namespace KineStat.Migrations
                     b.Property<int?>("AnswerId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("AssessmentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CustomTestName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -480,6 +488,8 @@ namespace KineStat.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnswerId");
+
+                    b.HasIndex("AssessmentId");
 
                     b.HasIndex("PatientId");
 
@@ -835,6 +845,10 @@ namespace KineStat.Migrations
 
             modelBuilder.Entity("KineStat.Models.ClinicalData", b =>
                 {
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId");
+
                     b.HasOne("KineStat.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
@@ -846,6 +860,8 @@ namespace KineStat.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Category");
 
@@ -933,6 +949,10 @@ namespace KineStat.Migrations
                         .WithMany()
                         .HasForeignKey("AnswerId");
 
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId");
+
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany("Responses")
                         .HasForeignKey("PatientId")
@@ -944,6 +964,8 @@ namespace KineStat.Migrations
                         .HasForeignKey("QuestionId");
 
                     b.Navigation("Answer");
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Patient");
 

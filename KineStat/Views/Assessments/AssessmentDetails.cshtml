@@ -92,10 +92,65 @@
                 </h5>
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Test Lasègue</li>
-                <li class="list-group-item">Test Schober</li>
-                <li class="list-group-item">Test Slump</li>
+
+                @if (ViewBag.Tests != null && ((List<PatientAnswerTests>)ViewBag.Tests).Any())
+                {
+                    var groupedTests = ((List<PatientAnswerTests>)ViewBag.Tests)
+                    .GroupBy(t => t.IsCustomTest
+                    ? "Tests personnalisés"
+                    : t.Question?.Cluster?.Name ?? "Autres")
+                    .ToList();
+
+                    int index = 0;
+
+                    foreach (var group in groupedTests)
+                    {
+                        var collapseId = $"details-cluster-{index++}";
+
+                        <li class="list-group-item px-2">
+                            <button class="btn btn-link fw-bold text-decoration-none w-100 text-start"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#@collapseId">
+                                <i class="bi bi-folder2-open me-2"></i>
+                                @group.Key
+                                <span class="badge bg-primary ms-2">@group.Count()</span>
+                            </button>
+
+                            <div class="collapse mt-2" id="@collapseId">
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var test in group)
+                                    {
+                                        <li class="list-group-item">
+                                            <strong>
+                                                @(test.IsCustomTest ? test.CustomTestName : test.Question?.Title)
+                                </strong>
+
+                                            <div class="text-muted small">
+                                                Résultat : @test.ResponseValue
+                                            </div>
+
+                                @if (!string.IsNullOrWhiteSpace(test.Observations))
+                                            {
+                                                <div class="fst-italic text-secondary small">
+                                                    💬 @test.Observations
+                                                </div>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">
+                        Aucun test enregistré
+                    </li>
+                }
+
             </ul>
+
         </div>
     </div>
     <div class="col-12 col-lg-4 mb-4">

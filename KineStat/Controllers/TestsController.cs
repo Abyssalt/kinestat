@@ -43,28 +43,27 @@ namespace KineStat.Controllers
 
 
             var today = DateTime.UtcNow.Date;
-            var latestResponses = await _context.PatientAnswerTests
-                .Where(pr => pr.PatientId == id)
-                .OrderByDescending(pr => pr.DateResponse)
-                .Take(100)
+
+            var existingResponses = await _context.PatientAnswerTests
+                .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId)
                 .ToListAsync();
 
 
-            var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
-            if (latestSessionDate.HasValue)
-            {
-                latestResponses = latestResponses
-                    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
-                    .ToList();
+            //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
+            //if (latestSessionDate.HasValue)
+            //{
+              //  latestResponses = latestResponses
+                //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+                  //  .ToList();
 
-            }
+            //}
 
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessmentId;
             ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
             ViewData["Clusters"] = clustersWithQuestions;
-            ViewData["ExistingResponses"] = latestResponses;
+            ViewData["ExistingResponses"] = existingResponses;
             ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
                                       $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
                                       $"<li class='breadcrumb-item'><a href='/Patients/Details/{id}'>{patient.FirstName} {patient.LastName}</a></li>" +
@@ -105,16 +104,28 @@ namespace KineStat.Controllers
                 var dateResponse = DateTime.UtcNow;
                 var today = dateResponse.Date;
 
-                var existingResponses = await _context.PatientAnswerTests
-                    .Where(pr => pr.PatientId == dto.PatientId &&
-                                 pr.DateResponse.Date == today)
-                    .ToListAsync();
+                var query = _context.PatientAnswerTests
+                    .Where(pr => pr.PatientId == dto.PatientId);
+
+                if (dto.AssessmentId.HasValue)
+                {
+                    query = query.Where(pr => pr.AssessmentId == dto.AssessmentId.Value);
+                }
+
+                var existingResponses = await query.ToListAsync();
+
 
                 int savedCount = 0;
                 int updatedCount = 0;
 
                 foreach (var test in dto.Tests)
                 {
+
+                    if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
+                    {
+                        continue;
+                    }
+
                     PatientAnswerTests response;
 
                     if (test.Custom)
@@ -136,6 +147,7 @@ namespace KineStat.Controllers
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId,
                                 DateResponse = dateResponse,
                                 ResponseValue = test.Value,
                                 Observations = test.Observations,
@@ -157,7 +169,10 @@ namespace KineStat.Controllers
 
                         if (response != null)
                         {
-                            response.ResponseValue = test.Value;
+                            if (!string.IsNullOrWhiteSpace(test.Value))
+                            {
+                                response.ResponseValue = test.Value;
+                            }
                             response.Observations = test.Observations;
                             response.DateResponse = dateResponse;
 
@@ -180,14 +195,20 @@ namespace KineStat.Controllers
                         }
                         else
                         {
+                            if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
+                            {
+                                continue;
+                            }
+
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId,
                                 DateResponse = dateResponse,
                                 QuestionId = test.Id,
                                 ResponseValue = test.Value,
                                 Observations = test.Observations,
-                                IsCustomTest = false
+                                IsCustomTest = false,
                             };
 
                             var qcm = await _context.QuestionQCMs

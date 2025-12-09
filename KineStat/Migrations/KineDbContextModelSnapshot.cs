@@ -451,6 +451,9 @@ namespace KineStat.Migrations
                     b.Property<int?>("AnswerId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("AssessmentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CustomTestName")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -482,6 +485,8 @@ namespace KineStat.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnswerId");
+
+                    b.HasIndex("AssessmentId");
 
                     b.HasIndex("PatientId");
 
@@ -941,6 +946,10 @@ namespace KineStat.Migrations
                         .WithMany()
                         .HasForeignKey("AnswerId");
 
+                    b.HasOne("KineStat.Models.Assessment", "Assessment")
+                        .WithMany()
+                        .HasForeignKey("AssessmentId");
+
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany("Responses")
                         .HasForeignKey("PatientId")
@@ -952,6 +961,8 @@ namespace KineStat.Migrations
                         .HasForeignKey("QuestionId");
 
                     b.Navigation("Answer");
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Patient");
 
