@@ -115,12 +115,13 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
-                </button>
-                <button type="button" class="btn btn-primary" onclick="saveResponses()">
-                    <i class="bi bi-arrow-right me-2"></i>Continuer
-                </button>
+                </a>
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                    Suivant<i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <hr class="border-primary border-2 opacity-25 mt-3">
             </div>
         </div>
     </div>

@@ -238,61 +238,7 @@ async function autoSaveResponses() {
 }
 
 async function saveResponses() {
-    const responses = [];
-
-    document.querySelectorAll('.card[data-question-id]').forEach(card => {
-        const questionId = parseInt(card.dataset.questionId);
-        const selectedRadio = card.querySelector('input[type="radio"]:checked');
-        const numberInput = card.querySelector('input[type="number"]');
-        const notesTextarea = card.querySelector('textarea');
-
-        let responseValue = null;
-
-        if (selectedRadio) {
-            responseValue = selectedRadio.value;
-        } else if (numberInput && numberInput.value !== '') {
-            responseValue = numberInput.value;
-        }
-
-        if (responseValue !== null) {
-            responses.push({
-                questionId: questionId,
-                response: responseValue,
-                notes: notesTextarea?.value || null
-            });
-        }
-    });
-
-    if (responses.length === 0) {
-        alert('Veuillez répondre à au moins une question avant d\'enregistrer.');
-        return;
-    }
-
-    try {
-        const response = await fetch('/ClinicalExam/SaveExamenClinique', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                patientId: globalPatientId,
-                assessmentId: globalAssessmentId,
-                responses: responses
-            })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert(`✓ ${responses.length} réponse(s) enregistrée(s) avec succès!`);
-            window.location.href = `/Tests/Tests/${globalPatientId}?assessmentId=${globalAssessmentId}`;
-        } else {
-            alert('❌ Erreur lors de l\'enregistrement: ' + result.message);
-        }
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('❌ Erreur de connexion au serveur');
-    }
+    window.location.href = `/Patients/Tests/${globalPatientId}?assessmentId=${globalAssessmentId}`;
 }
 
 function displayQuestions(category) {
