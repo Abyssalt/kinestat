@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    [Migration("20251208114917_LinkTestsToAssessment")]
-    partial class LinkTestsToAssessment
+    [Migration("20251209143917_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -454,7 +454,7 @@ namespace KineStat.Migrations
                     b.Property<int?>("AnswerId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AssessmentId")
+                    b.Property<int?>("AssessmentId")
                         .HasColumnType("integer");
 
                     b.Property<string>("CustomTestName")
@@ -951,9 +951,7 @@ namespace KineStat.Migrations
 
                     b.HasOne("KineStat.Models.Assessment", "Assessment")
                         .WithMany()
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssessmentId");
 
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany("Responses")

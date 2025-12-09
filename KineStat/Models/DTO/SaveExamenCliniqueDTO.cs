@@ -7,6 +7,7 @@ namespace KineStat.Models.DTO
     public class SaveExamenCliniqueDTO
     {
         public int PatientId { get; set; }
+        public int? AssessmentId { get; set; }
         public List<ExamenCliniqueResponseDTO> Responses { get; set; } = new List<ExamenCliniqueResponseDTO>();
     }
 

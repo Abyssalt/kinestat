@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class initalDb : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -205,33 +205,6 @@ namespace KineStat.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClinicalDatas",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PatientId = table.Column<int>(type: "integer", nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    Value = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ClinicalDatas", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ClinicalDatas_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ClinicalDatas_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Dossiers",
                 columns: table => new
                 {
@@ -297,6 +270,39 @@ namespace KineStat.Migrations
                         name: "FK_Assessments_Physios_PhysioId",
                         column: x => x.PhysioId,
                         principalTable: "Physios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClinicalDatas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PatientId = table.Column<int>(type: "integer", nullable: false),
+                    AssessmentId = table.Column<int>(type: "integer", nullable: true),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    Value = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClinicalDatas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClinicalDatas_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalTable: "Assessments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ClinicalDatas_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClinicalDatas_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -516,6 +522,7 @@ namespace KineStat.Migrations
                     DateResponse = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ResponseValue = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     Observations = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    AssessmentId = table.Column<int>(type: "integer", nullable: true),
                     IsCustomTest = table.Column<bool>(type: "boolean", nullable: false),
                     CustomTestName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     CustomTestType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true)
@@ -527,6 +534,11 @@ namespace KineStat.Migrations
                         name: "FK_PatientAnswerTests_Answers_AnswerId",
                         column: x => x.AnswerId,
                         principalTable: "Answers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PatientAnswerTests_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalTable: "Assessments",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PatientAnswerTests_Patients_PatientId",
@@ -601,6 +613,11 @@ namespace KineStat.Migrations
                 column: "PhysioId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClinicalDatas_AssessmentId",
+                table: "ClinicalDatas",
+                column: "AssessmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ClinicalDatas_CategoryId",
                 table: "ClinicalDatas",
                 column: "CategoryId");
@@ -659,6 +676,11 @@ namespace KineStat.Migrations
                 name: "IX_PatientAnswerTests_AnswerId",
                 table: "PatientAnswerTests",
                 column: "AnswerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PatientAnswerTests_AssessmentId",
+                table: "PatientAnswerTests",
+                column: "AssessmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PatientAnswerTests_PatientId",
