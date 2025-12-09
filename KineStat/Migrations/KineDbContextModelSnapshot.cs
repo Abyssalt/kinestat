@@ -452,7 +452,6 @@ namespace KineStat.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int?>("AssessmentId")
-
                         .HasColumnType("integer");
 
                     b.Property<string>("CustomTestName")
@@ -949,9 +948,7 @@ namespace KineStat.Migrations
 
                     b.HasOne("KineStat.Models.Assessment", "Assessment")
                         .WithMany()
-                        .HasForeignKey("AssessmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AssessmentId");
 
                     b.HasOne("KineStat.Models.Patient", "Patient")
                         .WithMany("Responses")
