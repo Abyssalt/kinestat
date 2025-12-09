@@ -44,7 +44,7 @@ namespace KineStat.Controllers
 
             var today = DateTime.UtcNow.Date;
             var existingResponses = await _context.PatientAnswerTests
-                .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId) 
+                .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId)
                 .ToListAsync();
 
 
@@ -182,7 +182,8 @@ namespace KineStat.Controllers
                                 QuestionId = test.Id,
                                 ResponseValue = test.Value,
                                 Observations = test.Observations,
-                                IsCustomTest = false
+                                IsCustomTest = false,
+                                AssessmentId = dto.AssessmentId
                             };
 
                             var qcm = await _context.QuestionQCMs
