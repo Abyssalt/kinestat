@@ -44,20 +44,20 @@ namespace KineStat.Controllers
 
             var today = DateTime.UtcNow.Date;
             var latestResponses = await _context.PatientAnswerTests
-                .Where(pr => pr.PatientId == id)
+                .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId)
                 .OrderByDescending(pr => pr.DateResponse)
                 .Take(100)
                 .ToListAsync();
 
 
-            var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
-            if (latestSessionDate.HasValue)
-            {
-                latestResponses = latestResponses
-                    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
-                    .ToList();
+            //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
+            //if (latestSessionDate.HasValue)
+            //{
+              //  latestResponses = latestResponses
+                //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+                  //  .ToList();
 
-            }
+            //}
 
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
@@ -107,7 +107,7 @@ namespace KineStat.Controllers
 
                 var existingResponses = await _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId &&
-                                 pr.DateResponse.Date == today)
+                                 pr.AssessmentId == dto.AssessmentId)
                     .ToListAsync();
 
                 int savedCount = 0;
@@ -136,6 +136,7 @@ namespace KineStat.Controllers
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId,
                                 DateResponse = dateResponse,
                                 ResponseValue = test.Value,
                                 Observations = test.Observations,
@@ -183,6 +184,7 @@ namespace KineStat.Controllers
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId,
                                 DateResponse = dateResponse,
                                 QuestionId = test.Id,
                                 ResponseValue = test.Value,
