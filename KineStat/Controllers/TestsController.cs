@@ -109,6 +109,12 @@ namespace KineStat.Controllers
 
                 foreach (var test in dto.Tests)
                 {
+
+                    if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
+                    {
+                        continue;
+                    }
+
                     PatientAnswerTests response;
 
                     if (test.Custom)
@@ -152,7 +158,10 @@ namespace KineStat.Controllers
 
                         if (response != null)
                         {
-                            response.ResponseValue = test.Value;
+                            if (!string.IsNullOrWhiteSpace(test.Value))
+                            {
+                                response.ResponseValue = test.Value;
+                            }
                             response.Observations = test.Observations;
                             response.DateResponse = dateResponse;
 
@@ -175,6 +184,11 @@ namespace KineStat.Controllers
                         }
                         else
                         {
+                            if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
+                            {
+                                continue;
+                            }
+
                             response = new PatientAnswerTests
                             {
                                 PatientId = dto.PatientId,

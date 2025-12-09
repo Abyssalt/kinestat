@@ -369,30 +369,34 @@ function loadExistingResponses(responses) {
         if (radioInputTrue || radioInputFalse) {
            
             if (valueString === 'true' && radioInputTrue) {
-               
                 radioInputTrue.checked = true;
                 markAsAnswered(questionId);
             } else if (valueString === 'false' && radioInputFalse) {
-               
                 radioInputFalse.checked = true;
                 markAsAnswered(questionId);
-            } 
-        } else if (numberInput) {
-            numberInput.value = response.value;
-            if (rangeInput) {
-                rangeInput.value = response.value;
-                const displaySpan = card.querySelector(`#display-${questionId}`);
-                if (displaySpan) {
-                    displaySpan.textContent = response.value;
-                }
             }
-            markAsAnswered(questionId);
+        } else if (numberInput) {
+            if (response.value !== null && response.value !== '') {
+                numberInput.value = response.value;
+                if (rangeInput) {
+                    rangeInput.value = response.value;
+                    const displaySpan = card.querySelector(`#display-${questionId}`);
+                    if (displaySpan) {
+                        displaySpan.textContent = response.value;
+                    }
+                }
+                markAsAnswered(questionId);
+            }
         } else if (selectInput) {
-            selectInput.value = response.value;
-            markAsAnswered(questionId);
+            if (response.value !== null && response.value !== '') {
+                selectInput.value = response.value;
+                markAsAnswered(questionId);
+            }
         } else if (textareaInput) {
-            textareaInput.value = response.value;
-            markAsAnswered(questionId);
+            if (response.value !== null && response.value !== '') {
+                textareaInput.value = response.value;
+                markAsAnswered(questionId);
+            }
         }
 
         if (response.observations) {
