@@ -12,12 +12,12 @@
     const testDescription = document.getElementById('customTestDescription').value.trim();
 
     if (!clusterId) {
-        alert('⚠️ Veuillez sélectionner un cluster.');
+      
     return;
             }
 
     if (!testName) {
-        alert('⚠️ Veuillez entrer un nom pour le test.');
+      
     return;
             }
 
