@@ -117,21 +117,6 @@ namespace KineStat.Controllers
         {
             try
             {
-                bool hasAtLeastOneField = !string.IsNullOrWhiteSpace(socrate.Site) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Onset) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Character) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Radiation) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Association) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Timing) ||
-                                          !string.IsNullOrWhiteSpace(socrate.ExacerbatingFactor) ||
-                                          !string.IsNullOrWhiteSpace(socrate.RelievingFactor);
-
-                if (!hasAtLeastOneField)
-                {
-                    TempData["Error"] = "Veuillez remplir au moins un champ du questionnaire SOCRATE.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
-                }
-
                 var assessment = await _context.Assessments
                     .FirstOrDefaultAsync(a => a.Id == socrate.AssessmentId);
 
