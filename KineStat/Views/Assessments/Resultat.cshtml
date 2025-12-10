@@ -74,7 +74,12 @@ var assessmentId = ViewData["AssessmentId"];
                                         </strong>
 
                                                 <div class="text-muted small">
-                                                    Résultat : @test.ResponseValue
+                                                    Résultat :
+                                                    @(
+                                                    test.ResponseValue == "true" ? "Positif" :
+                                                    test.ResponseValue == "false" ? "Negatif" :
+                                                    test.ResponseValue
+                                                    )
                                                 </div>
 
                                     @if (!string.IsNullOrWhiteSpace(test.Observations))
