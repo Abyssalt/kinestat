@@ -167,33 +167,49 @@
                     radarChart6Instance.data.datasets[0].data = data;
                     radarChart6Instance.update();
                 } else {
-                    radarChart6Instance = new Chart(ctx, {
+                        radarChart6Instance = new Chart(ctx, {
                         type: 'radar',
                         data: {
                             labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
                             datasets: [{
                                 label: "Profil TINTIV",
                                 data: data,
-                                backgroundColor: "rgba(255,99,132,0.25)",
+                                backgroundColor: "rgba(255,99,132,0.30)",
                                 borderColor: "rgb(255,99,132)",
-                                borderWidth: 3,
+                                borderWidth: 4,
+                                pointRadius: 6,
+                                pointHoverRadius: 9,
                                 pointBackgroundColor: "rgb(255,99,132)",
-                                pointBorderColor: "#fff"
+                                pointBorderColor: "#fff",
+                                tension: 0.25
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            animation: {
+                                duration: 300,
+                                easing: 'easeOutQuart'
+                            },
                             scales: {
                                 r: {
                                     min: 0,
-                                    max: 10,
-                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                    max: 6,
+                                    ticks: {
+                                        stepSize: 1,
+                                        backdropColor: "transparent"
+                                    },
+                                    pointLabels: {
+                                        font: { size: 13 }
+                                    }
                                 }
                             },
-                            plugins: { legend: { display: false } }
+                            plugins: {
+                                legend: { display: false }
+                            }
                         }
                     });
+
                 }
             }
             function initOrUpdateRadarChart6Eye() {
@@ -214,26 +230,42 @@
                             datasets: [{
                                 label: "Profil TINTIV",
                                 data: data,
-                                backgroundColor: "rgba(255,99,132,0.25)",
+                                backgroundColor: "rgba(255,99,132,0.30)",
                                 borderColor: "rgb(255,99,132)",
-                                borderWidth: 3,
+                                borderWidth: 4,
+                                pointRadius: 6,
+                                pointHoverRadius: 9,
                                 pointBackgroundColor: "rgb(255,99,132)",
-                                pointBorderColor: "#fff"
+                                pointBorderColor: "#fff",
+                                tension: 0.25
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            animation: {
+                                duration: 300,
+                                easing: 'easeOutQuart'
+                            },
                             scales: {
                                 r: {
                                     min: 0,
-                                    max: 10,
-                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                    max: 6,
+                                    ticks: {
+                                        stepSize: 1,
+                                        backdropColor: "transparent"
+                                    },
+                                    pointLabels: {
+                                        font: { size: 13 }
+                                    }
                                 }
                             },
-                            plugins: { legend: { display: false } }
+                            plugins: {
+                                legend: { display: false }
+                            }
                         }
                     });
+
                 }
             }
 

@@ -115,20 +115,7 @@
 
     }
 
-    function initializeTabs() {
-        document.querySelectorAll('#redflagsTabs .nav-link').forEach(tab => {
-            tab.addEventListener('click', function (e) {
-                e.preventDefault();
 
-                document.querySelectorAll('#redflagsTabs .nav-link')
-                    .forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-
-                const categoryId = this.dataset.category;
-                loadQuestionsByCategory(categoryId);
-            });
-        });
-    }
 
     function initializeTooltips() {
         const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -230,11 +217,14 @@
     }
 
     function saveAnswer(patientId, questionId, boolValue, comment) {
+        const assessmentId = parseInt(document.querySelector('meta[name="assessment-id"]').content);
+
         const dto = {
             PatientId: patientId,
             QuestionId: questionId,
             BoolValue: boolValue,
-            Comment: comment
+            Comment: comment,
+            AssessmentId: assessmentId
         };
 
         fetch(`/Patient/SaveOrUpdateAnswer`, {

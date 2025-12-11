@@ -164,11 +164,11 @@ namespace KineStat.Controllers
                     });
                 }
 
-                var assessment = _context.Assessments
-                    .Where(a => a.PatientId == answerDto.PatientId && a.DossierId == dossier.Id)
-                    .OrderByDescending(a => a.Date)
-                    .ThenByDescending(a => a.Id)
-                    .FirstOrDefault();
+                var assessment = await _context.Assessments
+    .FirstOrDefaultAsync(a =>
+        a.Id == answerDto.AssessmentId &&
+        a.PatientId == answerDto.PatientId
+    );
                 if (assessment == null)
                 {
                     return StatusCode(400, new
@@ -196,7 +196,8 @@ namespace KineStat.Controllers
                     savedAnswer.Comment = answerDto.Comment;
                 }
 
-                
+
+                await _context.SaveChangesAsync();
 
                 double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
 
@@ -204,6 +205,8 @@ namespace KineStat.Controllers
 
                 for (int categoryId = 1; categoryId <= 6; categoryId++)
                 {
+                    await _context.SaveChangesAsync();
+
                     double probability = await CalculateRedFlagCategory(answerDto.PatientId, assessment.Id, categoryId);
                     double radarValue = (probability * 100) / 10;
                     categoryPercentages.Add(radarValue);
