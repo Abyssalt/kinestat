@@ -155,7 +155,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             let radarChart6Instance = null;
             let radarChart9Instance = null;
-            let radarChart6EyeInstance = null; // 
+            let radarChart6EyeInstance = null; 
 
             function initOrUpdateRadarChart6() {
                 const ctx = document.getElementById("radarChart6");
@@ -251,9 +251,9 @@
                             scales: {
                                 r: {
                                     min: 0,
-                                    max: 6,
+                                    max: 10,
                                     ticks: {
-                                        stepSize: 1,
+                                        stepSize: 2,
                                         backdropColor: "transparent"
                                     },
                                     pointLabels: {
