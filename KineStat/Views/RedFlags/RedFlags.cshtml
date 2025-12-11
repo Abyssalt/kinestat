@@ -56,7 +56,6 @@
         <div id="questionnaireContainer" class="col-12 col-lg-8 mb-4 mb-lg-0">
         </div>
         <div id="testsContainer" class="col-12 col-lg-4">
-           
         </div>
     </div>
 </div>
@@ -90,6 +89,7 @@
     </div>
 </div>
 
+<script src="~/js/gauge.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -102,7 +102,7 @@
 
 <script>
     let hasDisplayedCriticalModal = false;
-    let criticalRedflagThreshold= 50; //unsure
+    let criticalRedflagThreshold= 20; //unsure
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
         const response = await fetch(`/RedFlags/${patientId}/RedFlagsQuestions/${categoryId}`);
@@ -111,7 +111,7 @@
         attachNoteToggleEvents();
         attachAnswerListeners();
         initializeTooltips();
-        updateGauge(RedFlagsStore.get());
+       
 
     }
 
@@ -255,60 +255,12 @@
 
     }
 
-    let currentProbability = 0;
-    let gaugeChart = null;
-
-    function initializeGauge() {
-        const ctx = document.getElementById('redFlagsGauge');
-        if (!ctx) return;
-
-        gaugeChart = new Chart(ctx.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: [''],
-                datasets: [
-                    {
-                        data: [currentProbability],
-                        backgroundColor: getColorForValue(currentProbability)
-                    },
-                    {
-                        data: [100 - currentProbability],
-                        backgroundColor: '#e9ecef'
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true, max: 100, display: false },
-                    y: { stacked: true, display: false }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                }
-            }
-        });
-    }
-
-    function getColorForValue(value) {
-        if (value <= 33) return '#28a745';
-        else if (value <= 66) return '#ffc107';
-        else return '#dc3545';
-    }
-
     function updateGauge(newValue) {
-        currentProbability = newValue;
-
         if (gaugeChart) {
-            gaugeChart.data.datasets[0].data[0] = newValue;
-            gaugeChart.data.datasets[0].backgroundColor = getColorForValue(newValue);
-            gaugeChart.data.datasets[1].data[0] = 100 - newValue;
-            gaugeChart.update();
+            document.getElementById('probabilityValue').textContent = newValue.toFixed(2) + '%';
+            moveNeedle(newValue);
+            
         }
-
         const elem = document.getElementById('probabilityValue');
         if (elem) elem.textContent = newValue.toFixed(2) + '%';
     }

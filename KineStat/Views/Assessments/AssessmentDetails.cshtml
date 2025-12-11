@@ -364,55 +364,10 @@
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-
-        const ctx = document.getElementById("redFlagsGaugeDetails");
-        const valueElem = document.getElementById("redFlagsGaugeDetailsValue");
-
         const redFlagsPercentage = @((Model.RedFlagsPercentage ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
-
-
-        if (!ctx) return;
-
-        const getColor = v =>
-            v <= 33 ? "#28a745" :
-            v <= 66 ? "#ffc107" :
-                      "#dc3545";
-
-        const value = redFlagsPercentage;
-
-        const chart = new Chart(ctx.getContext("2d"), {
-            type: "bar",
-            data: {
-                labels: [""],
-                datasets: [
-                    {
-                        data: [value],
-                        backgroundColor: getColor(value)
-                    },
-                    {
-                        data: [100 - value],
-                        backgroundColor: "#e9ecef"
-                    }
-                ]
-            },
-            options: {
-                indexAxis: "y",
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true, max: 100, display: false },
-                    y: { stacked: true, display: false }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                }
-            }
-        });
-
-        if (valueElem) {
-            valueElem.textContent = value.toFixed(2) + " %";
-        }
+        
+        GaugeManager.createGauge("redFlagsGaugeDetails", "redFlagsGaugeDetailsValue");
+        GaugeManager.updateGauge("redFlagsGaugeDetails", redFlagsPercentage);
     });
 </script>
 

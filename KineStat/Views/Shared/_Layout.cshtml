@@ -149,6 +149,7 @@
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+         <script src="~/js/gauge.js"></script>
 
         <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -372,50 +373,13 @@
             document.addEventListener("DOMContentLoaded", () => {
 
                 if (!window.RedFlagsStore) return;
-
-                const ctx = document.getElementById("redFlagsGaugeEye");
-                const valueElem = document.getElementById("redFlagsGaugeEyeValue");
-                if (!ctx) return;
-
-                const getColor = v =>
-                    v <= 33 ? "#28a745" :
-                    v <= 66 ? "#ffc107" :
-                              "#dc3545";
-
-                const chart = new Chart(ctx.getContext("2d"), {
-                    type: "bar",
-                    data: {
-                        labels: [""],
-                        datasets: [
-                            { data: [0], backgroundColor: "#e9ecef" },
-                            { data: [100], backgroundColor: "#e9ecef" }
-                        ]
-                    },
-                    options: {
-                        indexAxis: "y",
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { stacked: true, max: 100, display: false },
-                            y: { stacked: true, display: false }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    }
-                });
+                if (!document.getElementById("redFlagsGaugeEye")) return;
+                GaugeManager.createGauge("redFlagsGaugeEye", "redFlagsGaugeEyeValue");
 
                 RedFlagsStore.subscribe(value => {
-                    chart.data.datasets[0].data[0] = value;
-                    chart.data.datasets[1].data[0] = 100 - value;
-                    chart.data.datasets[0].backgroundColor = getColor(value);
-                    chart.update();
-
-                    if (valueElem) {
-                        valueElem.textContent = value.toFixed(2) + "%";
-                    }
+                    GaugeManager.updateGauge("redFlagsGaugeEye", value);
                 });
+             
             });
 
         </script>

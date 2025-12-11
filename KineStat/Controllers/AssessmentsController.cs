@@ -136,21 +136,6 @@ namespace KineStat.Controllers
         {
             try
             {
-                bool hasAtLeastOneField = !string.IsNullOrWhiteSpace(socrate.Site) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Onset) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Character) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Radiation) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Association) ||
-                                          !string.IsNullOrWhiteSpace(socrate.Timing) ||
-                                          !string.IsNullOrWhiteSpace(socrate.ExacerbatingFactor) ||
-                                          !string.IsNullOrWhiteSpace(socrate.RelievingFactor);
-
-                if (!hasAtLeastOneField)
-                {
-                    TempData["Error"] = "Veuillez remplir au moins un champ du questionnaire SOCRATE.";
-                    return RedirectToAction(nameof(Socrate), new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
-                }
-
                 var assessment = await _context.Assessments
                     .FirstOrDefaultAsync(a => a.Id == socrate.AssessmentId);
 
@@ -203,14 +188,28 @@ namespace KineStat.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
         {
             var assessment = await _context.Assessments.FindAsync(id);
+
             if (assessment != null)
             {
+                var clinicalDatas = _context.ClinicalDatas.Where(cd => cd.AssessmentId == id);
+                _context.ClinicalDatas.RemoveRange(clinicalDatas);
+
+                var socrate = await _context.Socrates.FirstOrDefaultAsync(s => s.AssessmentId == id);
+                if (socrate != null)
+                {
+                    _context.Socrates.Remove(socrate);
+                }
+
+                var testAnswers = _context.PatientAnswerTests.Where(t => t.AssessmentId == id);
+                _context.PatientAnswerTests.RemoveRange(testAnswers);
+
                 _context.Assessments.Remove(assessment);
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(
-                "DossierDetails", "Folder",new { id = dossierId }
+                "DossierDetails", "Folder", new { id = dossierId }
             );
         }
 
