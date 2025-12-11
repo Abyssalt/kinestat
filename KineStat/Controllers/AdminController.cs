@@ -39,12 +39,19 @@ namespace KineStat.Controllers
         /// redirection.</remarks>
         /// <param name="physio">The physio entity containing the details to be created. Must have valid model state; required fields should
         /// be populated.</param>
+        /// <param name="passwordConfirm">The password confirmation field to verify password entry.</param>
         /// <returns>A redirect to the index view upon successful creation or if an error occurs. If the model state is invalid,
         /// redirects to the index view with an error message.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Physio physio)
+        public async Task<IActionResult> Create(Physio physio, string passwordConfirm)
         {
+            if (physio.Password != passwordConfirm)
+            {
+                TempData["Error"] = "Les mots de passe ne correspondent pas.";
+                return RedirectToAction(nameof(Index));
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -75,14 +82,24 @@ namespace KineStat.Controllers
         /// Handles concurrency and general exceptions by displaying appropriate error messages.</remarks>
         /// <param name="physio">The physiotherapist entity containing the updated information. Must have a valid identifier and pass model
         /// validation.</param>
+        /// <param name="passwordConfirm">The password confirmation field to verify password entry when changing password.</param>
         /// <returns>A redirect to the index view. If the update is successful, a success message is displayed; otherwise, an
         /// error message is shown.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Physio physio)
+        public async Task<IActionResult> Edit(Physio physio, string passwordConfirm)
         {
             try
             {
+                if (!string.IsNullOrEmpty(physio.Password) || !string.IsNullOrEmpty(passwordConfirm))
+                {
+                    if (physio.Password != passwordConfirm)
+                    {
+                        TempData["Error"] = "Les mots de passe ne correspondent pas.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
                     var existingPhysio = await _context.Physios.FindAsync(physio.Id);
