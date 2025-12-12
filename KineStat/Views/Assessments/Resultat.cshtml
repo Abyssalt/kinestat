@@ -6,6 +6,7 @@ ViewData["Title"] = "Resultat";
 ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
 ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
 var assessmentId = ViewData["AssessmentId"];
+    ViewData["HideFloatingEye"] = true;
 
  }
 

@@ -234,21 +234,18 @@ namespace KineStat.Controllers
                         {
                             if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
                             {
-                                totalScore += 10;
+                                totalScore += 2;
                             }
                             validResponseCount++;
                         } else
                         {
                             if (!string.IsNullOrWhiteSpace(response.ResponseValue))
                             {
-                                totalScore += 5;
-                                validResponseCount++;
+                                totalScore += 2;
                             }
                         }
                     }
-
-                    double averageScore = validResponseCount > 0 ? totalScore / validResponseCount : 0;
-                    categoryScores.Add(Math.Round(averageScore, 2));
+                    categoryScores.Add(Math.Round(totalScore, 2));
                 }
 
                 if (dto.AssessmentId.HasValue)
@@ -392,22 +389,18 @@ namespace KineStat.Controllers
                         {
                             if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
                             {
-                                totalScore += 10;
+                                totalScore += 2;
                             }
 
-                            validResponseCount++;
                         } else
                         {
                             if (!string.IsNullOrWhiteSpace(response.ResponseValue))
                             {
-                                totalScore += 5;
-                                validResponseCount++;
+                                totalScore += 2;
                             }
                         }
                     }
-
-                    double averageScore = validResponseCount > 0 ? totalScore / validResponseCount : 0;
-                    categoryScores.Add(Math.Round(averageScore, 2));
+                    categoryScores.Add(Math.Round(totalScore, 2));
                 }
 
                 return Json(new { success = true, clinicalCategories = categoryScores });
