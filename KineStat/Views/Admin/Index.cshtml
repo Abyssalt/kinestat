@@ -123,7 +123,7 @@
 <div class="modal fade" id="createPhysioModal" tabindex="-1" aria-labelledby="createPhysioModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
-            <form asp-controller="Admin" asp-action="Create" method="post">
+            <form asp-controller="Admin" asp-action="Create" method="post" autocomplete="off">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold" id="createPhysioModalLabel">
                         <i class="bi bi-person-plus-fill me-2"></i>Ajouter un Kinésithérapeute
@@ -134,34 +134,34 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label for="createFirstName" class="form-label fw-medium">Prénom</label>
-                            <input type="text" class="form-control" id="createFirstName" name="FirstName" required>
+                            <input type="text" class="form-control" id="createFirstName" name="FirstName" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createLastName" class="form-label fw-medium">Nom</label>
-                            <input type="text" class="form-control" id="createLastName" name="LastName" required>
+                            <input type="text" class="form-control" id="createLastName" name="LastName" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createEmail" class="form-label fw-medium">Email</label>
-                            <input type="email" class="form-control" id="createEmail" name="Email" required>
+                            <input type="email" class="form-control" id="createEmail" name="Email" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPhoneNumber" class="form-label fw-medium">Téléphone</label>
-                            <input type="tel" class="form-control" id="createPhoneNumber" name="PhoneNumber" required>
+                            <input type="tel" class="form-control" id="createPhoneNumber" name="PhoneNumber" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPassword" class="form-label fw-medium">Mot de passe</label>
-                            <input type="password" class="form-control" id="createPassword" name="Password" required>
+                            <input type="password" class="form-control" id="createPassword" name="Password" autocomplete="new-password" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPasswordConfirm" class="form-label fw-medium">Confirmer le mot de passe</label>
-                            <input type="password" class="form-control" id="createPasswordConfirm" name="PasswordConfirm" required>
+                            <input type="password" class="form-control" id="createPasswordConfirm" name="PasswordConfirm" autocomplete="new-password" required>
                             <div class="invalid-feedback" id="createPasswordError">
                                 Les mots de passe ne correspondent pas.
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createINAMI" class="form-label fw-medium">Numéro INAMI</label>
-                            <input type="number" class="form-control" id="createINAMI" name="INAMINumber" required>
+                            <input type="number" class="form-control" id="createINAMI" name="INAMINumber" autocomplete="off" required>
                         </div>
                     </div>
                 </div>
