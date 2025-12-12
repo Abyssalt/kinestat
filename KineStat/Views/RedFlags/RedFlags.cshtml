@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+    ViewData["ShowFloatingEye"] = true;
     var patientId = ViewData["PatientId"]; 
     var assessmentId = ViewData["AssessmentId"];
 }

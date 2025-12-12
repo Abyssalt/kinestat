@@ -3,7 +3,7 @@
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
     var assessmentId = ViewData["AssessmentId"];
-    ViewData["HideFloatingEye"] = true;
+    ViewData["ShowClinicalFloatingEye"] = true;
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
