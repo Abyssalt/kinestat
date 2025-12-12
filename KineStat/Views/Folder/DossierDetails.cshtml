@@ -79,11 +79,19 @@
                                             <h6 class="mb-1 fw-semibold">
                                                 <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
                                             </h6>
-                                            <small class="text-secondary">
+                                            <small class="text-secondary d-block">
                                                 <i class="bi bi-person-badge me-1"></i>Kiné : @assessment.Physio?.FirstName
                                             </small>
                                         </div>
-                                        <i class="bi bi-chevron-right text-secondary"></i>
+
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge px-3 py-2 rounded-pill fw-semibold
+                                                @(assessment.Status == AssessmentStatus.EnCours ? "bg-success" : "bg-danger")">
+                                                @assessment.Status
+                                            </span>
+
+                                            <i class="bi bi-chevron-right text-secondary ms-3"></i>
+                                        </div>
                                     </div>
                                 </a>
                             }

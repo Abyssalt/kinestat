@@ -265,7 +265,8 @@ namespace KineStat.Controllers
                 PatientId = dossier.Patient.Id,
                 PhysioId = dossier.Patient.PhysioId,
                 Date = DateTime.Today,
-                RedFlagsPercentage = 0
+                RedFlagsPercentage = 0,
+                Status = AssessmentStatus.EnCours
             });
         }
 

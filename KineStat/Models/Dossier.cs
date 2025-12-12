@@ -2,11 +2,6 @@
 
 namespace KineStat.Models
 {
-    public enum FolderStatus
-    {
-        Cloturé,
-        EnCours
-    }
 
     public class Dossier
     {
@@ -20,8 +15,6 @@ namespace KineStat.Models
         public DateTime DateOuverture { get; set; }
 
         public string? Notes { get; set; }
-
-        public FolderStatus Status { get; set; }
 
         [Required]
         public int PatientId { get; set; }
