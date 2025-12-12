@@ -4,10 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace KineStat.Models
 {
 
+    using System.ComponentModel.DataAnnotations;
+
     public enum AssessmentStatus
     {
-        Cloturé,
-        EnCours
+        EnCours,
+        Cloture
     }
 
     public class Assessment
