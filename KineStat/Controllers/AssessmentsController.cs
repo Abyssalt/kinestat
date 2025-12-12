@@ -44,6 +44,14 @@ namespace KineStat.Controllers
                 .Select(cd => cd.Value)
                 .ToListAsync();
 
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.AssessmentId == assessment.Id && cd.CategoryId >= 7 && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
+
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
                 .ThenInclude(q => q.Cluster)
@@ -51,6 +59,7 @@ namespace KineStat.Controllers
                 .OrderBy(t => t.IsCustomTest
                     ? "Tests personnalisés"
                     : t.Question!.Cluster!.Name)
+
                 .ThenBy(t => t.DateResponse)
                 .ToListAsync();
 
@@ -314,6 +323,17 @@ namespace KineStat.Controllers
                 .ToListAsync();
 
             ViewBag.TintivValues = tintivData;
+
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId
+                             && cd.AssessmentId == assessment.Id
+                             && cd.CategoryId >= 7
+                             && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
 
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)

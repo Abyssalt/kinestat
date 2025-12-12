@@ -7,7 +7,16 @@ ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
 ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
 var assessmentId = ViewData["AssessmentId"];
 
-}
+ }
+
+ @{
+     var tintivJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.TintivValues ?? new List<double> { 0, 0, 0, 0, 0, 0 }
+     );
+     var clinicalJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.ClinicalValues ?? new List<double> { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+     );
+ }
 
 <meta name="patient-id" content="@Model.PatientId" />
 <meta name="assessment-id" content="@Model.Id" />

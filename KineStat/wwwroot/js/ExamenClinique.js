@@ -231,9 +231,18 @@ async function autoSaveResponses() {
             })
         });
 
-        await response.json();
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('Sauvegarde réussie');
+
+            if (data.clinicalCategories && window.ClinicalProfileStore) {
+                window.ClinicalProfileStore.set(data.clinicalCategories);
+                console.log('Catégories cliniques mises à jour:', data.clinicalCategories);
+            }
+        }
     } catch (error) {
-        console.error('Erreur sauvegarde automatique:', error);
+        console.error('Erreur:', error);
     }
 }
 

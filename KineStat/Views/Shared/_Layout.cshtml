@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     
     <script src="~/js/redflags-store.js"></script>
+    <script src="~/js/clinical-store.js"></script>
 
     </head>
     <body class="d-flex flex-column min-vh-100">
@@ -149,7 +150,8 @@
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-         <script src="~/js/gauge.js"></script>
+        <script src="~/js/gauge.js"></script>
+
 
         <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -270,42 +272,50 @@
                 }
             }
 
-            function initRadarChart9() {
+            function initOrUpdateRadarChart9() {
                 const ctx = document.getElementById("radarChart9");
-                if (!ctx || radarChart9Instance) return;
+                if (!ctx) return;
 
-                radarChart9Instance = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: [
-                            "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
-                            "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
-                            "Socio-environnemental", "Émotionnel/Affectif"
-                        ],
-                        datasets: [{
-                            label: "Profil clinique",
-                            data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
-                            backgroundColor: "rgba(13,110,253,0.25)",
-                            borderColor: "rgb(13,110,253)",
-                            borderWidth: 3,
-                            pointBackgroundColor: "rgb(13,110,253)",
-                            pointBorderColor: "#fff"
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                min: 0,
-                                max: 10,
-                                ticks: { stepSize: 2, backdropColor: "transparent" }
-                            }
+                const clinicalCategories = window.ClinicalProfileStore ? ClinicalProfileStore.get() : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                const data = clinicalCategories.length === 9 ? clinicalCategories : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+                if (radarChart9Instance) {
+                    radarChart9Instance.data.datasets[0].data = data;
+                    radarChart9Instance.update();
+                } else {
+                    radarChart9Instance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: [
+                                "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
+                                "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
+                                "Socio-environnemental", "Émotionnel/Affectif"
+                            ],
+                            datasets: [{
+                                label: "Profil clinique",
+                                data: data,
+                                backgroundColor: "rgba(13,110,253,0.25)",
+                                borderColor: "rgb(13,110,253)",
+                                borderWidth: 3,
+                                pointBackgroundColor: "rgb(13,110,253)",
+                                pointBorderColor: "#fff"
+                            }]
                         },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    min: 0,
+                                    max: 10,
+                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+        }
 
             function updatePathologiesList(categoriesArray) {
                 const pathologies = [
@@ -333,7 +343,7 @@
             }
 
        
-            initRadarChart9();
+            initOrUpdateRadarChart9();
             initOrUpdateRadarChart6();
             initOrUpdateRadarChart6Eye(); 
 
@@ -342,6 +352,11 @@
                     initOrUpdateRadarChart6();
                     initOrUpdateRadarChart6Eye();
                     updatePathologiesList(categoriesArray);
+                });
+            }
+            if (window.ClinicalProfileStore) {
+                ClinicalProfileStore.subscribe(clinicalArray => {
+                    initOrUpdateRadarChart9();
                 });
             }
 
@@ -363,6 +378,19 @@
                     })
                     .catch(error => {
                         console.error("Erreur lors du chargement des catégories:", error);
+                    });
+
+                fetch(`/Patient/${patientId}/Assessment/${assessmentId}/ClinicalCategoryPercentages`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.clinicalCategories) {
+                            if (window.ClinicalProfileStore) {
+                                ClinicalProfileStore.set(data.clinicalCategories);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors du chargement des catégories cliniques:", error);
                     });
             }
         });
