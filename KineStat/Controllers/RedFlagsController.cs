@@ -69,6 +69,7 @@ namespace KineStat.Controllers
             }
 
             assessment.RedFlagsPercentage = value;
+            assessment.Status = AssessmentStatus.Cloture;
 
             await _context.SaveChangesAsync();
 

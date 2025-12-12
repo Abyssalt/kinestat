@@ -24,7 +24,7 @@ namespace KineStat.Controllers
         [Route("Patient/{id}/CreateFolder")]
         public IActionResult CreateFolder(int id)
         {
-            return View(new Dossier { PatientId = id });
+            return View(new Dossier { PatientId = id});
         }
 
         /// <summary>

@@ -214,8 +214,7 @@ namespace KineStat.Controllers
                     
                     await transaction.CommitAsync();
                     
-                    TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} créé avec succès !";
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Anamnese","Patient", new { id = patient.Id });
                 }
                 catch (Exception ex)
                 {

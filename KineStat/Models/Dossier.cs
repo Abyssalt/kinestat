@@ -2,6 +2,7 @@
 
 namespace KineStat.Models
 {
+
     public class Dossier
     {
         [Key]

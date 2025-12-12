@@ -3,6 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
+
+    using System.ComponentModel.DataAnnotations;
+
+    public enum AssessmentStatus
+    {
+        EnCours,
+        Cloture
+    }
+
     public class Assessment
     {
         [Key]
@@ -34,7 +43,9 @@ namespace KineStat.Models
         public int DossierId { get; set; }
 
         public Dossier Dossier { get; set; }
-        
+
+        public AssessmentStatus Status { get; set; }
+
         public double? RedFlagsPercentage { get; set; }
 
     }
