@@ -31,7 +31,20 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string search, string status)
         {
-            var query = _context.Patients.Include(p => p.Physio).AsQueryable();
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userIdString = HttpContext.Session.GetString("UserId");
+
+            if (userRole != "Physio" || string.IsNullOrEmpty(userIdString))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            int physioId = int.Parse(userIdString);
+
+            var query = _context.Patients
+                .Include(p => p.Physio)
+                .Where(p => p.PhysioId == physioId)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -80,7 +93,26 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<JsonResult> SearchPatients(string search, string status, int page = 1, int pageSize = 5)
         {
-            var query = _context.Patients.Include(p => p.Physio).AsQueryable();
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userIdString = HttpContext.Session.GetString("UserId");
+
+            if (userRole != "Physio" || string.IsNullOrEmpty(userIdString))
+            {
+                return Json(new
+                {
+                    patients = new List<object>(),
+                    totalCount = 0,
+                    currentPage = 1,
+                    totalPages = 0
+                });
+            }
+
+            int physioId = int.Parse(userIdString);
+
+            var query = _context.Patients
+                .Include(p => p.Physio)
+                .Where(p => p.PhysioId == physioId)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -140,6 +172,18 @@ namespace KineStat.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Patient patient, string? NewDoctorLastName, string? NewDoctorFirstName, string? NewDoctorINAMI)
         {
+
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var userIdString = HttpContext.Session.GetString("UserId");
+
+            if (userRole != "Physio" || string.IsNullOrEmpty(userIdString))
+            {
+                TempData["Error"] = "Vous devez être connecté en tant que kinésithérapeute pour créer un patient.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            patient.PhysioId = int.Parse(userIdString);
+
             if (ModelState.IsValid)
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();

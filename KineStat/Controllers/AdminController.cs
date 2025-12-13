@@ -46,6 +46,13 @@ namespace KineStat.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Physio physio, string passwordConfirm)
         {
+            // Vérifier la force du mot de passe
+            if (!IsPasswordStrong(physio.Password, out List<string> errors))
+            {
+                TempData["Error"] = "Mot de passe faible : " + string.Join(", ", errors);
+                return RedirectToAction(nameof(Index));
+            }
+
             if (physio.Password != passwordConfirm)
             {
                 TempData["Error"] = "Les mots de passe ne correspondent pas.";
@@ -93,6 +100,13 @@ namespace KineStat.Controllers
             {
                 if (!string.IsNullOrEmpty(physio.Password) || !string.IsNullOrEmpty(passwordConfirm))
                 {
+
+                    if (!IsPasswordStrong(physio.Password, out List<string> errors))
+                    {
+                        TempData["Error"] = "Mot de passe faible : " + string.Join(", ", errors);
+                        return RedirectToAction(nameof(Index));
+                    }
+
                     if (physio.Password != passwordConfirm)
                     {
                         TempData["Error"] = "Les mots de passe ne correspondent pas.";
@@ -177,5 +191,36 @@ namespace KineStat.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        /// <summary>
+        /// Validates if a password meets the strong password requirements.
+        /// </summary>
+        /// <param name="password">The password to validate.</param>
+        /// <param name="errors">Output parameter containing a list of validation errors if the password is weak.</param>
+        /// <returns>True if the password is strong; otherwise, false.</returns>
+        private bool IsPasswordStrong(string password, out List<string> errors)
+        {
+            errors = new List<string>();
+
+            if (password.Length < 8)
+                errors.Add("Le mot de passe doit contenir au moins 8 caractères");
+
+            if (!password.Any(char.IsUpper))
+                errors.Add("Le mot de passe doit contenir au moins une majuscule");
+
+            if (!password.Any(char.IsLower))
+                errors.Add("Le mot de passe doit contenir au moins une minuscule");
+
+            if (!password.Any(char.IsDigit))
+                errors.Add("Le mot de passe doit contenir au moins un chiffre");
+
+            if (!password.Any(ch => "!@#$%^&*(),.?\":{}|<>_-+=[]\\/'`~;".Contains(ch)))
+                errors.Add("Au moins un caractère spécial");
+
+            return errors.Count == 0;
+        }
+
+
     }
 }

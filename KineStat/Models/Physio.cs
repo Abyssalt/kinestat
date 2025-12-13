@@ -23,7 +23,7 @@ namespace KineStat.Models
         public String Password { get; set; }
 
         [Required]
-        public int INAMINumber { get; set; }
+        public long INAMINumber { get; set; }
 
         public List<Patient> Patients { get; set; } = new List<Patient>();
     }
