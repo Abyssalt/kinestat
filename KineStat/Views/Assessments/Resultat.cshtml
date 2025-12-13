@@ -6,8 +6,18 @@ ViewData["Title"] = "Resultat";
 ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
 ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
 var assessmentId = ViewData["AssessmentId"];
+    ViewData["HideFloatingEye"] = true;
 
-}
+ }
+
+ @{
+     var tintivJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.TintivValues ?? new List<double> { 0, 0, 0, 0, 0, 0 }
+     );
+     var clinicalJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.ClinicalValues ?? new List<double> { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+     );
+ }
 
 <meta name="patient-id" content="@Model.PatientId" />
 <meta name="assessment-id" content="@Model.Id" />
@@ -74,7 +84,12 @@ var assessmentId = ViewData["AssessmentId"];
                                         </strong>
 
                                                 <div class="text-muted small">
-                                                    Résultat : @test.ResponseValue
+                                                    Résultat :
+                                                    @(
+                                                    test.ResponseValue == "true" ? "Positif" :
+                                                    test.ResponseValue == "false" ? "Negatif" :
+                                                    test.ResponseValue
+                                                    )
                                                 </div>
 
                                     @if (!string.IsNullOrWhiteSpace(test.Observations))

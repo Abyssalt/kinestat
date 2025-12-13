@@ -37,11 +37,13 @@
         cb(this.getCategories());
     },
 
+   
     clear() {
         this.value = 0;
         this.categories = [0, 0, 0, 0, 0, 0];
         sessionStorage.removeItem("redFlagsValue");
         sessionStorage.removeItem("redFlagsCategories");
+        sessionStorage.removeItem("clinicalCategories");
         this.listeners.forEach(cb => cb(0));
         this.categoryListeners.forEach(cb => cb([0, 0, 0, 0, 0, 0]));
     }

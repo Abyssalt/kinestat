@@ -3,6 +3,8 @@ using KineStat.Models;
 using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Globalization;
 
 namespace KineStat.Controllers
 {
@@ -199,13 +201,96 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
+                var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                var categoryScores = new List<double>();
+
+                foreach (var categoryId in examCliniqueCategories)
+                {
+                    var responses = await _context.PatientAnswerTests
+                        .Include(pat => pat.Question)
+                        .Where(pat =>
+                            pat.PatientId == dto.PatientId &&
+                            pat.AssessmentId == dto.AssessmentId &&
+                            pat.Question.CategoryId == categoryId &&
+                            pat.Question.ClusterId == null &&
+                            !pat.IsCustomTest)
+                        .ToListAsync();
+
+                    if (!responses.Any())
+                    {
+                        categoryScores.Add(0);
+                        continue;
+                    }
+
+
+                    double totalScore = 0;
+                    int validResponseCount = 0;
+
+                    foreach (var response in responses)
+                    {
+                        var question = await _context.Questions.FindAsync(response.QuestionId);
+
+                        if (question is QuestionBool)
+                        {
+                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
+                            {
+                                totalScore += 2;
+                            }
+                            validResponseCount++;
+                        } else
+                        {
+                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
+                            {
+                                totalScore += 2;
+                            }
+                        }
+                    }
+                    categoryScores.Add(Math.Round(totalScore, 2));
+                }
+
+                if (dto.AssessmentId.HasValue)
+                {
+                    for (int i = 0; i < examCliniqueCategories.Length; i++)
+                    {
+                        int categoryId = examCliniqueCategories[i];
+                        double categoryValue = categoryScores[i];
+
+                        var existingData = await _context.ClinicalDatas
+                            .FirstOrDefaultAsync(cd =>
+                                cd.PatientId == dto.PatientId &&
+                                cd.AssessmentId == dto.AssessmentId.Value &&
+                                cd.CategoryId == categoryId);
+
+                        if (existingData != null)
+                        {
+                            existingData.Value = categoryValue;
+                            _context.ClinicalDatas.Update(existingData);
+                        }
+                        else
+                        {
+                            var newData = new ClinicalData
+                            {
+                                PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId.Value,
+                                CategoryId = categoryId,
+                                Value = categoryValue
+                            };
+                            _context.ClinicalDatas.Add(newData);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                
+            }
+
                 return Json(new
                 {
                     success = true,
                     message = "Réponses enregistrées avec succès",
                     savedCount = savedCount,
                     updatedCount = updatedCount,
-                    totalCount = savedCount + updatedCount
+                    totalCount = savedCount + updatedCount,
+                    clinicalCategories = categoryScores
                 });
             }
             catch (Exception ex)
@@ -260,6 +345,69 @@ namespace KineStat.Controllers
             catch (Exception ex)
             {
                 return Json(new List<object>());
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the calculated percentages for the 9 clinical categories for a specific assessment.
+        /// </summary>
+        [HttpGet]
+        [Route("Patient/{patientId}/Assessment/{assessmentId}/ClinicalCategoryPercentages")]
+        public async Task<IActionResult> GetClinicalCategoryPercentages(int patientId, int assessmentId)
+        {
+            try
+            {
+                var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                var categoryScores = new List<double>();
+
+                foreach (var categoryId in examCliniqueCategories)
+                {
+                    var responses = await _context.PatientAnswerTests
+                        .Include(pat => pat.Question)
+                        .Where(pat =>
+                            pat.PatientId == patientId &&
+                            pat.AssessmentId == assessmentId &&
+                            pat.Question.CategoryId == categoryId &&
+                            pat.Question.ClusterId == null &&
+                            !pat.IsCustomTest)
+                        .ToListAsync();
+
+                    if (!responses.Any())
+                    {
+                        categoryScores.Add(0);
+                        continue;
+                    }
+
+                    double totalScore = 0;
+                    int validResponseCount = 0;
+
+                    foreach (var response in responses)
+                    {
+                        var question = await _context.Questions.FindAsync(response.QuestionId);
+
+                        if (question is QuestionBool)
+                        {
+                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
+                            {
+                                totalScore += 2;
+                            }
+
+                        } else
+                        {
+                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
+                            {
+                                totalScore += 2;
+                            }
+                        }
+                    }
+                    categoryScores.Add(Math.Round(totalScore, 2));
+                }
+
+                return Json(new { success = true, clinicalCategories = categoryScores });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

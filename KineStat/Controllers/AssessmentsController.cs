@@ -44,10 +44,25 @@ namespace KineStat.Controllers
                 .Select(cd => cd.Value)
                 .ToListAsync();
 
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.AssessmentId == assessment.Id && cd.CategoryId >= 7 && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
+
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
                 .ThenInclude(q => q.Cluster)
-                .Where(t => t.PatientId == assessment.PatientId && t.AssessmentId == assessment.Id)
+                .Where(t =>
+                    t.PatientId == assessment.PatientId &&
+                    t.AssessmentId == assessment.Id &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
                 .OrderBy(t => t.IsCustomTest
                     ? "Tests personnalisés"
                     : t.Question!.Cluster!.Name)
@@ -57,7 +72,26 @@ namespace KineStat.Controllers
             ViewBag.Tests = tests;
 
             ViewBag.TintivValues = tintivData;
+            var firstAssessment = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId)
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id })
+                .FirstOrDefaultAsync();
 
+            List<double>? firstTintivData = null;
+
+            if (firstAssessment != null && firstAssessment.Id != assessment.Id)
+            {
+                firstTintivData = await _context.ClinicalDatas
+                    .Where(cd =>
+                        cd.AssessmentId == firstAssessment.Id &&
+                        cd.CategoryId <= 6)
+                    .OrderBy(cd => cd.CategoryId)
+                    .Select(cd => cd.Value)
+                    .ToListAsync();
+            }
+
+            ViewBag.FirstTintivValues = firstTintivData;
             return View(assessment);
         }
 
@@ -297,17 +331,56 @@ namespace KineStat.Controllers
 
             ViewBag.TintivValues = tintivData;
 
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId
+                             && cd.AssessmentId == assessment.Id
+                             && cd.CategoryId >= 7
+                             && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
+
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
                 .ThenInclude(q=> q.Cluster)
                 .Where(t =>
                     t.PatientId == id &&
-                    t.AssessmentId == assessmentId)
+                    t.AssessmentId == assessmentId &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
+
                 .OrderBy(t => t.DateResponse)
                 .OrderBy(t => t.Question.Cluster.Name)
                 .ToListAsync();
 
             ViewBag.Tests = tests;
+
+            var firstAssessment = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId)
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id })
+                .FirstOrDefaultAsync();
+
+            List<double>? firstTintivData = null;
+
+            if (firstAssessment != null && firstAssessment.Id != assessment.Id)
+            {
+                firstTintivData = await _context.ClinicalDatas
+                    .Where(cd =>
+                        cd.AssessmentId == firstAssessment.Id &&
+                        cd.CategoryId <= 6)
+                    .OrderBy(cd => cd.CategoryId)
+                    .Select(cd => cd.Value)
+                    .ToListAsync();
+            }
+
+            ViewBag.FirstTintivValues = firstTintivData;
+
 
             if (assessment == null)
                 return NotFound("Aucun bilan trouvé");
