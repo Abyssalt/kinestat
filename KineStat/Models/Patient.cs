@@ -45,7 +45,7 @@ namespace KineStat.Models
         [Required]
         public Gender Gender { get; set; }
 
-        [Required] 
+        [Required]
         public string SocialSecurityNumber { get; set; }
 
 
@@ -72,5 +72,13 @@ namespace KineStat.Models
         public ICollection<Assessment>? Assessments { get; set; } = new List<Assessment>();
 
         public virtual ICollection<PatientAnswerTests>? Responses { get; set; }
+
+        [Required]
+        [DataType(DataType.DateTime)]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        public bool IsAnonymized { get; set; } = false;
+
+        public DateTime? AnonymizedDate { get; set; }
     }
 }
