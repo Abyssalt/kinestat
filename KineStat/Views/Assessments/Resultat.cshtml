@@ -2,12 +2,21 @@
 
 
 ﻿@{
-ViewData["Title"] = "Resultat";
-ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
-ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
-var assessmentId = ViewData["AssessmentId"];
-    ViewData["HideFloatingEye"] = true;
+    ViewData["Title"] = "Resultat";
+    var patientId = ViewContext.RouteData.Values["id"]?.ToString();
+    var assessmentId = ViewData["AssessmentId"];
+    var folderId = ViewData["FolderId"];
 
+ViewData["HideFloatingEye"] = true;
+ViewData["Breadcrumbs"] =
+    $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/Tests/{assessmentId}'>Tests</a></li>" +
+    $"<li class='breadcrumb-item active'>Résultats</li>";
  }
 
  @{

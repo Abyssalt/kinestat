@@ -9,7 +9,15 @@
     var patientId = ViewData["PatientId"] != null ? Convert.ToInt32(ViewData["PatientId"]) : 0;
     var patient = ViewData["Patient"] as Patient;
     var assessmentId = ViewData["AssessmentId"];
-
+    var folderId = ViewData["FolderId"];
+    ViewData["Breadcrumbs"] =
+        $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
+        $"<li class='breadcrumb-item active'>Tests</li>";
 
     int totalQuestions = clusters.Sum(c => c.Questions.Count);
 }
@@ -27,10 +35,10 @@
                         <i class="bi bi-person-badge me-1"></i>Patient : <strong>@patientNom</strong>
                     </p>
                 </div>
-                <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
-                <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
                 </a>
             </div>

@@ -26,11 +26,12 @@ namespace KineStat.Controllers
         /// <param name="id">The unique identifier of the patient whose Red Flags are to be displayed.</param>
         /// <param name="assessmentId">The unique identifier of the assessment associated with the Red Flags.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the Red Flags view for the specified patient and assessment.</returns>
-        [Route("Patient/{id}/RedFlags/{assessmentId}")]
-        public IActionResult RedFlags(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/RedFlags/{assessmentId}")]
+        public IActionResult RedFlags(int id, int folderId, int assessmentId)
         {
             ViewData["PatientId"] = id.ToString();
             ViewData["AssessmentId"] = assessmentId.ToString();
+            ViewData["FolderId"] = folderId.ToString();
             return View();
         }
 
