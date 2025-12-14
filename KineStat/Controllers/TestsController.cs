@@ -26,8 +26,8 @@ namespace KineStat.Controllers
         /// <returns>An asynchronous operation that returns an <see cref="IActionResult"/> representing the rendered 'Tests' view
         /// with patient and test data.</returns>
         [HttpGet]
-        [Route("Patient/{id}/Tests/{assessmentId}")]
-        public async Task<IActionResult> Tests(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/Tests/{assessmentId}")]
+        public async Task<IActionResult> Tests(int id, int folderId, int assessmentId)
         {
             var patient = await _context.Patients
                 .Include(p => p.Physio)
@@ -52,9 +52,9 @@ namespace KineStat.Controllers
             //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
             //if (latestSessionDate.HasValue)
             //{
-              //  latestResponses = latestResponses
-                //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
-                  //  .ToList();
+            //  latestResponses = latestResponses
+            //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+            //  .ToList();
 
             //}
 
@@ -64,11 +64,7 @@ namespace KineStat.Controllers
             ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
             ViewData["Clusters"] = clustersWithQuestions;
             ViewData["ExistingResponses"] = existingResponses;
-            ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
-                                      $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-                                      $"<li class='breadcrumb-item'><a href='/Patients/Details/{id}'>{patient.FirstName} {patient.LastName}</a></li>" +
-                                      $"<li class='breadcrumb-item active' aria-current='page'>Tests</li>";
-
+            ViewData["FolderId"] = folderId;
 
             return View("Tests", clustersWithQuestions);
         }

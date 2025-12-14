@@ -24,11 +24,12 @@ namespace KineStat.Controllers
         /// <param name="assessmentId">The unique identifier of the clinical assessment to display for the patient.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
         /// assessment.</returns>
-        [Route("Patient/{id}/ExamenClinique/{assessmentId}")]
-        public IActionResult ExamenClinique(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/ExamenClinique/{assessmentId}")]
+        public IActionResult ExamenClinique(int id, int folderId, int assessmentId)
         {
             ViewData["AssessmentId"] = assessmentId.ToString();
             ViewData["PatientId"] = id.ToString();
+            ViewData["FolderId"] = folderId.ToString();
             return View();
         }
 

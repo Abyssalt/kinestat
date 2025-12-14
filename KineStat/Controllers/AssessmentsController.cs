@@ -183,7 +183,7 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
+                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, folderId=assessment.DossierId ,assessmentId = socrate.AssessmentId });
             }
             catch (Exception ex)
             {
@@ -313,8 +313,8 @@ namespace KineStat.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the assessment's results view if found and associated with the patient;
         /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
         /// patient.</returns>
-        [Route("Patient/{id}/Resultat/{assessmentId}")]
-        public async Task<IActionResult> Resultat(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/Resultat/{assessmentId}")]
+        public async Task<IActionResult> Resultat(int id,int folderId, int assessmentId)
         {
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
@@ -389,6 +389,7 @@ namespace KineStat.Controllers
                 return BadRequest("Ce bilan n'appartient pas à ce patient.");
             ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessment.Id;
+            ViewData["FolderId"] = folderId;
 
             return View(assessment);
         }
