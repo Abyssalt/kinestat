@@ -126,6 +126,8 @@ namespace KineStat.Controllers
                 .ToListAsync();
 
             ViewBag.ClinicalAnswers = clinicalAnswers;
+
+
             return View(assessment);
         }
 
