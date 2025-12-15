@@ -102,6 +102,30 @@ namespace KineStat.Controllers
             }
 
             ViewBag.FirstTintivValues = firstTintivData;
+
+            var redFlagsAnswers = await _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Include(a => a.Question)
+                .ThenInclude(q => q.Category)
+                .Where(a => a.PatientId == assessment.PatientId && a.AssessmentId == assessment.Id)
+                .OrderBy(a => a.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.RedFlagsAnswers = redFlagsAnswers;
+
+            var clinicalAnswers = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Category)
+                .Where(t => t.PatientId == assessment.PatientId
+                            && t.AssessmentId == assessment.Id
+                            && t.Question.ClusterId == null
+                            && !t.IsCustomTest
+                            && t.Question.CategoryId >= 7
+                            && t.Question.CategoryId <= 15)
+                .OrderBy(t => t.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.ClinicalAnswers = clinicalAnswers;
             return View(assessment);
         }
 

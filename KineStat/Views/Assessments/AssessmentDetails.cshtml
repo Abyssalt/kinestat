@@ -325,7 +325,79 @@
         </div>
     </div>
 </div>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="accordion shadow-sm" id="redFlagsAccordion">
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingRedFlags">
+                    <button class="accordion-button collapsed fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseRedFlags">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        Red Flags – Réponses
+                    </button>
+                </h2>
 
+                <div id="collapseRedFlags"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#redFlagsAccordion">
+                    <div class="accordion-body">
+                        @if (ViewBag.RedFlagsAnswers != null && ((List<PatientAnswerBool>)ViewBag.RedFlagsAnswers).Any())
+                        {
+                            var groupedRedFlags = ((List<PatientAnswerBool>)ViewBag.RedFlagsAnswers)
+                            .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
+                            .ToList();
+
+                            int rfIndex = 0;
+
+                            foreach (var group in groupedRedFlags)
+                            {
+                                var collapseId = $"rf-collapse-{rfIndex++}";
+
+                                <div class="mb-3">
+                                    <button class="btn btn-link fw-bold text-decoration-none w-100 text-start"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId">
+                                        <i class="bi bi-folder2-open me-2"></i>
+                                        @group.Key
+                                        <span class="badge bg-danger ms-2">@group.Count()</span>
+                                    </button>
+
+                                    <div class="collapse mt-2" id="@collapseId">
+                                        <ul class="list-group">
+                                            @foreach (var answer in group)
+                                            {
+                                                <li class="list-group-item">
+                                                    <strong>@answer.Question?.Title</strong>
+                                                    <div class="text-muted small">
+                                                        Réponse : @(answer.Value ? "Oui" : "Non")
+                                                    </div>
+                                                    @if (!string.IsNullOrWhiteSpace(answer.Comment))
+                                                    {
+                                                        <div class="fst-italic text-secondary small">
+                                                            💬 @answer.Comment
+                                                        </div>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">
+                                Aucune réponse Red Flags enregistrée pour ce bilan.
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <div class="modal fade" id="deleteAssessmentModal" tabindex="-1">
