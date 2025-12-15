@@ -12,13 +12,14 @@ namespace KineStat.Controllers
 
     public class RedFlagsController : Controller
     {
-        private readonly KineDbContext _context; 
-        private readonly BayesCalculator _bayesCalculator;
+        private readonly KineDbContext _context;
+        private readonly BayesService _bayesService;
+
 
         public RedFlagsController(KineDbContext context)
         {
             _context = context;
-            _bayesCalculator = new BayesCalculator();
+            _bayesService = new BayesService(_context, new BayesCalculator());
         }
 
         /// <summary>
@@ -326,14 +327,15 @@ namespace KineStat.Controllers
         /// <exception cref="InvalidOperationException">Thrown if no prior context is defined for the specified medical context and category, or if the prior value
         /// is not strictly between 0 and 1.</exception>
         private async Task<double> CalculateRedFlagCategory(int patientId, int assessmentId, int categoryId)
-        {
-            var answersForCategory = _context.PatientAnswers
-                .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Question.CategoryId == categoryId)
-                .Include(a => a.Question)
-                .ToList();
-
+        { 
             var assessment = await _context.Assessments.FindAsync(assessmentId);
+            if (assessment == null)
+            {
+                throw new Exception(
+                    $"Le bilan {assessmentId} n'existe pas.");
+
+            }
+
             var priorContext = _context.PriorContexts
                 .FirstOrDefault(p => p.MedicalContextId == assessment.MedicalContextId && p.CategoryId == categoryId);
 
@@ -349,7 +351,8 @@ namespace KineStat.Controllers
                     $"Le prior ({priorContext.Value}) doit être strictement entre 0 et 1.");
             }
             double categoryPrior = priorContext.Value;
-            double posterior = _bayesCalculator.CalculateCategoryProbability(answersForCategory, categoryPrior);
+
+            double posterior = await _bayesService.CalculateCategoryProbability(patientId, assessmentId, categoryId, categoryPrior);
 
             return posterior;
         }
