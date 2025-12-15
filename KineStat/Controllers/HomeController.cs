@@ -34,5 +34,18 @@ namespace KineStat.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        // Used for testing error pages
+        [HttpGet]
+        public IActionResult TestAccessDenied()
+        {
+            return RedirectToAction("AccessDenied", "Error");
+        }
+
+        [HttpGet]
+        public IActionResult TestUnauthorized()
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
     }
 }
