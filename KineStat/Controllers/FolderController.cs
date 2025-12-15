@@ -2,9 +2,12 @@
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class FolderController : Controller
     {
         private readonly KineDbContext _context;
@@ -22,9 +25,16 @@ namespace KineStat.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the folder creation view for the specified patient.</returns>
         [HttpGet]
         [Route("Patient/{id}/CreateFolder")]
-        public IActionResult CreateFolder(int id)
+        public async Task<IActionResult> CreateFolder(int id)
         {
-            return View(new Dossier { PatientId = id});
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
+            return View(new Dossier { PatientId = id });
         }
 
         /// <summary>
@@ -41,6 +51,15 @@ namespace KineStat.Controllers
         public async Task<IActionResult> SaveFolder(Dossier dossier)
         {
             dossier.DateOuverture = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dossier.PatientId))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction("Index", "Patients");
+            }
+
             _context.Dossiers.Add(dossier);
 
             try
@@ -71,6 +90,13 @@ namespace KineStat.Controllers
                 .Include(d => d.Assessments)
                     .ThenInclude(a => a.Physio)
                 .FirstOrDefaultAsync(d => d.Id == id);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsDossierOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             if (dossier == null)
                 return NotFound();
