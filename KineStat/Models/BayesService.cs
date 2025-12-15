@@ -1,4 +1,5 @@
 ﻿using KineStat.Data;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace KineStat.Models
@@ -20,14 +21,22 @@ namespace KineStat.Models
         }
 
         /// <summary>
-        /// Calculates the posterior probability for a category by applying Bayes' theorem sequentially to each answer </summary>
-        /// <param name="answers" > The list of boolean patient answers belonging to this category </param>
-        /// <param name="categoryPrior"> The initial prior probability of the category (must be between 0 and 1) </param>
-        /// <returns>
-        /// The final posterior probability after processing all answers
-        /// </returns>
-        public double CalculateCategoryProbability(List<PatientAnswerBool> answers, double categoryPrior)
+        /// Calculates the posterior probability for a category by retrieving patient answers
+        /// from the database and applying Bayes' theorem sequentially.
+        /// </summary>
+        /// <param name="patientId">ID of the patient.</param>
+        /// <param name="assessmentId">ID of the assessment.</param>
+        /// <param name="categoryId">ID of the question category.</param>
+        /// <param name="categoryPrior">The initial prior probability of the category (must be between 0 and 1).</param>
+        /// <returns>The final posterior probability for the category.</returns>
+        public async Task<double> CalculateCategoryProbability(int patientId, int assessmentId, int categoryId, double categoryPrior)
         {
+            var answers = await _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Question.CategoryId == categoryId)
+                .Include(a => a.Question)
+                .ToListAsync();
+
             double posterior = categoryPrior;
             foreach (var answer in answers)
             {
@@ -35,6 +44,7 @@ namespace KineStat.Models
             }
             return posterior;
         }
+
 
 
         /// <summary>
@@ -45,14 +55,14 @@ namespace KineStat.Models
         /// <param name="dossierId">ID of the dossier.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>A list of patient boolean answers for the specified pathology and no cluster.</returns>
-        private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int dossierId, int pathologyId)
+        private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int pathologyId)
         {
             var patient = _context.Patients
                .Where(p => p.Id == patientId)
                .FirstOrDefault();
             if (patient == null) return null;
             var assessment = _context.Assessments
-                    .Where(a => a.PatientId == patientId && a.DossierId == dossierId)
+                    .Where(a => a.PatientId == patientId)
                     .OrderByDescending(a => a.Date)
                     .ThenByDescending(a => a.Id)
                     .FirstOrDefault();
@@ -77,14 +87,14 @@ namespace KineStat.Models
         /// <param name="dossierId">ID of the dossier.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>A list of clusters associated with the specified pathology.</returns>
-        private async Task<List<Cluster>> GetClustersByPathology(int patientId, int assessmentId, int dossierId, int pathologyId)
+        private async Task<List<Cluster>> GetClustersByPathology(int patientId, int assessmentId, int pathologyId)
         {
             var patient = await _context.Patients
               .Where(p => p.Id == patientId)
               .FirstOrDefaultAsync();
             if (patient == null) return null;
             var assessment = await _context.Assessments
-                    .Where(a => a.PatientId == patientId && a.DossierId == dossierId)
+                    .Where(a => a.PatientId == patientId)
                     .OrderByDescending(a => a.Date)
                     .ThenByDescending(a => a.Id)
                     .FirstOrDefaultAsync();
@@ -137,16 +147,20 @@ namespace KineStat.Models
         /// <param name="dossierId">ID of the dossier.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>The final posterior probability for the pathology after evaluating all answers and clusters.</returns>
-        public async Task<double> CalculateProbabilityByPathology(double prior, int patientId, int assessmentId, int dossierId, int pathologyId)
+        public async Task<double> CalculateProbabilityByPathology(double prior, int patientId, int assessmentId,int pathologyId)
         {
             double posterior = prior;
-            var nonClusterAnswers = await GetPatientAnswersByPathology(patientId, assessmentId, dossierId, pathologyId);
-            if (nonClusterAnswers != null && nonClusterAnswers.Any())
+            var boolAnswers = await GetPatientAnswersByPathology(patientId, assessmentId, pathologyId);
+            if (boolAnswers != null && boolAnswers.Any())
             {
-                posterior = CalculateCategoryProbability(nonClusterAnswers, posterior);
+                foreach( var a in boolAnswers)
+                {
+                    posterior = _calculator.CalculatePosterior(posterior, a.Question.RVPositive, a.Question.RVNegative, a.Value);
+                }
+            
             }
 
-            var clusters = await GetClustersByPathology(patientId, assessmentId, dossierId, pathologyId);
+            var clusters = await GetClustersByPathology(patientId, assessmentId, pathologyId);
             if (clusters != null && clusters.Any())
             {
                 foreach (var cluster in clusters)
