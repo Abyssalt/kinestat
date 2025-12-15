@@ -298,7 +298,6 @@ namespace KineStat.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var patient = await _context.Patients.FindAsync(id);
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
@@ -306,6 +305,8 @@ namespace KineStat.Controllers
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
                 return RedirectToAction(nameof(Index));
             }
+
+            var patient = await _context.Patients.FindAsync(id);
 
             if (patient == null)
             {
