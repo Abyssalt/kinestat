@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -96,7 +96,7 @@ namespace KineStat.Migrations
                     Email = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
-                    INAMINumber = table.Column<int>(type: "integer", nullable: false)
+                    INAMINumber = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -186,7 +186,10 @@ namespace KineStat.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     DoctorId = table.Column<int>(type: "integer", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
-                    PhysioId = table.Column<int>(type: "integer", nullable: false)
+                    PhysioId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsAnonymized = table.Column<bool>(type: "boolean", nullable: false),
+                    AnonymizedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -237,6 +240,7 @@ namespace KineStat.Migrations
                     MedicalContextId = table.Column<int>(type: "integer", nullable: false),
                     PhysioId = table.Column<int>(type: "integer", nullable: false),
                     DossierId = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     RedFlagsPercentage = table.Column<double>(type: "double precision", nullable: true),
                     MedicalRecordId = table.Column<int>(type: "integer", nullable: true)
                 },
