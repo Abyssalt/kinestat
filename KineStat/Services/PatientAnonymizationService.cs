@@ -1,0 +1,109 @@
+﻿using KineStat.Data;
+using KineStat.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace KineStat.Services
+{
+    /// <summary>
+    /// Department responsible for the automatic anonymization of patient data 
+    /// in accordance with the GDPR (20 years of conservation)
+    /// </summary>
+    public class PatientAnonymizationService
+    {
+        private readonly KineDbContext _context;
+        private readonly ILogger<PatientAnonymizationService> _logger;
+        private const int RETENTION_YEARS = 20;
+
+        public PatientAnonymizationService(
+            KineDbContext context,
+            ILogger<PatientAnonymizationService> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Anonymise all patients whose creation date is more than 20 years old
+        /// Returns the number of anonymized patients
+        /// </summary>
+        public async Task<int> AnonymizeExpiredPatientsAsync()
+        {
+            _logger.LogInformation("=== DÉBUT ANONYMISATION RGPD ===");
+
+            try
+            {
+                var cutoffDate = DateTime.UtcNow.AddYears(-RETENTION_YEARS);
+
+                var patientsToAnonymize = await _context.Patients
+                    .Where(p => p.CreatedDate < cutoffDate && !p.IsAnonymized)
+                    .ToListAsync();
+
+                _logger.LogInformation($"Patients à anonymiser: {patientsToAnonymize.Count}");
+
+                if (patientsToAnonymize.Count == 0)
+                {
+                    _logger.LogInformation("Aucun patient à anonymiser");
+                    return 0;
+                }
+
+                int anonymizedCount = 0;
+                var now = DateTime.UtcNow;
+
+                foreach (var patient in patientsToAnonymize)
+                {
+                    try
+                    {
+                        AnonymizePatient(patient, now);
+                        anonymizedCount++;
+
+                        _logger.LogInformation(
+                            $"Patient ID {patient.Id} anonymisé (créé le {patient.CreatedDate:yyyy-MM-dd})");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Erreur anonymisation patient ID {patient.Id}");
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    $"=== FIN ANONYMISATION RGPD : {anonymizedCount} patients anonymisés ===");
+
+                return anonymizedCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ERREUR lors de l'anonymisation");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Anonymize a patient’s personal data
+        /// </summary>
+        private void AnonymizePatient(Patient patient, DateTime anonymizationDate)
+        {
+            var anonymousId = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+
+            patient.LastName = $"ANONYME_{anonymousId}";
+            patient.FirstName = "ANONYME";
+            patient.Email = $"anonyme_{anonymousId}@anonymise.rgpd";
+            patient.PhoneNumber = "0000000000";
+            patient.SocialSecurityNumber = $"ANONYMISE_{anonymousId}";
+            patient.Address = "ADRESSE ANONYMISEE";
+
+            patient.Profession = null;
+            patient.ActivitesPhysiques = null;
+            patient.AntecedentsMedicaux = "DONNEES ANONYMISEES";
+            patient.MedicationActuelle = null;
+
+            patient.Status = PatientStatus.Terminé;
+            patient.IsAnonymized = true;
+            patient.AnonymizedDate = anonymizationDate;
+
+            // Note: BirthDate, Weight, Height, Gender sont conservés pour les statistiques
+        }
+    }
+}

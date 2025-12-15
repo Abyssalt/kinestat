@@ -3,9 +3,14 @@ using KineStat.Models;
 using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Globalization;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class ClinicalExamController : Controller
     {
         private readonly KineDbContext _context;
@@ -22,11 +27,19 @@ namespace KineStat.Controllers
         /// <param name="assessmentId">The unique identifier of the clinical assessment to display for the patient.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
         /// assessment.</returns>
-        [Route("Patient/{id}/ExamenClinique/{assessmentId}")]
-        public IActionResult ExamenClinique(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/ExamenClinique/{assessmentId}")]
+        public async Task<IActionResult> ExamenClinique(int id, int folderId, int assessmentId)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             ViewData["AssessmentId"] = assessmentId.ToString();
             ViewData["PatientId"] = id.ToString();
+            ViewData["FolderId"] = folderId.ToString();
             return View();
         }
 
@@ -45,7 +58,12 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return Unauthorized();
+            }
 
             var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
 
@@ -142,6 +160,13 @@ namespace KineStat.Controllers
             {
                 var dateResponse = DateTime.UtcNow;
 
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dto.PatientId))
+                {
+                    return Json(new { success = false, message = "Accès refusé" });
+                }
+
                 var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
                               && !pr.IsCustomTest);
@@ -199,13 +224,96 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
+                var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                var categoryScores = new List<double>();
+
+                foreach (var categoryId in examCliniqueCategories)
+                {
+                    var responses = await _context.PatientAnswerTests
+                        .Include(pat => pat.Question)
+                        .Where(pat =>
+                            pat.PatientId == dto.PatientId &&
+                            pat.AssessmentId == dto.AssessmentId &&
+                            pat.Question.CategoryId == categoryId &&
+                            pat.Question.ClusterId == null &&
+                            !pat.IsCustomTest)
+                        .ToListAsync();
+
+                    if (!responses.Any())
+                    {
+                        categoryScores.Add(0);
+                        continue;
+                    }
+
+
+                    double totalScore = 0;
+                    int validResponseCount = 0;
+
+                    foreach (var response in responses)
+                    {
+                        var question = await _context.Questions.FindAsync(response.QuestionId);
+
+                        if (question is QuestionBool)
+                        {
+                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
+                            {
+                                totalScore += 2;
+                            }
+                            validResponseCount++;
+                        } else
+                        {
+                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
+                            {
+                                totalScore += 2;
+                            }
+                        }
+                    }
+                    categoryScores.Add(Math.Round(totalScore, 2));
+                }
+
+                if (dto.AssessmentId.HasValue)
+                {
+                    for (int i = 0; i < examCliniqueCategories.Length; i++)
+                    {
+                        int categoryId = examCliniqueCategories[i];
+                        double categoryValue = categoryScores[i];
+
+                        var existingData = await _context.ClinicalDatas
+                            .FirstOrDefaultAsync(cd =>
+                                cd.PatientId == dto.PatientId &&
+                                cd.AssessmentId == dto.AssessmentId.Value &&
+                                cd.CategoryId == categoryId);
+
+                        if (existingData != null)
+                        {
+                            existingData.Value = categoryValue;
+                            _context.ClinicalDatas.Update(existingData);
+                        }
+                        else
+                        {
+                            var newData = new ClinicalData
+                            {
+                                PatientId = dto.PatientId,
+                                AssessmentId = dto.AssessmentId.Value,
+                                CategoryId = categoryId,
+                                Value = categoryValue
+                            };
+                            _context.ClinicalDatas.Add(newData);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                
+            }
+
                 return Json(new
                 {
                     success = true,
                     message = "Réponses enregistrées avec succès",
                     savedCount = savedCount,
                     updatedCount = updatedCount,
-                    totalCount = savedCount + updatedCount
+                    totalCount = savedCount + updatedCount,
+                    clinicalCategories = categoryScores
                 });
             }
             catch (Exception ex)
@@ -231,6 +339,13 @@ namespace KineStat.Controllers
         {
             try
             {
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+                {
+                    return Unauthorized();
+                }
+
                 var query = _context.PatientAnswerTests
                     .Include(pr => pr.Question)
                     .ThenInclude(q => q.Category)
@@ -260,6 +375,76 @@ namespace KineStat.Controllers
             catch (Exception ex)
             {
                 return Json(new List<object>());
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the calculated percentages for the 9 clinical categories for a specific assessment.
+        /// </summary>
+        [HttpGet]
+        [Route("Patient/{patientId}/Assessment/{assessmentId}/ClinicalCategoryPercentages")]
+        public async Task<IActionResult> GetClinicalCategoryPercentages(int patientId, int assessmentId)
+        {
+            try
+            {
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+                {
+                    return Json(new { success = false, message = "Accès refusé" });
+                }
+
+                var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                var categoryScores = new List<double>();
+
+                foreach (var categoryId in examCliniqueCategories)
+                {
+                    var responses = await _context.PatientAnswerTests
+                        .Include(pat => pat.Question)
+                        .Where(pat =>
+                            pat.PatientId == patientId &&
+                            pat.AssessmentId == assessmentId &&
+                            pat.Question.CategoryId == categoryId &&
+                            pat.Question.ClusterId == null &&
+                            !pat.IsCustomTest)
+                        .ToListAsync();
+
+                    if (!responses.Any())
+                    {
+                        categoryScores.Add(0);
+                        continue;
+                    }
+
+                    double totalScore = 0;
+                    int validResponseCount = 0;
+
+                    foreach (var response in responses)
+                    {
+                        var question = await _context.Questions.FindAsync(response.QuestionId);
+
+                        if (question is QuestionBool)
+                        {
+                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
+                            {
+                                totalScore += 2;
+                            }
+
+                        } else
+                        {
+                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
+                            {
+                                totalScore += 2;
+                            }
+                        }
+                    }
+                    categoryScores.Add(Math.Round(totalScore, 2));
+                }
+
+                return Json(new { success = true, clinicalCategories = categoryScores });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

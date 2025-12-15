@@ -3,9 +3,12 @@ using KineStat.Models;
 using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class TestsController : Controller
     {
         private readonly KineDbContext _context;
@@ -26,12 +29,19 @@ namespace KineStat.Controllers
         /// <returns>An asynchronous operation that returns an <see cref="IActionResult"/> representing the rendered 'Tests' view
         /// with patient and test data.</returns>
         [HttpGet]
-        [Route("Patient/{id}/Tests/{assessmentId}")]
-        public async Task<IActionResult> Tests(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/Tests/{assessmentId}")]
+        public async Task<IActionResult> Tests(int id, int folderId, int assessmentId)
         {
             var patient = await _context.Patients
                 .Include(p => p.Physio)
                 .FirstOrDefaultAsync(p => p.Id == id);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             var allClusters = await _context.Cluster
                 .Include(c => c.Questions)
@@ -52,9 +62,9 @@ namespace KineStat.Controllers
             //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
             //if (latestSessionDate.HasValue)
             //{
-              //  latestResponses = latestResponses
-                //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
-                  //  .ToList();
+            //  latestResponses = latestResponses
+            //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
+            //  .ToList();
 
             //}
 
@@ -64,11 +74,7 @@ namespace KineStat.Controllers
             ViewData["PatientNom"] = $"{patient.FirstName} {patient.LastName}";
             ViewData["Clusters"] = clustersWithQuestions;
             ViewData["ExistingResponses"] = existingResponses;
-            ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/'>Accueil</a></li>" +
-                                      $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-                                      $"<li class='breadcrumb-item'><a href='/Patients/Details/{id}'>{patient.FirstName} {patient.LastName}</a></li>" +
-                                      $"<li class='breadcrumb-item active' aria-current='page'>Tests</li>";
-
+            ViewData["FolderId"] = folderId;
 
             return View("Tests", clustersWithQuestions);
         }
@@ -93,6 +99,13 @@ namespace KineStat.Controllers
                 if (dto.PatientId <= 0)
                 {
                     return BadRequest(new { success = false, message = "Patient invalide" });
+                }
+
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dto.PatientId))
+                {
+                    return StatusCode(403, new { success = false, message = "Accès refusé" });
                 }
 
                 var patient = await _context.Patients.FindAsync(dto.PatientId);

@@ -2,8 +2,16 @@
 @{
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
+    ViewData["ShowFloatingEye"] = true;
     var patientId = ViewData["PatientId"]; 
     var assessmentId = ViewData["AssessmentId"];
+    var folderId = ViewData["FolderId"];
+    ViewData["Breadcrumbs"] =
+        $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
+        $"<li class='breadcrumb-item active'>Red Flags</li>";
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
@@ -19,7 +27,7 @@
                         <i class="bi bi-exclamation-triangle me-2"></i>Red Flags
                     </h1>
                 </div>
-                <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-right me-2"></i>Suivant
                 </a>
             </div>
@@ -115,20 +123,7 @@
 
     }
 
-    function initializeTabs() {
-        document.querySelectorAll('#redflagsTabs .nav-link').forEach(tab => {
-            tab.addEventListener('click', function (e) {
-                e.preventDefault();
 
-                document.querySelectorAll('#redflagsTabs .nav-link')
-                    .forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-
-                const categoryId = this.dataset.category;
-                loadQuestionsByCategory(categoryId);
-            });
-        });
-    }
 
     function initializeTooltips() {
         const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -169,8 +164,9 @@
         if (hasDisplayedCriticalModal) return;
         hasDisplayedCriticalModal = true;
         const assessmentId = @assessmentId;
+        const folderId = @folderId;
         const btn = document.getElementById("redirectToSummaryBtn");
-        btn.href = `/Patient/${patientId}/Resultat/${assessmentId}`;
+        btn.href = `/Patient/${patientId}/Dossier/${folderId}/Resultat/${assessmentId}`;
 
         const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
         modal.show();
@@ -230,11 +226,14 @@
     }
 
     function saveAnswer(patientId, questionId, boolValue, comment) {
+        const assessmentId = parseInt(document.querySelector('meta[name="assessment-id"]').content);
+
         const dto = {
             PatientId: patientId,
             QuestionId: questionId,
             BoolValue: boolValue,
-            Comment: comment
+            Comment: comment,
+            AssessmentId: assessmentId
         };
 
         fetch(`/Patient/SaveOrUpdateAnswer`, {

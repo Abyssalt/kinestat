@@ -1,4 +1,5 @@
 using KineStat.Data;
+using KineStat.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -22,6 +23,10 @@ builder.Services.AddSession(options =>
 
 // Add HttpContextAccessor for accessing session in controllers
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<PatientAnonymizationService>();
+
+builder.Services.AddHostedService<PatientAnonymizationBackgroundService>();
 
 var app = builder.Build();
 

@@ -3,6 +3,7 @@ using System;
 using KineStat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    partial class KineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251212184457_ChangeINAMINumberToLong")]
+    partial class ChangeINAMINumberToLong
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -344,17 +347,11 @@ namespace KineStat.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("AnonymizedDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("AntecedentsMedicaux")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("date");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("DoctorId")
                         .HasColumnType("integer");
@@ -372,9 +369,6 @@ namespace KineStat.Migrations
 
                     b.Property<int?>("Height")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsAnonymized")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()

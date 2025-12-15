@@ -5,9 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class PatientController : Controller
     {
         private readonly KineDbContext _context;
@@ -27,6 +30,13 @@ namespace KineStat.Controllers
         [Route("Patient/{id}/Anamnese")]
         public async Task<IActionResult> Anamnese(int id)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             var patient = _context.Patients
                 .Include(p => p.Dossiers)
                 .Include(p => p.Doctor)
@@ -70,6 +80,15 @@ namespace KineStat.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                    if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patient.Id))
+                    {
+                        TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction("Index", "Patients");
+                    }
+
                     var existingPatient = await _context.Patients.FindAsync(patient.Id);
                     if (existingPatient == null)
                     {
@@ -178,6 +197,14 @@ namespace KineStat.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction("Index", "Patients");
+            }
+
             var patient = await _context.Patients.FindAsync(PatientId);
 
             if (patient == null)

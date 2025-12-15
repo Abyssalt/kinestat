@@ -33,10 +33,13 @@
     </div>
 
     <div class="row mb-4">
-        <div class="col-12">
+        <div class="col-12 d-flex gap-2 flex-wrap">
             <button type="button" class="btn btn-success fw-medium" data-bs-toggle="modal" data-bs-target="#createPhysioModal">
                 <i class="bi bi-plus-circle me-2"></i>Ajouter un Kinésithérapeute
             </button>
+            <a asp-action="Questions" class="btn btn-primary fw-medium">
+                <i class="bi bi-question-circle me-2"></i>Gérer les Questions (RV+/RV-)
+            </a>
         </div>
     </div>
 
@@ -123,7 +126,7 @@
 <div class="modal fade" id="createPhysioModal" tabindex="-1" aria-labelledby="createPhysioModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
-            <form asp-controller="Admin" asp-action="Create" method="post">
+            <form asp-controller="Admin" asp-action="Create" method="post" autocomplete="off">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold" id="createPhysioModalLabel">
                         <i class="bi bi-person-plus-fill me-2"></i>Ajouter un Kinésithérapeute
@@ -134,34 +137,34 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label for="createFirstName" class="form-label fw-medium">Prénom</label>
-                            <input type="text" class="form-control" id="createFirstName" name="FirstName" required>
+                            <input type="text" class="form-control" id="createFirstName" name="FirstName" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createLastName" class="form-label fw-medium">Nom</label>
-                            <input type="text" class="form-control" id="createLastName" name="LastName" required>
+                            <input type="text" class="form-control" id="createLastName" name="LastName" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createEmail" class="form-label fw-medium">Email</label>
-                            <input type="email" class="form-control" id="createEmail" name="Email" required>
+                            <input type="email" class="form-control" id="createEmail" name="Email" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPhoneNumber" class="form-label fw-medium">Téléphone</label>
-                            <input type="tel" class="form-control" id="createPhoneNumber" name="PhoneNumber" required>
+                            <input type="tel" class="form-control" id="createPhoneNumber" name="PhoneNumber" autocomplete="off" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPassword" class="form-label fw-medium">Mot de passe</label>
-                            <input type="password" class="form-control" id="createPassword" name="Password" required>
+                            <input type="password" class="form-control" id="createPassword" name="Password" autocomplete="new-password" required>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createPasswordConfirm" class="form-label fw-medium">Confirmer le mot de passe</label>
-                            <input type="password" class="form-control" id="createPasswordConfirm" name="PasswordConfirm" required>
+                            <input type="password" class="form-control" id="createPasswordConfirm" name="PasswordConfirm" autocomplete="new-password" required>
                             <div class="invalid-feedback" id="createPasswordError">
                                 Les mots de passe ne correspondent pas.
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="createINAMI" class="form-label fw-medium">Numéro INAMI</label>
-                            <input type="number" class="form-control" id="createINAMI" name="INAMINumber" required>
+                            <input type="number" class="form-control" id="createINAMI" name="INAMINumber" autocomplete="off" required>
                         </div>
                     </div>
                 </div>
@@ -264,7 +267,54 @@
 
 @section Scripts {
     <script>
-        function loadPhysioData(id, firstName, lastName, email, phone, password, inami) {
+
+        function validatePasswordStrength(password) {
+            const minLength = 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+           const hasSpecialChar = /[!@@#$%^&*(),.?":{}|<>_\-+=[\]\\/'`~;]/.test(password);
+
+            const errors = [];
+
+            if (password.length < minLength) {
+                errors.push('Au moins ' + minLength + ' caractères');
+            }
+            if (!hasUpperCase) {
+                errors.push('Au moins une majuscule');
+            }
+            if (!hasLowerCase) {
+                errors.push('Au moins une minuscule');
+            }
+            if (!hasNumber) {
+                errors.push('Au moins un chiffre');
+            }
+            if (!hasSpecialChar) {
+                errors.push('Au moins un caractère spécial (!@@#$%^&*...)');
+            }
+
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+        }
+
+        function displayPasswordErrors(inputId, errorContainerId, errors) {
+            const errorContainer = document.getElementById(errorContainerId);
+            const input = document.getElementById(inputId);
+
+            if (errors.length > 0) {
+                input.classList.add('is-invalid');
+                errorContainer.innerHTML = '<strong>Mot de passe faible :</strong><br>' + errors.join('<br>');
+                errorContainer.style.display = 'block';
+            } else {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                errorContainer.style.display = 'none';
+            }
+        }
+
+        function loadPhysioData(id, firstName, lastName, email, phone, inami) {
             document.getElementById('editId').value = id;
             document.getElementById('editFirstName').value = firstName;
             document.getElementById('editLastName').value = lastName;
@@ -274,8 +324,8 @@
             document.getElementById('editPasswordConfirm').value = '';
             document.getElementById('editINAMI').value = inami;
 
-            document.getElementById('editPassword').classList.remove('is-invalid');
-            document.getElementById('editPasswordConfirm').classList.remove('is-invalid');
+            document.getElementById('editPassword').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('editPasswordConfirm').classList.remove('is-invalid', 'is-valid');
         }
 
         function loadDeletePhysioData(id, firstName, lastName) {
@@ -283,14 +333,44 @@
             document.getElementById('deletePhysioName').textContent = firstName + ' ' + lastName;
         }
 
+        document.getElementById('createPassword').addEventListener('input', function() {
+            const password = this.value;
+            if (password.length > 0) {
+                const validation = validatePasswordStrength(password);
+                displayPasswordErrors('createPassword', 'createPasswordError', validation.errors);
+            } else {
+                this.classList.remove('is-invalid', 'is-valid');
+                document.getElementById('createPasswordError').style.display = 'none';
+            }
+        });
+
+        document.getElementById('editPassword').addEventListener('input', function() {
+            const password = this.value;
+            if (password.length > 0) {
+                const validation = validatePasswordStrength(password);
+                displayPasswordErrors('editPassword', 'editPasswordError', validation.errors);
+            } else {
+                this.classList.remove('is-invalid', 'is-valid');
+                document.getElementById('editPasswordError').style.display = 'none';
+            }
+        });
+
         document.getElementById('createPhysioModal').querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('createPassword').value;
             const passwordConfirm = document.getElementById('createPasswordConfirm').value;
+
+            const validation = validatePasswordStrength(password);
+            if (!validation.isValid) {
+                e.preventDefault();
+                displayPasswordErrors('createPassword', 'createPasswordError', validation.errors);
+                return false;
+            }
 
             if (password !== passwordConfirm) {
                 e.preventDefault();
                 document.getElementById('createPassword').classList.add('is-invalid');
                 document.getElementById('createPasswordConfirm').classList.add('is-invalid');
+                document.getElementById('createPasswordError').innerHTML = '<strong>Les mots de passe ne correspondent pas.</strong>';
                 document.getElementById('createPasswordError').style.display = 'block';
                 return false;
             }
@@ -308,10 +388,18 @@
                 return true;
             }
 
+            const validation = validatePasswordStrength(password);
+            if (!validation.isValid) {
+                e.preventDefault();
+                displayPasswordErrors('editPassword', 'editPasswordError', validation.errors);
+                return false;
+            }
+
             if (password !== passwordConfirm) {
                 e.preventDefault();
                 document.getElementById('editPassword').classList.add('is-invalid');
                 document.getElementById('editPasswordConfirm').classList.add('is-invalid');
+                document.getElementById('editPasswordError').innerHTML = '<strong>Les mots de passe ne correspondent pas.</strong>';
                 document.getElementById('editPasswordError').style.display = 'block';
                 return false;
             }
@@ -321,26 +409,16 @@
             document.getElementById('editPasswordError').style.display = 'none';
         });
 
-        ['createPassword', 'createPasswordConfirm'].forEach(function(id) {
+        ['createPasswordConfirm', 'editPasswordConfirm'].forEach(function(id) {
             document.getElementById(id).addEventListener('input', function() {
-                document.getElementById('createPassword').classList.remove('is-invalid');
-                document.getElementById('createPasswordConfirm').classList.remove('is-invalid');
-                document.getElementById('createPasswordError').style.display = 'none';
-            });
-        });
-
-        ['editPassword', 'editPasswordConfirm'].forEach(function(id) {
-            document.getElementById(id).addEventListener('input', function() {
-                document.getElementById('editPassword').classList.remove('is-invalid');
-                document.getElementById('editPasswordConfirm').classList.remove('is-invalid');
-                document.getElementById('editPasswordError').style.display = 'none';
+                this.classList.remove('is-invalid');
             });
         });
 
         document.getElementById('createPhysioModal').addEventListener('hidden.bs.modal', function () {
             this.querySelector('form').reset();
-            document.getElementById('createPassword').classList.remove('is-invalid');
-            document.getElementById('createPasswordConfirm').classList.remove('is-invalid');
+            document.getElementById('createPassword').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('createPasswordConfirm').classList.remove('is-invalid', 'is-valid');
             document.getElementById('createPasswordError').style.display = 'none';
         });
     </script>

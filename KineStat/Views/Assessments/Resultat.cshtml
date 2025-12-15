@@ -2,12 +2,31 @@
 
 
 ﻿@{
-ViewData["Title"] = "Resultat";
-ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
-ViewData["Breadcrumbs"] = "<li class='breadcrumb-item'><a href='/'>Accueil</a></li><li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Resultat</li>";
-var assessmentId = ViewData["AssessmentId"];
+    ViewData["Title"] = "Resultat";
+    var patientId = ViewContext.RouteData.Values["id"]?.ToString();
+    var assessmentId = ViewData["AssessmentId"];
+    var folderId = ViewData["FolderId"];
 
-}
+ViewData["HideFloatingEye"] = true;
+ViewData["Breadcrumbs"] =
+    $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
+    $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/Tests/{assessmentId}'>Tests</a></li>" +
+    $"<li class='breadcrumb-item active'>Résultats</li>";
+ }
+
+ @{
+     var tintivJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.TintivValues ?? new List<double> { 0, 0, 0, 0, 0, 0 }
+     );
+     var clinicalJson = System.Text.Json.JsonSerializer.Serialize(
+         ViewBag.ClinicalValues ?? new List<double> { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+     );
+ }
 
 <meta name="patient-id" content="@Model.PatientId" />
 <meta name="assessment-id" content="@Model.Id" />
@@ -17,11 +36,11 @@ var assessmentId = ViewData["AssessmentId"];
          <div class="col-12">
              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                  <div>
-                     <h1 class="h2 fw-bold text-primary mb-2">
+                     <h1 class="h2 fw-bold text-primary mb-2">  
                          <i class="bi bi-graph-up me-2"></i>Résultat
                      </h1>
                  </div>
-                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                      <i class="bi bi-arrow-left me-2"></i>Retour 
                  </a>
              </div>
@@ -74,7 +93,12 @@ var assessmentId = ViewData["AssessmentId"];
                                         </strong>
 
                                                 <div class="text-muted small">
-                                                    Résultat : @test.ResponseValue
+                                                    Résultat :
+                                                    @(
+                                                    test.ResponseValue == "true" ? "Positif" :
+                                                    test.ResponseValue == "false" ? "Negatif" :
+                                                    test.ResponseValue
+                                                    )
                                                 </div>
 
                                     @if (!string.IsNullOrWhiteSpace(test.Observations))

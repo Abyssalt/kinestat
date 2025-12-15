@@ -2,10 +2,13 @@
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class AssessmentsController : Controller
     {
         private readonly KineDbContext _context;
@@ -31,6 +34,13 @@ namespace KineStat.Controllers
                 .Include(a => a.Questions)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             if (assessment == null)
                 return NotFound();
 
@@ -44,10 +54,25 @@ namespace KineStat.Controllers
                 .Select(cd => cd.Value)
                 .ToListAsync();
 
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId && cd.AssessmentId == assessment.Id && cd.CategoryId >= 7 && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
+
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
                 .ThenInclude(q => q.Cluster)
-                .Where(t => t.PatientId == assessment.PatientId && t.AssessmentId == assessment.Id)
+                .Where(t =>
+                    t.PatientId == assessment.PatientId &&
+                    t.AssessmentId == assessment.Id &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
                 .OrderBy(t => t.IsCustomTest
                     ? "Tests personnalisés"
                     : t.Question!.Cluster!.Name)
@@ -57,7 +82,26 @@ namespace KineStat.Controllers
             ViewBag.Tests = tests;
 
             ViewBag.TintivValues = tintivData;
+            var firstAssessment = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId)
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id })
+                .FirstOrDefaultAsync();
 
+            List<double>? firstTintivData = null;
+
+            if (firstAssessment != null && firstAssessment.Id != assessment.Id)
+            {
+                firstTintivData = await _context.ClinicalDatas
+                    .Where(cd =>
+                        cd.AssessmentId == firstAssessment.Id &&
+                        cd.CategoryId <= 6)
+                    .OrderBy(cd => cd.CategoryId)
+                    .Select(cd => cd.Value)
+                    .ToListAsync();
+            }
+
+            ViewBag.FirstTintivValues = firstTintivData;
             return View(assessment);
         }
 
@@ -72,6 +116,13 @@ namespace KineStat.Controllers
         {
             var patient = await _context.Patients.FindAsync(id);
             var assessment = await _context.Assessments.FindAsync(assessmentId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             if (patient == null)
             {
@@ -149,7 +200,7 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, assessmentId = socrate.AssessmentId });
+                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, folderId=assessment.DossierId ,assessmentId = socrate.AssessmentId });
             }
             catch (Exception ex)
             {
@@ -169,6 +220,14 @@ namespace KineStat.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
         {
             var assessment = await _context.Assessments.FindAsync(id);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce bilan.";
+                return RedirectToAction("Index", "Patients");
+            }
 
             if (assessment != null)
             {
@@ -207,6 +266,15 @@ namespace KineStat.Controllers
         public async Task<IActionResult> StartAssessment(int PatientId, int DossierId, int PhysioId, int MedicalContextId)
         {
             var patient = await _context.Patients.FindAsync(PatientId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction("Index", "Patients");
+            }
+
             if (patient == null)
                 return NotFound("Patient introuvable");
 
@@ -251,6 +319,13 @@ namespace KineStat.Controllers
                 .ThenInclude(p => p.Physio)
                 .FirstOrDefaultAsync(d => d.Id == dossierId);
 
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsDossierOwnedByPhysio(_context, physioId, dossierId))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             if (dossier == null)
                 return NotFound("Dossier introuvable");
 
@@ -279,13 +354,20 @@ namespace KineStat.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the assessment's results view if found and associated with the patient;
         /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
         /// patient.</returns>
-        [Route("Patient/{id}/Resultat/{assessmentId}")]
-        public async Task<IActionResult> Resultat(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/Resultat/{assessmentId}")]
+        public async Task<IActionResult> Resultat(int id,int folderId, int assessmentId)
         {
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
                 .Include(a => a.Dossier)
                 .FirstOrDefaultAsync(a => a.Id == assessmentId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, assessmentId))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             var tintivData = await _context.ClinicalDatas
                 .Where(cd => cd.PatientId == assessment.PatientId
@@ -297,17 +379,56 @@ namespace KineStat.Controllers
 
             ViewBag.TintivValues = tintivData;
 
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == assessment.PatientId
+                             && cd.AssessmentId == assessment.Id
+                             && cd.CategoryId >= 7
+                             && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            ViewBag.ClinicalValues = clinicalData;
+
             var tests = await _context.PatientAnswerTests
                 .Include(t => t.Question)
                 .ThenInclude(q=> q.Cluster)
                 .Where(t =>
                     t.PatientId == id &&
-                    t.AssessmentId == assessmentId)
+                    t.AssessmentId == assessmentId &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
+
                 .OrderBy(t => t.DateResponse)
                 .OrderBy(t => t.Question.Cluster.Name)
                 .ToListAsync();
 
             ViewBag.Tests = tests;
+
+            var firstAssessment = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId)
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id })
+                .FirstOrDefaultAsync();
+
+            List<double>? firstTintivData = null;
+
+            if (firstAssessment != null && firstAssessment.Id != assessment.Id)
+            {
+                firstTintivData = await _context.ClinicalDatas
+                    .Where(cd =>
+                        cd.AssessmentId == firstAssessment.Id &&
+                        cd.CategoryId <= 6)
+                    .OrderBy(cd => cd.CategoryId)
+                    .Select(cd => cd.Value)
+                    .ToListAsync();
+            }
+
+            ViewBag.FirstTintivValues = firstTintivData;
+
 
             if (assessment == null)
                 return NotFound("Aucun bilan trouvé");
@@ -316,6 +437,7 @@ namespace KineStat.Controllers
                 return BadRequest("Ce bilan n'appartient pas à ce patient.");
             ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessment.Id;
+            ViewData["FolderId"] = folderId;
 
             return View(assessment);
         }

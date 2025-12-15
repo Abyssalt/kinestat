@@ -1,0 +1,407 @@
+﻿@model List<KineStat.Models.Question>
+
+@{
+    ViewData["Title"] = "Administration - Questions";
+}
+
+<div class="container-fluid px-3 px-md-4 py-4">
+
+    <div id="alertContainer"></div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 fw-bold text-primary mb-2">
+                <i class="bi bi-question-circle-fill me-2"></i>Administration des Questions
+            </h1>
+            <hr class="border-primary border-2 opacity-25">
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            <label for="searchInput" class="form-label fw-medium">
+                                <i class="bi bi-search me-2"></i>Rechercher une question
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="searchInput"
+                                   placeholder="Titre de la question..."
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-medium">
+                                Résultats : <span class="badge bg-info fs-6" id="resultCount">@Model.Count question(s)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-list-ul me-2"></i>Liste des Questions
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        <div class="table-responsive d-none d-lg-block">
+                            <table class="table table-hover align-middle mb-0" id="questionsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="fw-semibold" style="width: 40%">Titre</th>
+                                        <th scope="col" class="fw-semibold" style="width: 15%">Catégorie</th>
+                                        <th scope="col" class="fw-semibold text-center" style="width: 12%">RV+</th>
+                                        <th scope="col" class="fw-semibold text-center" style="width: 12%">RV-</th>
+                                        <th scope="col" class="fw-semibold" style="width: 15%">Source</th>
+                                        <th scope="col" class="fw-semibold text-center" style="width: 6%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="questionsTableBody">
+                                    @foreach (var question in Model)
+                                    {
+                                        <tr data-question-id="@question.Id"
+                                            data-question-title="@question.Title.ToLower()"
+                                            data-category="@(question.Category?.Name ?? "")">
+                                            <td class="fw-medium">@question.Title</td>
+                                            <td>
+                                                @if (question.Category != null)
+                                                {
+                                                    <span class="badge bg-secondary bg-opacity-75">@question.Category.Name</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted fst-italic">Non défini</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success fs-6 rv-positive">@question.RVPositive.ToString("F2")</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger fs-6 rv-negative">@question.RVNegative.ToString("F2")</span>
+                                            </td>
+                                            <td class="source-text">
+                                                <small class="text-secondary">@(question.SourceRv ?? "Non spécifié")</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-warning"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editQuestionModal"
+                                                        data-question-id="@question.Id"
+                                                        data-question-title="@question.Title"
+                                                        data-question-rv-positive="@question.RVPositive.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                                        data-question-rv-negative="@question.RVNegative.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                                        data-question-source="@(question.SourceRv ?? "")">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-lg-none" id="questionsList">
+                            @foreach (var question in Model)
+                            {
+                                <div class="border-bottom p-3 question-card"
+                                     data-question-id="@question.Id"
+                                     data-question-title="@question.Title.ToLower()"
+                                     data-category="@(question.Category?.Name ?? "")">
+
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold mb-0 flex-grow-1 me-2">@question.Title</h6>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editQuestionModal"
+                                                data-question-id="@question.Id"
+                                                data-question-title="@question.Title"
+                                                data-question-rv-positive="@question.RVPositive.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-question-rv-negative="@question.RVNegative.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-question-source="@(question.SourceRv ?? "")">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                    </div>
+
+                                    @if (question.Category != null)
+                                    {
+                                        <div class="mb-2">
+                                            <span class="badge bg-secondary bg-opacity-75">@question.Category.Name</span>
+                                        </div>
+                                    }
+
+                                    <div class="d-flex gap-2 mb-2">
+                                        <div class="flex-fill">
+                                            <small class="text-muted d-block">RV+</small>
+                                            <span class="badge bg-success w-100 rv-positive">@question.RVPositive.ToString("F2")</span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <small class="text-muted d-block">RV-</small>
+                                            <span class="badge bg-danger w-100 rv-negative">@question.RVNegative.ToString("F2")</span>
+                                        </div>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(question.SourceRv))
+                                    {
+                                        <div class="source-text">
+                                            <small class="text-secondary">
+                                                <i class="bi bi-book me-1"></i>@question.SourceRv
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-4 text-secondary"></i>
+                            <p class="text-secondary mt-3 mb-0">Aucune question enregistrée</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form id="editQuestionForm">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold" id="editQuestionModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i>Modifier les valeurs RV
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editQuestionId">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-primary">Question</label>
+                        <p class="form-control-plaintext bg-light p-3 rounded" id="editQuestionTitle"></p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="editRVPositive" class="form-label fw-medium">
+                                <i class="bi bi-plus-circle-fill text-success me-2"></i>RV+ (Vraisemblance Positive)
+                            </label>
+                            <input type="number"
+                                   class="form-control form-control-lg"
+                                   id="editRVPositive"
+                                   step="0.01"
+                                   min="0"
+                                   required>
+                            <div class="form-text">Valeur lorsque le test est positif</div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="editRVNegative" class="form-label fw-medium">
+                                <i class="bi bi-dash-circle-fill text-danger me-2"></i>RV- (Vraisemblance Négative)
+                            </label>
+                            <input type="number"
+                                   class="form-control form-control-lg"
+                                   id="editRVNegative"
+                                   step="0.01"
+                                   min="0"
+                                   required>
+                            <div class="form-text">Valeur lorsque le test est négatif</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="editSourceRv" class="form-label fw-medium">
+                                <i class="bi bi-book-fill text-info me-2"></i>Source
+                            </label>
+                            <textarea class="form-control"
+                                      id="editSourceRv"
+                                      rows="3"
+                                      placeholder="Référence bibliographique ou source des valeurs RV"></textarea>
+                            <div class="form-text">Optionnel : indiquez la source de ces valeurs</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4 mb-0" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Note :</strong> Les valeurs RV sont utilisées dans le calcul bayésien pour évaluer la probabilité d'une pathologie.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Annuler
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show border-0" role="alert" id="${alertId}">
+                    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            `;
+
+            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+
+            setTimeout(() => {
+                const alert = document.getElementById(alertId);
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        document.getElementById('editQuestionModal').addEventListener('show.bs.modal', function(event) {
+            document.getElementById('editRVPositive').classList.remove('is-invalid');
+            document.getElementById('editRVNegative').classList.remove('is-invalid');
+
+            const button = event.relatedTarget;
+
+            const questionId = button.getAttribute('data-question-id');
+            const questionTitle = button.getAttribute('data-question-title');
+            const rvPositive = button.getAttribute('data-question-rv-positive');
+            const rvNegative = button.getAttribute('data-question-rv-negative');
+            const sourceRv = button.getAttribute('data-question-source');
+
+            document.getElementById('editQuestionId').value = questionId;
+            document.getElementById('editQuestionTitle').textContent = questionTitle;
+            document.getElementById('editRVPositive').value = rvPositive;
+            document.getElementById('editRVNegative').value = rvNegative;
+            document.getElementById('editSourceRv').value = sourceRv || '';
+        });
+
+        document.getElementById('editQuestionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editQuestionId').value;
+            const rvPositive = document.getElementById('editRVPositive').value.replace(',', '.');
+            const rvNegative = document.getElementById('editRVNegative').value.replace(',', '.');
+            const sourceRv = document.getElementById('editSourceRv').value;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            try {
+                const response = await fetch('@Url.Action("UpdateQuestionRV", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        '__RequestVerificationToken': token,
+                        'id': id,
+                        'rvPositive': rvPositive,
+                        'rvNegative': rvNegative,
+                        'sourceRv': sourceRv
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const row = document.querySelector(`#questionsTable tr[data-question-id="${id}"]`);
+                    if (row) {
+                        row.querySelector('.rv-positive').textContent = parseFloat(rvPositive).toFixed(2);
+                        row.querySelector('.rv-negative').textContent = parseFloat(rvNegative).toFixed(2);
+                        row.querySelector('.source-text').innerHTML = `<small class="text-secondary">${sourceRv || 'Non spécifié'}</small>`;
+                    }
+
+                    const card = document.querySelector(`#questionsList .question-card[data-question-id="${id}"]`);
+                    if (card) {
+                        card.querySelector('.rv-positive').textContent = parseFloat(rvPositive).toFixed(2);
+                        card.querySelector('.rv-negative').textContent = parseFloat(rvNegative).toFixed(2);
+
+                        const sourceElement = card.querySelector('.source-text');
+                        if (sourceRv) {
+                            if (sourceElement) {
+                                sourceElement.innerHTML = `<small class="text-secondary"><i class="bi bi-book me-1"></i>${sourceRv}</small>`;
+                            } else {
+                                const sourceHtml = `<div class="source-text"><small class="text-secondary"><i class="bi bi-book me-1"></i>${sourceRv}</small></div>`;
+                                card.insertAdjacentHTML('beforeend', sourceHtml);
+                            }
+                        } else if (sourceElement) {
+                            sourceElement.remove();
+                        }
+                    }
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editQuestionModal'));
+                    modal.hide();
+
+                    showAlert(result.message, 'success');
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Erreur de connexion au serveur : ' + error.message, 'danger');
+            }
+        });
+
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('questionsTableBody');
+        const questionsList = document.getElementById('questionsList');
+        const resultCount = document.getElementById('resultCount');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            if (tableBody) {
+                const rows = tableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const title = row.getAttribute('data-question-title');
+                    const category = row.getAttribute('data-category').toLowerCase();
+
+                    if (searchTerm === '' || title.includes(searchTerm) || category.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            if (questionsList) {
+                const cards = questionsList.querySelectorAll('.question-card');
+                visibleCount = 0;
+                cards.forEach(card => {
+                    const title = card.getAttribute('data-question-title');
+                    const category = card.getAttribute('data-category').toLowerCase();
+
+                    if (searchTerm === '' || title.includes(searchTerm) || category.includes(searchTerm)) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            resultCount.textContent = `${visibleCount} question(s)`;
+        });
+    </script>
+}

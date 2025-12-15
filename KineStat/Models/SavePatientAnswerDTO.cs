@@ -15,5 +15,7 @@
         public double ? NumericValue { get; set; }
 
         public string ? Comment { get; set;  }
+
+        public int AssessmentId { get; set; }
     }
 }

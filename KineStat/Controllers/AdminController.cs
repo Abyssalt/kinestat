@@ -3,9 +3,12 @@ using KineStat.Models;
 using KineStat.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using KineStat.Filters;
 
 namespace KineStat.Controllers
 {
+    [AuthorizeAdmin]
     public class AdminController : Controller
     {
         private readonly KineDbContext _context;
@@ -46,6 +49,13 @@ namespace KineStat.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Physio physio, string passwordConfirm)
         {
+            // Vérifier la force du mot de passe
+            if (!IsPasswordStrong(physio.Password, out List<string> errors))
+            {
+                TempData["Error"] = "Mot de passe faible : " + string.Join(", ", errors);
+                return RedirectToAction(nameof(Index));
+            }
+
             if (physio.Password != passwordConfirm)
             {
                 TempData["Error"] = "Les mots de passe ne correspondent pas.";
@@ -93,6 +103,13 @@ namespace KineStat.Controllers
             {
                 if (!string.IsNullOrEmpty(physio.Password) || !string.IsNullOrEmpty(passwordConfirm))
                 {
+
+                    if (!IsPasswordStrong(physio.Password, out List<string> errors))
+                    {
+                        TempData["Error"] = "Mot de passe faible : " + string.Join(", ", errors);
+                        return RedirectToAction(nameof(Index));
+                    }
+
                     if (physio.Password != passwordConfirm)
                     {
                         TempData["Error"] = "Les mots de passe ne correspondent pas.";
@@ -177,5 +194,150 @@ namespace KineStat.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        /// <summary>
+        /// Validates if a password meets the strong password requirements.
+        /// </summary>
+        /// <param name="password">The password to validate.</param>
+        /// <param name="errors">Output parameter containing a list of validation errors if the password is weak.</param>
+        /// <returns>True if the password is strong; otherwise, false.</returns>
+        private bool IsPasswordStrong(string password, out List<string> errors)
+        {
+            errors = new List<string>();
+
+            if (password.Length < 8)
+                errors.Add("Le mot de passe doit contenir au moins 8 caractères");
+
+            if (!password.Any(char.IsUpper))
+                errors.Add("Le mot de passe doit contenir au moins une majuscule");
+
+            if (!password.Any(char.IsLower))
+                errors.Add("Le mot de passe doit contenir au moins une minuscule");
+
+            if (!password.Any(char.IsDigit))
+                errors.Add("Le mot de passe doit contenir au moins un chiffre");
+
+            if (!password.Any(ch => "!@#$%^&*(),.?\":{}|<>_-+=[]\\/'`~;".Contains(ch)))
+                errors.Add("Au moins un caractère spécial");
+
+            return errors.Count == 0;
+        }
+
+
+        /// <summary>
+        /// Displays all questions with their RV values for modification
+        /// </summary>
+        /// <returns>View with list of all questions</returns>
+        [HttpGet]
+        public async Task<IActionResult> Questions()
+        {
+            var questions = await _context.Questions
+                .Include(q => q.Category)
+                .Include(q => q.Cluster)
+                .OrderBy(q => q.Category.Name)
+                .ThenBy(q => q.Title)
+                .ToListAsync();
+
+            return View(questions);
+        }
+
+        /// <summary>
+        /// Updates RV+ and RV- values for a specific question
+        /// </summary>
+        /// <param name="id">Question ID</param>
+        /// <param name="rvPositive">New RV+ value</param>
+        /// <param name="rvNegative">New RV- value</param>
+        /// <param name="sourceRv">Source for the RV values</param>
+        /// <returns>JSON result indicating success or failure</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateQuestionRV(int id, string rvPositive, string rvNegative, string sourceRv)
+        {
+            try
+            {
+                var question = await _context.Questions.FindAsync(id);
+
+                if (question == null)
+                {
+                    return Json(new { success = false, message = "Question introuvable." });
+                }
+
+                if (!double.TryParse(rvPositive.Replace(',', '.'),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out double parsedRvPositive))
+                {
+                    return Json(new { success = false, message = "Valeur RV+ invalide." });
+                }
+
+                if (!double.TryParse(rvNegative.Replace(',', '.'),
+                    NumberStyles.Any,
+                    CultureInfo.InvariantCulture,
+                    out double parsedRvNegative))
+                {
+                    return Json(new { success = false, message = "Valeur RV- invalide." });
+                }
+
+                if (parsedRvPositive < 0 || parsedRvNegative < 0)
+                {
+                    return Json(new { success = false, message = "Les valeurs RV doivent être positives." });
+                }
+
+                question.RVPositive = parsedRvPositive;
+                question.RVNegative = parsedRvNegative;
+                question.SourceRv = sourceRv ?? question.SourceRv;
+
+                _context.Update(question);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Question '{question.Title}' mise à jour avec succès."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = $"Erreur lors de la mise à jour : {ex.Message}"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Search questions by title (for AJAX autocomplete)
+        /// </summary>
+        /// <param name="searchTerm">Search term</param>
+        /// <returns>JSON array of matching questions</returns>
+        [HttpGet]
+        public async Task<IActionResult> SearchQuestions(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return Json(new List<object>());
+            }
+
+            var questions = await _context.Questions
+                .Include(q => q.Category)
+                .Where(q => q.Title.Contains(searchTerm))
+                .OrderBy(q => q.Title)
+                .Take(50)
+                .Select(q => new
+                {
+                    id = q.Id,
+                    title = q.Title,
+                    rvPositive = q.RVPositive,
+                    rvNegative = q.RVNegative,
+                    sourceRv = q.SourceRv,
+                    categoryName = q.Category != null ? q.Category.Name : "Sans catégorie"
+                })
+                .ToListAsync();
+
+            return Json(questions);
+        }
+
     }
 }

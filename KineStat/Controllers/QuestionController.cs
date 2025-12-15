@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using KineStat.Models;
+using KineStat.Filters;
 
 namespace KineStat.Controllers
 {
+    [AuthorizeAdmin] // Ryan : Added for protection, but it seems that we don't use this..
     public class QuestionController : Controller    // TODO : Adjust this class when the db will be linked
     {
         private static List<Question> _questions = new List<Question>() // Temporary list of question while waiting for the DB, replace it with the DbContext

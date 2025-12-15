@@ -346,26 +346,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 mt-4">
-                            <div class="section-header d-flex align-items-center mb-2">
-                                <div class="section-icon me-3">
-                                    <i class="bi bi-clipboard2-pulse fs-4"></i>
-                                </div>
-                                <h6 class="text-uppercase text-muted small fw-semibold mb-0">Assignation</h6>
-                            </div>
-                            <hr class="mt-0 mb-3">
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label class="form-label small text-uppercase text-muted">Kinésithérapeute *</label>
-                            <select class="form-select cache-field" name="PhysioId" data-field="PhysioId" data-validation="select" required>
-                                <option value="">-- Sélectionner --</option>
-                                @foreach (var physio in ViewBag.Physios)
-                                {
-                                    <option value="@physio.Id">@physio.FirstName @physio.LastName</option>
-                                }
-                            </select>
-                        </div>
+                        
                     </div>
                 </form>
             </div>
@@ -551,7 +532,7 @@
         }
 
         function updateCreateButton() {
-            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber', 'PhysioId'];
+            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber'];
             const valid = required.every(f => { const input = document.querySelector(`.cache-field[data-field="${f}"]`); return input && input.value.trim() && validateField(input); });
             const btn = document.getElementById('createPatientBtn');
             btn.disabled = !valid;

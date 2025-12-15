@@ -1,9 +1,5 @@
 ﻿<!DOCTYPE html>
 <html lang="fr">
-
-
-
-
 <head>
 
     <meta charset="utf-8" />
@@ -27,6 +23,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     
     <script src="~/js/redflags-store.js"></script>
+    <script src="~/js/clinical-store.js"></script>
 
     </head>
     <body class="d-flex flex-column min-vh-100">
@@ -95,7 +92,7 @@
             </main>
         </div>
 
-        @if (ViewData["PatientId"] != null && ViewData["HideFloatingEye"] == null)
+    @if (ViewData["PatientId"] != null && (ViewData["ShowFloatingEye"] != null || ViewData["ShowClinicalFloatingEye"] != null))
         {
 
             <div class="position-fixed bottom-0 end-0 me-3 me-md-4 mb-5" style="z-index: 1030; margin-bottom: 100px !important;">
@@ -124,7 +121,14 @@
                             </div>
                             <hr class="my-2">
                             <div class="flex-grow-1 overflow-auto">
-                                <canvas id="radarChart6Eye"></canvas>
+                                @if (ViewData["ShowClinicalFloatingEye"] != null)
+                                {
+                                    <canvas id="radarChart9Eye"></canvas>
+                                }
+                                else
+                                {
+                                    <canvas id="radarChart6Eye"></canvas>
+                                }
                             </div>
                         </div>
                     </div>
@@ -142,25 +146,41 @@
             </div>
         }
 
-        <footer class="border-top bg-light mt-auto">
-            <div class="container">
-                <div class="text-center py-3">
-                    <p class="mb-0 text-secondary small">&copy; 2025 KineStat - Licence MIT - HERS Section Informatique</p>
-                </div>
+    <footer class="border-top bg-light mt-auto">
+        <div class="container">
+            <div class="text-center py-3">
+                <p class="mb-0 text-secondary small">
+                    &copy; 2025 KineStat –
+                    <a href="https://mit-license.org/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-secondary text-decoration-none">
+                        Licence MIT
+                    </a> –
+                    <a href="https://hers.be/formations/economique/bachelier-en-informatique/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-secondary text-decoration-none">
+                        HERS Section Informatique
+                    </a>
+                </p>
             </div>
-        </footer>
+        </div>
+    </footer>
+
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-         <script src="~/js/gauge.js"></script>
+        <script src="~/js/gauge.js"></script>
+
 
         <script>
         document.addEventListener("DOMContentLoaded", () => {
             let radarChart6Instance = null;
             let radarChart9Instance = null;
-            let radarChart6EyeInstance = null; // 
-
+            let radarChart6EyeInstance = null; 
+            let radarChart9EyeInstance = null;
             function initOrUpdateRadarChart6() {
                 const ctx = document.getElementById("radarChart6");
                 if (!ctx) return;
@@ -172,33 +192,49 @@
                     radarChart6Instance.data.datasets[0].data = data;
                     radarChart6Instance.update();
                 } else {
-                    radarChart6Instance = new Chart(ctx, {
+                        radarChart6Instance = new Chart(ctx, {
                         type: 'radar',
                         data: {
                             labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
                             datasets: [{
                                 label: "Profil TINTIV",
                                 data: data,
-                                backgroundColor: "rgba(255,99,132,0.25)",
+                                backgroundColor: "rgba(255,99,132,0.30)",
                                 borderColor: "rgb(255,99,132)",
-                                borderWidth: 3,
+                                borderWidth: 4,
+                                pointRadius: 6,
+                                pointHoverRadius: 9,
                                 pointBackgroundColor: "rgb(255,99,132)",
-                                pointBorderColor: "#fff"
+                                pointBorderColor: "#fff",
+                                tension: 0.25
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            animation: {
+                                duration: 300,
+                                easing: 'easeOutQuart'
+                            },
                             scales: {
                                 r: {
                                     min: 0,
                                     max: 10,
-                                    ticks: { stepSize: 2, backdropColor: "transparent" }
+                                    ticks: {
+                                        stepSize: 2,
+                                        backdropColor: "transparent"
+                                    },
+                                    pointLabels: {
+                                        font: { size: 13 }
+                                    }
                                 }
                             },
-                            plugins: { legend: { display: false } }
+                            plugins: {
+                                legend: { display: false }
+                            }
                         }
                     });
+
                 }
             }
             function initOrUpdateRadarChart6Eye() {
@@ -219,10 +255,71 @@
                             datasets: [{
                                 label: "Profil TINTIV",
                                 data: data,
-                                backgroundColor: "rgba(255,99,132,0.25)",
+                                backgroundColor: "rgba(255,99,132,0.30)",
                                 borderColor: "rgb(255,99,132)",
-                                borderWidth: 3,
+                                borderWidth: 4,
+                                pointRadius: 6,
+                                pointHoverRadius: 9,
                                 pointBackgroundColor: "rgb(255,99,132)",
+                                pointBorderColor: "#fff",
+                                tension: 0.25
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 300,
+                                easing: 'easeOutQuart'
+                            },
+                            scales: {
+                                r: {
+                                    min: 0,
+                                    max: 10,
+                                    ticks: {
+                                        stepSize: 2,
+                                        backdropColor: "transparent"
+                                    },
+                                    pointLabels: {
+                                        font: { size: 13 }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+
+                }
+            }
+
+            function initOrUpdateRadarChart9() {
+                const ctx = document.getElementById("radarChart9");
+                if (!ctx) return;
+
+                const clinicalCategories = window.ClinicalProfileStore ? ClinicalProfileStore.get() : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                const data = clinicalCategories.length === 9 ? clinicalCategories : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+                if (radarChart9Instance) {
+                    radarChart9Instance.data.datasets[0].data = data;
+                    radarChart9Instance.update();
+                } else {
+                    radarChart9Instance = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: [
+                                "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
+                                "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
+                                "Socio-environnemental", "Émotionnel/Affectif"
+                            ],
+                            datasets: [{
+                                label: "Profil clinique",
+                                data: data,
+                                backgroundColor: "rgba(13,110,253,0.25)",
+                                borderColor: "rgb(13,110,253)",
+                                borderWidth: 3,
+                                pointBackgroundColor: "rgb(13,110,253)",
                                 pointBorderColor: "#fff"
                             }]
                         },
@@ -240,13 +337,20 @@
                         }
                     });
                 }
-            }
+        }
 
-            function initRadarChart9() {
-                const ctx = document.getElementById("radarChart9");
-                if (!ctx || radarChart9Instance) return;
+                function initOrUpdateRadarChart9Eye() {
+            const ctx = document.getElementById("radarChart9Eye");
+            if (!ctx) return;
 
-                radarChart9Instance = new Chart(ctx, {
+            const clinicalCategories = window.ClinicalProfileStore ? ClinicalProfileStore.get() : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            const data = clinicalCategories.length === 9 ? clinicalCategories : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            if (radarChart9EyeInstance) {
+                radarChart9EyeInstance.data.datasets[0].data = data;
+                radarChart9EyeInstance.update();
+            } else {
+                radarChart9EyeInstance = new Chart(ctx, {
                     type: 'radar',
                     data: {
                         labels: [
@@ -256,28 +360,44 @@
                         ],
                         datasets: [{
                             label: "Profil clinique",
-                            data: [10, 9, 8, 7, 5, 6, 4, 7, 5],
+                            data: data,
                             backgroundColor: "rgba(13,110,253,0.25)",
                             borderColor: "rgb(13,110,253)",
-                            borderWidth: 3,
+                            borderWidth: 4,
+                            pointRadius: 6,
+                            pointHoverRadius: 9,
                             pointBackgroundColor: "rgb(13,110,253)",
-                            pointBorderColor: "#fff"
+                            pointBorderColor: "#fff",
+                            tension: 0.25
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: {
+                            duration: 300,
+                            easing: 'easeOutQuart'
+                        },
                         scales: {
                             r: {
                                 min: 0,
                                 max: 10,
-                                ticks: { stepSize: 2, backdropColor: "transparent" }
+                                ticks: {
+                                    stepSize: 2,
+                                    backdropColor: "transparent"
+                                },
+                                pointLabels: {
+                                    font: { size: 11 }
+                                }
                             }
                         },
-                        plugins: { legend: { display: false } }
+                        plugins: {
+                            legend: { display: false }
+                        }
                     }
                 });
             }
+        }
 
             function updatePathologiesList(categoriesArray) {
                 const pathologies = [
@@ -305,15 +425,22 @@
             }
 
        
-            initRadarChart9();
+            initOrUpdateRadarChart9();
             initOrUpdateRadarChart6();
             initOrUpdateRadarChart6Eye(); 
+            initOrUpdateRadarChart9Eye();
 
             if (window.RedFlagsStore) {
                 RedFlagsStore.subscribeCategories(categoriesArray => {
                     initOrUpdateRadarChart6();
                     initOrUpdateRadarChart6Eye();
                     updatePathologiesList(categoriesArray);
+                });
+            }
+            if (window.ClinicalProfileStore) {
+                ClinicalProfileStore.subscribe(clinicalArray => {
+                    initOrUpdateRadarChart9();
+                    initOrUpdateRadarChart9Eye();
                 });
             }
 
@@ -336,11 +463,25 @@
                     .catch(error => {
                         console.error("Erreur lors du chargement des catégories:", error);
                     });
+
+                fetch(`/Patient/${patientId}/Assessment/${assessmentId}/ClinicalCategoryPercentages`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.clinicalCategories) {
+                            if (window.ClinicalProfileStore) {
+                                ClinicalProfileStore.set(data.clinicalCategories);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors du chargement des catégories cliniques:", error);
+                    });
             }
         });
     </script>
 
         <script>
+
             document.addEventListener("DOMContentLoaded", () => {
 
                 if (!window.RedFlagsStore) return;

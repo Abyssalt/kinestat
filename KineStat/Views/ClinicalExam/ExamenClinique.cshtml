@@ -3,6 +3,15 @@
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     var patientId = ViewData["PatientId"];
     var assessmentId = ViewData["AssessmentId"];
+    var folderId = ViewData["FolderId"];
+    ViewData["ShowClinicalFloatingEye"] = true;
+    ViewData["Breadcrumbs"] =
+        $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+        $"<li class='breadcrumb-item active'>Examen Clinique</li>";
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">
@@ -10,7 +19,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -18,7 +27,7 @@
                         <i class="bi bi-search me-2"></i>Examen clinique
                     </h1>
                 </div>
-                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     Suivant<i class="bi bi-arrow-right ms-2"></i>
                 </a>
             </div>
@@ -118,7 +127,7 @@
                 <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
-                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     Suivant<i class="bi bi-arrow-right ms-2"></i>
                 </a>
                 <hr class="border-primary border-2 opacity-25 mt-3">

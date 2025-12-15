@@ -3,9 +3,12 @@ using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
 
     public class RedFlagsController : Controller
     {
@@ -26,11 +29,12 @@ namespace KineStat.Controllers
         /// <param name="id">The unique identifier of the patient whose Red Flags are to be displayed.</param>
         /// <param name="assessmentId">The unique identifier of the assessment associated with the Red Flags.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the Red Flags view for the specified patient and assessment.</returns>
-        [Route("Patient/{id}/RedFlags/{assessmentId}")]
-        public IActionResult RedFlags(int id, int assessmentId)
+        [Route("Patient/{id}/Dossier/{folderId}/RedFlags/{assessmentId}")]
+        public IActionResult RedFlags(int id, int folderId, int assessmentId)
         {
             ViewData["PatientId"] = id.ToString();
             ViewData["AssessmentId"] = assessmentId.ToString();
+            ViewData["FolderId"] = folderId.ToString();
             return View();
         }
 
@@ -93,10 +97,18 @@ namespace KineStat.Controllers
         /// category. Returns a 404 Not Found response if the patient or their latest assessment does not exist.</returns>
         [HttpGet]
         [Route("RedFlags/{patientId}/RedFlagsQuestions/{categoryId}")]
-        public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
+        public async  Task<IActionResult> GetRedFlagsQuestions(int patientId, int categoryId)
         {
 
             var patient = _context.Patients.Find(patientId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+            {
+                return Unauthorized();
+            }
+
             if (patient == null) return NotFound();
             var boolQuestions = _context.Questions
                 .OfType<QuestionBool>()
@@ -146,6 +158,14 @@ namespace KineStat.Controllers
             {
 
                 var patient = FindPatientById(answerDto.PatientId);
+
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, answerDto.PatientId))
+                {
+                    return StatusCode(403, new { success = false, message = "Accès refusé" });
+                }
+
                 if (patient == null)
                 {
                     return NotFound(new { success = false, message = "Le patient n'existe pas" });
@@ -165,11 +185,11 @@ namespace KineStat.Controllers
                     });
                 }
 
-                var assessment = _context.Assessments
-                    .Where(a => a.PatientId == answerDto.PatientId && a.DossierId == dossier.Id)
-                    .OrderByDescending(a => a.Date)
-                    .ThenByDescending(a => a.Id)
-                    .FirstOrDefault();
+                var assessment = await _context.Assessments
+    .FirstOrDefaultAsync(a =>
+        a.Id == answerDto.AssessmentId &&
+        a.PatientId == answerDto.PatientId
+    );
                 if (assessment == null)
                 {
                     return StatusCode(400, new
@@ -197,7 +217,8 @@ namespace KineStat.Controllers
                     savedAnswer.Comment = answerDto.Comment;
                 }
 
-                
+
+                await _context.SaveChangesAsync();
 
                 double redflagsPercentage = await GetSumRedflagsPercentage(answerDto.PatientId, assessment.Id);
 
@@ -205,6 +226,8 @@ namespace KineStat.Controllers
 
                 for (int categoryId = 1; categoryId <= 6; categoryId++)
                 {
+                    await _context.SaveChangesAsync();
+
                     double probability = await CalculateRedFlagCategory(answerDto.PatientId, assessment.Id, categoryId);
                     double radarValue = (probability * 100) / 10;
                     categoryPercentages.Add(radarValue);
@@ -361,6 +384,13 @@ namespace KineStat.Controllers
         [Route("Patient/{patientId}/Assessment/{assessmentId}/CategoryPercentages")]
         public async Task<IActionResult> GetCategoryPercentages(int patientId, int assessmentId)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+            {
+                return StatusCode(403, new { success = false, message = "Accès refusé" });
+            }
+
             try
             {
                 var categoryPercentages = new List<double>();
