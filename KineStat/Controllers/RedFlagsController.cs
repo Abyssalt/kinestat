@@ -3,9 +3,12 @@ using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
 
     public class RedFlagsController : Controller
     {
@@ -94,10 +97,18 @@ namespace KineStat.Controllers
         /// category. Returns a 404 Not Found response if the patient or their latest assessment does not exist.</returns>
         [HttpGet]
         [Route("RedFlags/{patientId}/RedFlagsQuestions/{categoryId}")]
-        public IActionResult GetRedFlagsQuestions(int patientId, int categoryId)
+        public async  Task<IActionResult> GetRedFlagsQuestions(int patientId, int categoryId)
         {
 
             var patient = _context.Patients.Find(patientId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+            {
+                return Unauthorized();
+            }
+
             if (patient == null) return NotFound();
             var boolQuestions = _context.Questions
                 .OfType<QuestionBool>()
@@ -147,6 +158,14 @@ namespace KineStat.Controllers
             {
 
                 var patient = FindPatientById(answerDto.PatientId);
+
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, answerDto.PatientId))
+                {
+                    return StatusCode(403, new { success = false, message = "Accès refusé" });
+                }
+
                 if (patient == null)
                 {
                     return NotFound(new { success = false, message = "Le patient n'existe pas" });
@@ -365,6 +384,13 @@ namespace KineStat.Controllers
         [Route("Patient/{patientId}/Assessment/{assessmentId}/CategoryPercentages")]
         public async Task<IActionResult> GetCategoryPercentages(int patientId, int assessmentId)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+            {
+                return StatusCode(403, new { success = false, message = "Accès refusé" });
+            }
+
             try
             {
                 var categoryPercentages = new List<double>();
