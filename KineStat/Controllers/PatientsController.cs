@@ -3,10 +3,13 @@ using KineStat.Models;
 using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class PatientsController : Controller
     {
         private readonly KineDbContext _context;
@@ -295,6 +298,14 @@ namespace KineStat.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var patient = await _context.Patients.FindAsync(id);
 
             if (patient == null)

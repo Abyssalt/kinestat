@@ -2,9 +2,11 @@ using KineStat.Data;
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class DoctorsController : Controller
     {
         private readonly KineDbContext _context;

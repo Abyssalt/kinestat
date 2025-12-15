@@ -5,9 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Globalization;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class ClinicalExamController : Controller
     {
         private readonly KineDbContext _context;
@@ -25,8 +28,15 @@ namespace KineStat.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
         /// assessment.</returns>
         [Route("Patient/{id}/Dossier/{folderId}/ExamenClinique/{assessmentId}")]
-        public IActionResult ExamenClinique(int id, int folderId, int assessmentId)
+        public async Task<IActionResult> ExamenClinique(int id, int folderId, int assessmentId)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             ViewData["AssessmentId"] = assessmentId.ToString();
             ViewData["PatientId"] = id.ToString();
             ViewData["FolderId"] = folderId.ToString();
@@ -48,7 +58,12 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return Unauthorized();
+            }
 
             var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
 
@@ -144,6 +159,13 @@ namespace KineStat.Controllers
             try
             {
                 var dateResponse = DateTime.UtcNow;
+
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dto.PatientId))
+                {
+                    return Json(new { success = false, message = "Accès refusé" });
+                }
 
                 var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
@@ -317,6 +339,13 @@ namespace KineStat.Controllers
         {
             try
             {
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+                {
+                    return Unauthorized();
+                }
+
                 var query = _context.PatientAnswerTests
                     .Include(pr => pr.Question)
                     .ThenInclude(q => q.Category)
@@ -358,6 +387,13 @@ namespace KineStat.Controllers
         {
             try
             {
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
+                {
+                    return Json(new { success = false, message = "Accès refusé" });
+                }
+
                 var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
                 var categoryScores = new List<double>();
 

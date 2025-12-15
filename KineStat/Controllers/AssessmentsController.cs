@@ -2,10 +2,13 @@
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class AssessmentsController : Controller
     {
         private readonly KineDbContext _context;
@@ -30,6 +33,13 @@ namespace KineStat.Controllers
                 .Include(a => a.RedFlagsDetected)
                 .Include(a => a.Questions)
                 .FirstOrDefaultAsync(a => a.Id == id);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             if (assessment == null)
                 return NotFound();
@@ -106,6 +116,13 @@ namespace KineStat.Controllers
         {
             var patient = await _context.Patients.FindAsync(id);
             var assessment = await _context.Assessments.FindAsync(assessmentId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             if (patient == null)
             {
@@ -204,6 +221,14 @@ namespace KineStat.Controllers
         {
             var assessment = await _context.Assessments.FindAsync(id);
 
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce bilan.";
+                return RedirectToAction("Index", "Patients");
+            }
+
             if (assessment != null)
             {
                 var clinicalDatas = _context.ClinicalDatas.Where(cd => cd.AssessmentId == id);
@@ -241,6 +266,15 @@ namespace KineStat.Controllers
         public async Task<IActionResult> StartAssessment(int PatientId, int DossierId, int PhysioId, int MedicalContextId)
         {
             var patient = await _context.Patients.FindAsync(PatientId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
+            {
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction("Index", "Patients");
+            }
+
             if (patient == null)
                 return NotFound("Patient introuvable");
 
@@ -285,6 +319,13 @@ namespace KineStat.Controllers
                 .ThenInclude(p => p.Physio)
                 .FirstOrDefaultAsync(d => d.Id == dossierId);
 
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsDossierOwnedByPhysio(_context, physioId, dossierId))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
             if (dossier == null)
                 return NotFound("Dossier introuvable");
 
@@ -320,6 +361,13 @@ namespace KineStat.Controllers
                 .Include(a => a.Patient)
                 .Include(a => a.Dossier)
                 .FirstOrDefaultAsync(a => a.Id == assessmentId);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, assessmentId))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             var tintivData = await _context.ClinicalDatas
                 .Where(cd => cd.PatientId == assessment.PatientId

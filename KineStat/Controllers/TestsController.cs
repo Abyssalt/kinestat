@@ -3,9 +3,12 @@ using KineStat.Models;
 using KineStat.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using KineStat.Filters;
+using KineStat.Helpers;
 
 namespace KineStat.Controllers
 {
+    [AuthorizePhysio]
     public class TestsController : Controller
     {
         private readonly KineDbContext _context;
@@ -32,6 +35,13 @@ namespace KineStat.Controllers
             var patient = await _context.Patients
                 .Include(p => p.Physio)
                 .FirstOrDefaultAsync(p => p.Id == id);
+
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
 
             var allClusters = await _context.Cluster
                 .Include(c => c.Questions)
@@ -89,6 +99,13 @@ namespace KineStat.Controllers
                 if (dto.PatientId <= 0)
                 {
                     return BadRequest(new { success = false, message = "Patient invalide" });
+                }
+
+                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+                if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dto.PatientId))
+                {
+                    return StatusCode(403, new { success = false, message = "Accès refusé" });
                 }
 
                 var patient = await _context.Patients.FindAsync(dto.PatientId);

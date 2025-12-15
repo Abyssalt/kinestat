@@ -4,9 +4,11 @@ using KineStat.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using KineStat.Filters;
 
 namespace KineStat.Controllers
 {
+    [AuthorizeAdmin]
     public class AdminController : Controller
     {
         private readonly KineDbContext _context;
