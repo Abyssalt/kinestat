@@ -197,12 +197,12 @@ namespace KineStat.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
         {
-            var patient = await _context.Patients.FindAsync(PatientId);
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
-            if (patient == null)
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
             {
-                TempData["Error"] = "Patient introuvable";
-                return RedirectToAction("Anamnese", new { id = PatientId });
+                TempData["Error"] = "Vous n'avez pas accès à ce patient.";
+                return RedirectToAction("Index", "Patients");
             }
 
             var patient = await _context.Patients.FindAsync(PatientId);
