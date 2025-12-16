@@ -34,12 +34,6 @@
                 <button class="btn btn-outline-primary fw-medium" disabled>
                     <i class="bi bi-file-earmark-pdf me-2"></i>Exporter PDF
                 </button>
-
-                <button class="btn btn-outline-danger fw-medium"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteAssessmentModal">
-                    <i class="bi bi-trash me-2"></i>Supprimer
-                </button>
             </div>
             <hr class="border-primary border-2 opacity-25 mt-3">
         </div>
@@ -457,8 +451,8 @@
                         @if (ViewBag.ClinicalAnswers != null && ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers).Any())
                         {
                             var groupedClinical = ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers)
-                            .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
-                            .ToList();
+                                .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
+                                .ToList();
 
                             int clinIndex = 0;
 
@@ -508,6 +502,11 @@
             </div>
         </div>
     </div>
+    <button class="btn btn-outline-danger fw-medium"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteAssessmentModal">
+        <i class="bi bi-trash me-2"></i>Supprimer
+    </button>
 </div>
 
 <div class="modal fade" id="deleteAssessmentModal" tabindex="-1">
@@ -552,6 +551,7 @@
 
         </div>
     </div>
+
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
