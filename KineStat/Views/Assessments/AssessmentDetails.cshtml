@@ -22,7 +22,7 @@
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <a asp-controller="Folder" asp-action="DossierDetails"
-                   asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium">
+                   asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -35,7 +35,7 @@
                 <a asp-controller="Assessments"
                    asp-action="ExportAssessmentDetailsPdf"
                    asp-route-id="@Model.Id"
-                   class="btn btn-success fw-medium">
+                   class="btn btn-success fw-medium btn-tablet-lg">
                     <i class="bi bi-file-earmark-pdf me-2"></i>Exporter PDF
                 </a>
             </div>
@@ -506,7 +506,7 @@
             </div>
         </div>
     </div>
-    <button class="btn btn-outline-danger fw-medium mt-3"
+    <button class="btn btn-outline-danger fw-medium btn-tablet-lg mt-3"
             data-bs-toggle="modal"
             data-bs-target="#deleteAssessmentModal">
         <i class="bi bi-trash me-2"></i>Supprimer
@@ -534,7 +534,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-outline-secondary"
+                <button class="btn btn-outline-secondary btn-tablet-lg"
                         data-bs-dismiss="modal">
                     Annuler
                 </button>
@@ -546,7 +546,7 @@
                       method="post">
                     @Html.AntiForgeryToken()
                     <button type="submit"
-                            class="btn btn-danger fw-medium">
+                            class="btn btn-danger fw-medium btn-tablet-lg">
                         <i class="bi bi-trash me-2"></i>
                         Supprimer définitivement
                     </button>

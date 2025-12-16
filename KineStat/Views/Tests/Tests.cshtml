@@ -65,7 +65,7 @@
     </div>
 
     <div class="mb-4 d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline-primary fw-medium" onclick="toggleAddTestForm()">
+        <button type="button" class="btn btn-outline-primary fw-medium btn-tablet-lg" onclick="toggleAddTestForm()">
             <i class="bi bi-plus-circle me-2"></i>Ajouter un test spécifique
         </button>
     </div>
@@ -140,7 +140,7 @@
                         </div>
 
                         <div class="cluster-actions">
-                            <button class="btn-cluster-action btn-start" onclick="toggleClusterTests(@cluster.Id)">
+                            <button class="btn-cluster-action btn-start btn-tablet-lg" onclick="toggleClusterTests(@cluster.Id)">
                                 ▶ Commencer
                             </button>
                         </div>
@@ -205,7 +205,7 @@
 
                                                 <div class="mb-2">
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium"
+                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
                                                             onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
@@ -260,7 +260,7 @@
 
                                                 <div class="mb-2">
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium"
+                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
                                                             onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
@@ -294,7 +294,7 @@
 
                                                 <div class="mb-2">
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium"
+                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
                                                             onclick="toggleObservations(@question.Id)">
                                                         <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
                                                     </button>
@@ -338,7 +338,7 @@
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-center">
 
                     <div class="d-flex gap-2 w-100 w-sm-auto">
-                        <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                        <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                             <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
                         </a>
                     </div>
@@ -428,14 +428,14 @@
                 if (statusBadge) statusBadge.textContent = 'Non commencé';
                 if (actionBtn) {
                     actionBtn.textContent = '▶ Commencer';
-                    actionBtn.className = 'btn-cluster-action btn-start';
+                        actionBtn.className = 'btn-cluster-action btn-start btn-start btn-tablet-lg';
                 }
                 card.classList.remove('has-progress', 'completed');
             } else if (progress.percentage === 100) {
                 if (statusBadge) statusBadge.textContent = '✓ Complété';
                 if (actionBtn) {
                     actionBtn.textContent = '✓ Revoir les tests';
-                    actionBtn.className = 'btn-cluster-action btn-review';
+                        actionBtn.className = 'btn-cluster-action btn-review btn-tablet-lg';
                 }
                 card.classList.remove('has-progress');
                 card.classList.add('completed');
@@ -443,7 +443,7 @@
                 if (statusBadge) statusBadge.textContent = 'En cours';
                 if (actionBtn) {
                     actionBtn.textContent = '→ Continuer';
-                    actionBtn.className = 'btn-cluster-action btn-continue';
+                        actionBtn.className = 'btn-cluster-action btn-continue btn-tablet-lg';
                 }
                 card.classList.add('has-progress');
                 card.classList.remove('completed');

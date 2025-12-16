@@ -19,7 +19,7 @@
                 </h1>
                 <p class="text-secondary mb-0">@Model.FirstName @Model.LastName</p>
             </div>
-            <a asp-controller="Index" asp-action="Index" class="btn btn-outline-secondary fw-medium">
+            <a asp-controller="Index" asp-action="Index" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                 <i class="bi bi-arrow-left me-2"></i>Retour à la liste
             </a>
         </div>
@@ -51,7 +51,7 @@
                     <i class="bi bi-person-badge me-2"></i>Informations administratives
                 </h5>
                 <button type="button"
-                        class="btn btn-warning fw-medium edit-patient-btn"
+                            class="btn btn-warning fw-medium btn-tablet-lg edit-patient-btn"
                         title="Modifier"
                         data-id="@Model.Id"
                         data-lastname="@Model.LastName"
@@ -171,7 +171,7 @@
                     <i class="bi bi-clipboard2-pulse me-2"></i>Informations médicales
                 </h5>
                 <button type="button"
-                        class="btn btn-light fw-medium edit-medical-btn"
+                            class="btn btn-light fw-medium btn-tablet-lg edit-medical-btn"
                         title="Modifier"
                         data-profession="@(Model.Profession ?? "")"
                         data-activites="@(Model.ActivitesPhysiques ?? "")"
@@ -214,7 +214,7 @@
                 <a asp-controller="Folder"
                    asp-action="CreateFolder"
                    asp-route-id="@Model.Id"
-                   class="btn btn-light fw-medium">
+                       class="btn btn-light fw-medium btn-tablet-lg">
                     <i class="bi bi-plus-circle me-1"></i>Nouveau dossier
                 </a>
             </div>
@@ -292,8 +292,8 @@
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-outline-secondary fw-medium" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" id="saveMedicalBtn" class="btn btn-success fw-medium">
+                <button type="button" class="btn btn-outline-secondary fw-medium btn-tablet-lg" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="saveMedicalBtn" class="btn btn-success fw-medium btn-tablet-lg">
                     <i class="bi bi-save me-2"></i>Enregistrer
                 </button>
             </div>
@@ -404,7 +404,7 @@
                                 }
                             </select>
                             <div class="mt-2" id="edit_addDoctorBtnContainer" style="display: none;">
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="edit_addDoctorBtn">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-tablet-lg" id="edit_addDoctorBtn">
                                     <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
                                 </button>
                             </div>
@@ -440,8 +440,8 @@
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-outline-secondary fw-medium" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" id="saveEditBtn" class="btn btn-secondary fw-medium" disabled>
+                <button type="button" class="btn btn-outline-secondary fw-medium btn-tablet-lg" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="saveEditBtn" class="btn btn-secondary fw-medium btn-tablet-lg" disabled>
                     <i class="bi bi-save me-2"></i>Enregistrer
                 </button>
             </div>
