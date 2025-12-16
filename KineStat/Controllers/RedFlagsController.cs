@@ -412,7 +412,7 @@ namespace KineStat.Controllers
                 for (int categoryId = 1; categoryId <= 6; categoryId++)
                 {
                     double probability = await CalculateRedFlagCategory(patientId, assessmentId, categoryId);
-                    double radarValue = (probability * 100) / 10;
+                    double radarValue = (probability * 100) / 10 / 2;
                     categoryPercentages.Add(radarValue);
                 }
 
