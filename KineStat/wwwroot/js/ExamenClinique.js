@@ -61,7 +61,7 @@ const testSuggestions = {
             'Règle prédiction clinique Hicks'
         ]
     },
-    'Croyances & Cognition': {
+    'Croyances et Cognition': {
         'Oui': [
             'Questionnaire Tampa (kinésiophobie)',
             'Questionnaire PCS (catastrophisme)',
@@ -251,6 +251,7 @@ async function saveResponses() {
 }
 
 function displayQuestions(category) {
+
     const container = document.getElementById('questionnaireContainer');
     container.innerHTML = '';
 
@@ -272,6 +273,7 @@ function displayQuestions(category) {
 
     questionsToDisplay.forEach(({ category: subCategory, questions }) => {
         questions.forEach((q, index) => {
+
             const questionCard = createQuestionCard(q, `${subCategory.replace(/\s+/g, '_')}_${index}`, subCategory);
             container.appendChild(questionCard);
         });
@@ -281,6 +283,8 @@ function displayQuestions(category) {
 }
 
 function createQuestionCard(question, uniqueId, category) {
+
+    
     const card = document.createElement('div');
     card.className = 'card border-0 shadow-sm mb-3';
     card.dataset.questionId = question.id;

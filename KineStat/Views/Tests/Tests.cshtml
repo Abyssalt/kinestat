@@ -27,17 +27,14 @@
     <div class="card border-0 shadow mb-4">
         <div class="card-body p-3 p-md-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                <div>
-                    <h1 class="h2 fw-bold text-primary mb-2">
-                        <i class="bi bi-clipboard2-pulse me-2"></i>Évaluation complète
-                    </h1>
-                    <p class="text-secondary mb-0">
-                        <i class="bi bi-person-badge me-1"></i>Patient : <strong>@patientNom</strong>
-                    </p>
-                </div>
+                
                 <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
+                <div>
+                    <h1 class="h2 fw-bold text-primary mb-2">
+                        <i class="bi bi-clipboard2-pulse me-2"></i>Évaluation complète
+                    </h1></div>
                 <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
                 </a>
@@ -70,12 +67,6 @@
     <div class="mb-4 d-flex gap-2 flex-wrap">
         <button type="button" class="btn btn-outline-primary fw-medium" onclick="toggleAddTestForm()">
             <i class="bi bi-plus-circle me-2"></i>Ajouter un test spécifique
-        </button>
-        <button type="button" class="btn btn-outline-secondary fw-medium" onclick="expandAllClusters()">
-            <i class="bi bi-arrows-expand me-2"></i>Tout déplier
-        </button>
-        <button type="button" class="btn btn-outline-secondary fw-medium" onclick="collapseAllClusters()">
-            <i class="bi bi-arrows-collapse me-2"></i>Tout replier
         </button>
     </div>
 
@@ -122,38 +113,39 @@
             int clusterIndex = 0;
         }
 
-        <div class="accordion" id="clustersAccordion">
+        <div class="clusters-grid">
             @foreach (var cluster in clusters)
             {
-                clusterIndex++;
                 var collapseId = "collapse-cluster-" + cluster.Id;
-                var headingId = "heading-cluster-" + cluster.Id;
 
-                <div class="accordion-item border-0 shadow mb-3">
-                    <h2 class="accordion-header" id="@headingId">
-                        <button class="accordion-button collapsed bg-primary text-white fw-bold"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#@collapseId"
-                                aria-expanded="false"
-                                aria-controls="@collapseId"
-                                style="border-radius: 0.375rem;">
-                            <div class="d-flex justify-content-between align-items-center w-100 me-3">
-                                <div>
-                                    <i class="bi bi-folder2-open me-2"></i>@cluster.Name
-                                </div>
-                                <span class="badge bg-light text-dark">
-                                    @cluster.Questions.Count question(s)
-                                </span>
-                            </div>
-                        </button>
-                    </h2>
+                <div class="cluster-card" data-cluster-id="@cluster.Id">
+                    <div class="cluster-card-header" onclick="toggleClusterTests(@cluster.Id)">
+                        <div class="cluster-title">
+                            <span class="cluster-icon">📋</span>
+                            <span>@cluster.Name</span>
+                        </div>
+                        <div class="cluster-badge-group">
+                            <span class="cluster-progress-badge">0/@cluster.Questions.Count</span>
+                            <span class="cluster-status-badge">Non commencé</span>
+                        </div>
+                    </div>
 
-                    <div id="@collapseId"
-                         class="accordion-collapse collapse"
-                         aria-labelledby="@headingId"
-                         data-bs-parent="#clustersAccordion">
-                        <div class="accordion-body p-3">
+                    <div class="cluster-card-body">
+                        <p class="cluster-description">
+                            @cluster.Questions.Count test(s) à effectuer
+                        </p>
+
+                        <div class="cluster-progress-bar">
+                            <div class="cluster-progress-fill" style="width: 0%"></div>
+                        </div>
+
+                        <div class="cluster-actions">
+                            <button class="btn-cluster-action btn-start" onclick="toggleClusterTests(@cluster.Id)">
+                                ▶ Commencer
+                            </button>
+                        </div>
+
+                        <div id="@collapseId" class="collapse mt-3">
                             <div id="testsContainer-@cluster.Id">
                                 @foreach (var question in cluster.Questions)
                                 {
@@ -225,11 +217,11 @@
                                                             <label class="form-label fw-medium">
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
-                                                        <textarea class="form-control"
+                                                            <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
-                                                          placeholder="Notez ici vos observations..." onchange="autoSaveTest(@question.Id)"></textarea>
-
+                                                          placeholder="Notez ici vos observations..."
+                                                          oninput="autoSaveTest(@question.Id)"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -246,9 +238,10 @@
                                                            min="@ladder.Min"
                                                            max="@ladder.Max"
                                                            placeholder="Entrez la valeur"
-                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')" id="input-@question.Id"
-                                                            oninput="autoSaveTest(@question.Id)"
-                                                            id="input-@question.Id">
+                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
+                                                           oninput="autoSaveTest(@question.Id)"
+                                                           id="input-@question.Id">
+
                                                     <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
                                                     <input type="range"
                                                            class="form-range"
@@ -280,11 +273,10 @@
                                                                 <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
                                                             </label>
                                                             <textarea class="form-control"
-                                                              name="test-@question.Id-observations"
-                                                              rows="3"
-                                                              placeholder="Notez ici vos observations..."
-                                                            oninput="autoSaveTest(@question.Id)"></textarea>
-                                                                
+                                                          name="test-@question.Id-observations"
+                                                          rows="3"
+                                                          placeholder="Notez ici vos observations..."
+                                                          oninput="autoSaveTest(@question.Id)"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -326,6 +318,14 @@
                                         </div>
                                     </div>
                                 }
+                                <div class="text-center mt-4 mb-3">
+                                    <button type="button" 
+                                            class="btn-back-to-top" 
+                                            onclick="scrollToClusterTop(@cluster.Id)">
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                        Remonter en haut
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -336,11 +336,6 @@
         <div class="card border-0 shadow">
             <div class="card-body p-3 p-md-4">
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-center">
-                    <button type="button"
-                            class="btn btn-outline-secondary btn-lg fw-medium w-100 w-sm-auto"
-                            onclick="resetForm()">
-                        <i class="bi bi-arrow-counterclockwise me-2"></i>Réinitialiser
-                    </button>
 
                     <div class="d-flex gap-2 w-100 w-sm-auto">
                         <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
@@ -357,6 +352,7 @@
 
 @section Scripts {
     <script src="~/js/Tests.js"></script>
+    <link rel="stylesheet" href="~/css/tests.css" />
     <script>
         globalPatientId = @patientId;
         globalAssessmentId = @assessmentId;
@@ -396,73 +392,111 @@
     });
 
 
-        function expandAllClusters() {
-            document.querySelectorAll('.accordion-collapse').forEach(collapse => {
-                const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
-                bsCollapse.show();
+        function calculateClusterProgress(clusterId) {
+            const container = document.getElementById('testsContainer-' + clusterId);
+            if (!container) return { completed: 0, total: 0, percentage: 0 };
+
+            const tests = container.querySelectorAll('.test-card');
+            const total = tests.length;
+            const completed = container.querySelectorAll('.answered-badge[style*="inline-block"]').length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            return { completed, total, percentage };
+        }
+
+        function updateClusterCard(clusterId) {
+            const progress = calculateClusterProgress(clusterId);
+            const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
+
+            if (!card) return;
+
+            const progressBadge = card.querySelector('.cluster-progress-badge');
+            if (progressBadge) {
+                progressBadge.textContent = `${progress.completed}/${progress.total}`;
+            }
+
+            const progressFill = card.querySelector('.cluster-progress-fill');
+            if (progressFill) {
+                progressFill.style.width = `${progress.percentage}%`;
+            }
+
+
+            const statusBadge = card.querySelector('.cluster-status-badge');
+            const actionBtn = card.querySelector('.btn-cluster-action');
+
+            if (progress.percentage === 0) {
+                if (statusBadge) statusBadge.textContent = 'Non commencé';
+                if (actionBtn) {
+                    actionBtn.textContent = '▶ Commencer';
+                    actionBtn.className = 'btn-cluster-action btn-start';
+                }
+                card.classList.remove('has-progress', 'completed');
+            } else if (progress.percentage === 100) {
+                if (statusBadge) statusBadge.textContent = '✓ Complété';
+                if (actionBtn) {
+                    actionBtn.textContent = '✓ Revoir les tests';
+                    actionBtn.className = 'btn-cluster-action btn-review';
+                }
+                card.classList.remove('has-progress');
+                card.classList.add('completed');
+            } else {
+                if (statusBadge) statusBadge.textContent = 'En cours';
+                if (actionBtn) {
+                    actionBtn.textContent = '→ Continuer';
+                    actionBtn.className = 'btn-cluster-action btn-continue';
+                }
+                card.classList.add('has-progress');
+                card.classList.remove('completed');
+            }
+        }
+
+        function toggleClusterTests(clusterId) {
+            const collapseId = 'collapse-cluster-' + clusterId;
+            const collapse = document.getElementById(collapseId);
+
+            if (!collapse) return;
+
+            const bsCollapse = new bootstrap.Collapse(collapse, {
+                toggle: true
             });
         }
 
-        function collapseAllClusters() {
-            document.querySelectorAll('.accordion-collapse').forEach(collapse => {
-                const bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
-                bsCollapse.hide();
-            });
+        function scrollToClusterTop(clusterId) {
+            const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
+            if (card) {
+                card.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         }
+       
+
+
+        const originalUpdateProgress = window.updateProgress;
+        window.updateProgress = function() {
+    
+            if (originalUpdateProgress) {
+                originalUpdateProgress();
+            }
+
+            document.querySelectorAll('[data-cluster-id]').forEach(card => {
+                const clusterId = card.getAttribute('data-cluster-id');
+                updateClusterCard(clusterId);
+            });
+        };
+
+        window.addEventListener('load', function() {
+
+            setTimeout(function() {
+                document.querySelectorAll('[data-cluster-id]').forEach(card => {
+                    const clusterId = card.getAttribute('data-cluster-id');
+                    updateClusterCard(clusterId);
+                });
+            }, 100);
+        });
+
+
     </script>
 
-    <style>
-        .test-card {
-            transition: all 0.2s ease;
-        }
-
-            .test-card:hover {
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
-
-            .test-card.border-success {
-                box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
-            }
-
-        .border-2 {
-            border-width: 2px !important;
-        }
-
-        .btn-check:checked + .btn-outline-success {
-            background-color: #198754;
-            border-color: #198754;
-            color: white;
-        }
-
-        .btn-check:checked + .btn-outline-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
-        }
-
-
-        .accordion-button:not(.collapsed) {
-            background-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        .accordion-button.collapsed {
-            background-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        .accordion-button::after {
-            filter: brightness(0) invert(1);
-        }
-
-        .accordion-button:focus {
-            box-shadow: none;
-            border-color: rgba(0,0,0,.125);
-        }
-
-        .accordion-item {
-            border-radius: 0.375rem !important;
-            overflow: hidden;
-        }
-    </style>
 }

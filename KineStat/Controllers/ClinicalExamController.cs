@@ -268,7 +268,7 @@ namespace KineStat.Controllers
                             }
                         }
                     }
-                    categoryScores.Add(Math.Round(totalScore, 2));
+                    categoryScores.Add(Math.Round(totalScore/2, 2));
                 }
 
                 if (dto.AssessmentId.HasValue)
@@ -437,7 +437,7 @@ namespace KineStat.Controllers
                             }
                         }
                     }
-                    categoryScores.Add(Math.Round(totalScore, 2));
+                    categoryScores.Add(Math.Round(totalScore/2, 2));
                 }
 
                 return Json(new { success = true, clinicalCategories = categoryScores });
