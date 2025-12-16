@@ -18,6 +18,13 @@ namespace KineStat.Models
         Abandonné,
     }
 
+    public enum Country
+    {
+        Belgique,
+        France,
+        Luxembourg, 
+        Suisse
+    }
     public class Patient
     {
         [Key]
@@ -48,7 +55,10 @@ namespace KineStat.Models
         [Required]
         public string SocialSecurityNumber { get; set; }
 
+        [Required]
+        public Country Country { get; set; }
 
+        
         //Medical Informations
         public string? Profession { get; set; }
         public string? ActivitesPhysiques { get; set; }

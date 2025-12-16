@@ -66,7 +66,8 @@
                         data-weight="@(Model.Weight?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-height="@(Model.Height?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-doctorid="@(Model.DoctorId?.ToString() ?? "")"
-                        data-address="@(Model.Address ?? "")">
+                        data-address="@(Model.Address ?? "")"
+                        data-country="@(Model.Country)">
                     <i class="bi bi-pencil me-1"></i>Modifier
                 </button>
             </div>
@@ -113,6 +114,10 @@
                         <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Adresse</label>
                         <p class="form-control-plaintext mb-0">@(Model.Address ?? "Non renseignée")</p>
                     </div>
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Pays</label>
+                            <p class="form-control-plaintext mb-0"> @(Model.Country.ToString() ?? "Non renseigné")</p>
+                        </div>
                     <div class="col-12 col-md-4 mb-3">
                         <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Téléphone</label>
                         <p class="form-control-plaintext mb-0">
@@ -362,6 +367,22 @@
                         <div class="col-12">
                             <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Adresse</label>
                             <input type="text" class="form-control edit-field" id="edit_Address" name="Address">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">
+                                Pays <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select edit-field"
+                                    id="edit_Country"
+                                    name="Country"
+                                    data-validation="select"
+                                    required>
+                                <option value="">-- Sélectionner un pays --</option>
+                                <option value="0">Belgique</option>
+                                <option value="1">France</option>
+                                <option value="2">Luxembourg</option>
+                                <option value="3">Suisse</option>
+                            </select>
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">N° Sécurité sociale <span class="text-danger">*</span></label>
@@ -718,6 +739,7 @@
                     document.getElementById('edit_Weight').value = data.weight;
                     document.getElementById('edit_Height').value = data.height;
                     document.getElementById('edit_DoctorSelect').value = data.doctorid || '';
+                    document.getElementById('edit_Country').value = data.country;
 
                     const editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
                     editModal.show();
