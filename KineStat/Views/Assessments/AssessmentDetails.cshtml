@@ -22,7 +22,7 @@
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <a asp-controller="Folder" asp-action="DossierDetails"
-                    asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium">
+                   asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -31,9 +31,13 @@
                     </h1>
                     <p class="text-secondary mb-0">Bilan du @Model.Date.ToString("dd/MM/yyyy")</p>
                 </div>
-                <button class="btn btn-outline-primary fw-medium" disabled>
+
+                <a asp-controller="Assessments"
+                   asp-action="ExportAssessmentDetailsPdf"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-success fw-medium">
                     <i class="bi bi-file-earmark-pdf me-2"></i>Exporter PDF
-                </button>
+                </a>
 
                 <button class="btn btn-outline-danger fw-medium"
                         data-bs-toggle="modal"
