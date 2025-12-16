@@ -8,7 +8,7 @@
     var folderId = ViewData["FolderId"];
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
         $"<li class='breadcrumb-item active'>Red Flags</li>";
