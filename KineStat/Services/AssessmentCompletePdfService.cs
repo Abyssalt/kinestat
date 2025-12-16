@@ -80,9 +80,7 @@ namespace KineStat.Services
                             x.CurrentPageNumber();
                             x.Span(" / ");
                             x.TotalPages();
-                        })
-                        .FontSize(9)
-                        .FontColor(Colors.Grey.Darken1);
+                        });
                 });
             });
 
@@ -390,7 +388,7 @@ namespace KineStat.Services
                 {
                     row.AutoItem()
                         .Background(Colors.Blue.Lighten3)
-                        .Padding(5, 3)
+                        .Padding(5)
                         .Text(badge)
                         .FontSize(10)
                         .Bold()
