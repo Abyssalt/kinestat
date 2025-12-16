@@ -17,7 +17,7 @@
                         <i class="bi bi-folder-open me-2"></i>@Model.Titre
                     </h1>
                 </div>
-                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                     <i class="bi bi-arrow-left me-2"></i>Retour à l'anamnèse
                 </a>
             </div>
@@ -53,7 +53,7 @@
                         <h5 class="mb-0 fw-bold">
                             <i class="bi bi-clipboard2-pulse me-2"></i>Bilans
                         </h5>
-                        <a asp-controller="Assessments" asp-action="CreateAssessment" asp-route-dossierId="@Model.Id" class="btn btn-light fw-medium">
+                        <a asp-controller="Assessments" asp-action="CreateAssessment" asp-route-dossierId="@Model.Id" class="btn btn-light fw-medium btn-tablet-lg">
                             <i class="bi bi-plus-circle me-1"></i>Nouveau bilan
                         </a>
                     </div>
@@ -101,7 +101,7 @@
                                             @if (assessment.Status == AssessmentStatus.EnCours)
                                             {
                                                 <a asp-controller="Assessments" asp-action="Socrate" asp-route-id="@Model.PatientId" asp-route-assessmentId="@assessment.Id"
-                                                   class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 me-3">
+                                                   class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 me-3 btn-tablet-lg">
                                                     <i class="bi bi-play-fill me-1"></i>Reprendre
                                                 </a>
 
