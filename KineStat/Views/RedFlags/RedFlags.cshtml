@@ -8,7 +8,7 @@
     var folderId = ViewData["FolderId"];
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
         $"<li class='breadcrumb-item active'>Red Flags</li>";
@@ -110,20 +110,18 @@
 
 <script>
     let hasDisplayedCriticalModal = false;
-    let criticalRedflagThreshold= 20; //unsure
+    let criticalRedflagThreshold = 20;
+
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
-        const response = await fetch(`/RedFlags/${patientId}/RedFlagsQuestions/${categoryId}`);
+        const assessmentId = @assessmentId;
+        const response = await fetch(`/RedFlags/${patientId}/Assessment/${assessmentId}/Questions/${categoryId}`);
         const html = await response.text();
         document.getElementById("questionnaireContainer").innerHTML = html;
         attachNoteToggleEvents();
         attachAnswerListeners();
         initializeTooltips();
-       
-
     }
-
-
 
     function initializeTooltips() {
         const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -131,7 +129,6 @@
             new bootstrap.Tooltip(el);
         });
     }
-
 
     function attachNoteToggleEvents() {
         document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
@@ -141,6 +138,7 @@
             const target = document.querySelector(targetSelector);
 
             if (!target) return;
+
             const textarea = target.querySelector('textarea');
             let btnText = "";
             if (textarea && textarea.value.trim() !== "") {
@@ -176,19 +174,40 @@
         initializeTabs();
         loadQuestionsByCategory(1);
         initializeGauge();
+
+        fetchInitialState();
+
         RedFlagsStore.subscribe(function(newValue) {
-        updateGauge(newValue);
+            updateGauge(newValue);
+        });
     });
-        
-    });
+
+    function fetchInitialState() {
+        const patientId = @patientId;
+        const assessmentId = @assessmentId;
+
+        fetch(`/Patient/${patientId}/Assessment/${assessmentId}/CategoryPercentages`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.totalPercentage !== undefined) {
+                        RedFlagsStore.set(data.totalPercentage);
+                    } else if (data.redflags !== undefined) {
+                         RedFlagsStore.set(data.redflags);
+                    }
+
+                    if (data.categories) {
+                        RedFlagsStore.setCategories(data.categories);
+                    }
+                }
+            });
+    }
 
     function attachAnswerListeners() {
-
         const radios = document.querySelectorAll('input[name^="q_"]');
         radios.forEach(radio => {
             radio.addEventListener('change', handleRadioChange);
         });
-
         const textareas = document.querySelectorAll('textarea[name^="note_"]');
         textareas.forEach(textarea => {
             textarea.addEventListener('change', handleTextareaInput);
@@ -201,7 +220,6 @@
         const value = radio.value === "true";
         const patientId = @ViewData["PatientId"];
         const comment = getCommentForQuestion(questionId);
-
         saveAnswer(patientId, questionId, value, comment);
     }
 
@@ -226,8 +244,7 @@
     }
 
     function saveAnswer(patientId, questionId, boolValue, comment) {
-        const assessmentId = parseInt(document.querySelector('meta[name="assessment-id"]').content);
-
+        const assessmentId = @assessmentId;
         const dto = {
             PatientId: patientId,
             QuestionId: questionId,
@@ -235,7 +252,6 @@
             Comment: comment,
             AssessmentId: assessmentId
         };
-
         fetch(`/Patient/SaveOrUpdateAnswer`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -243,32 +259,24 @@
         })
         .then(async response => {
             if (!response.ok) {
-                const text = await response.text();
-                console.error("Erreur serveur:", text);
                 throw new Error('Erreur serveur');
             }
             return response.json();
         })
         .then(data => {
-        console.log("Saved:", data);
-
-        RedFlagsStore.set(data.redflags);
-        if (data.categories) {
-            RedFlagsStore.setCategories(data.categories);
-        }
-        if (data.redflags >= criticalRedflagThreshold) {
-            showCriticalRedFlagModal(patientId);
-        }
-    });
-
-
+            RedFlagsStore.set(data.redflags);
+            if (data.categories) {
+                RedFlagsStore.setCategories(data.categories);
+            }
+            if (data.redflags >= criticalRedflagThreshold) {
+                showCriticalRedFlagModal(patientId);
+            }
+        });
     }
 
     function updateGauge(newValue) {
-        if (gaugeChart) {
-            document.getElementById('probabilityValue').textContent = newValue.toFixed(2) + '%';
+        if (typeof moveNeedle === 'function') {
             moveNeedle(newValue);
-            
         }
         const elem = document.getElementById('probabilityValue');
         if (elem) elem.textContent = newValue.toFixed(2) + '%';

@@ -95,7 +95,7 @@ namespace KineStat.Controllers
                 firstTintivData = await _context.ClinicalDatas
                     .Where(cd =>
                         cd.AssessmentId == firstAssessment.Id &&
-                        cd.CategoryId <= 6)
+                        cd.CategoryId>=1 && cd.CategoryId <= 15)
                     .OrderBy(cd => cd.CategoryId)
                     .Select(cd => cd.Value)
                     .ToListAsync();
@@ -162,7 +162,7 @@ namespace KineStat.Controllers
             if (patient == null)
             {
                 TempData["Error"] = "Patient introuvable.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (assessment == null)
@@ -261,7 +261,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce bilan.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (assessment != null)
@@ -307,7 +307,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (patient == null)
