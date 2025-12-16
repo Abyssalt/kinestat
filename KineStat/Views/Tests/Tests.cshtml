@@ -318,7 +318,14 @@
                                         </div>
                                     </div>
                                 }
-
+                                <div class="text-center mt-4 mb-3">
+                                    <button type="button" 
+                                            class="btn-back-to-top" 
+                                            onclick="scrollToClusterTop(@cluster.Id)">
+                                        <i class="bi bi-arrow-up-circle"></i>
+                                        Remonter en haut
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -453,7 +460,15 @@
             });
         }
 
-
+        function scrollToClusterTop(clusterId) {
+            const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
+            if (card) {
+                card.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
        
 
 
