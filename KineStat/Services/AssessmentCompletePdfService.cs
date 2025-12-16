@@ -29,26 +29,18 @@ namespace KineStat.Services
 
                     // Header
                     page.Header()
-                        .Height(60)
                         .Background(Colors.Blue.Lighten3)
-                        .Padding(15)
-                        .Row(row =>
+                        .Padding(10)
+                        .Column(column =>
                         {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text("Dossier Kinésithérapie")
-                                    .FontSize(18)
-                                    .Bold()
-                                    .FontColor(Colors.Blue.Darken2);
+                            column.Item().Text("Dossier Kinésithérapie")
+                                .FontSize(14)
+                                .Bold()
+                                .FontColor(Colors.Blue.Darken2);
 
-                                column.Item().Text($"Patient : {patient.FirstName} {patient.LastName}")
-                                    .FontSize(12)
-                                    .FontColor(Colors.Grey.Darken2);
-
-                                column.Item().Text($"Date : {assessment.Date:dd/MM/yyyy}")
-                                    .FontSize(10)
-                                    .FontColor(Colors.Grey.Darken1);
-                            });
+                            column.Item().Text($"Patient : {patient.FirstName} {patient.LastName} - {assessment.Date:dd/MM/yyyy}")
+                                .FontSize(10)
+                                .FontColor(Colors.Grey.Darken2);
                         });
 
                     // Start of the content
