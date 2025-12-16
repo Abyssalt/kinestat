@@ -95,7 +95,7 @@ namespace KineStat.Controllers
                 firstTintivData = await _context.ClinicalDatas
                     .Where(cd =>
                         cd.AssessmentId == firstAssessment.Id &&
-                        cd.CategoryId <= 6)
+                        cd.CategoryId>=1 && cd.CategoryId <= 15)
                     .OrderBy(cd => cd.CategoryId)
                     .Select(cd => cd.Value)
                     .ToListAsync();
