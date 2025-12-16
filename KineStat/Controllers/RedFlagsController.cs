@@ -229,7 +229,7 @@ namespace KineStat.Controllers
                     await _context.SaveChangesAsync();
 
                     double probability = await CalculateRedFlagCategory(answerDto.PatientId, assessment.Id, categoryId);
-                    double radarValue = (probability * 100) / 10;
+                    double radarValue = (probability * 100) / 10 /2;
                     categoryPercentages.Add(radarValue);
                 }
 
@@ -393,6 +393,20 @@ namespace KineStat.Controllers
 
             try
             {
+                var hasAnswers = await _context.PatientAnswers
+                    .OfType<PatientAnswerBool>()
+                    .AnyAsync(a => a.PatientId == patientId && a.AssessmentId == assessmentId);
+
+                if (!hasAnswers)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        categories = new List<double> { 0, 0, 0, 0, 0, 0 },
+                        totalPercentage = 0.0
+                    });
+                }
+
                 var categoryPercentages = new List<double>();
 
                 for (int categoryId = 1; categoryId <= 6; categoryId++)
@@ -402,7 +416,9 @@ namespace KineStat.Controllers
                     categoryPercentages.Add(radarValue);
                 }
 
-                return Ok(new { success = true, categories = categoryPercentages });
+                double totalPercentage = await GetSumRedflagsPercentage(patientId, assessmentId);
+
+                return Ok(new { success = true, categories = categoryPercentages, totalPercentage =totalPercentage });
             }
             catch (Exception ex)
             {
