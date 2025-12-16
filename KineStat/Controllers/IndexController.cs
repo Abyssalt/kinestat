@@ -10,11 +10,11 @@ using KineStat.Helpers;
 namespace KineStat.Controllers
 {
     [AuthorizePhysio]
-    public class PatientsController : Controller
+    public class IndexController : Controller
     {
         private readonly KineDbContext _context;
 
-        public PatientsController(KineDbContext context)
+        public IndexController(KineDbContext context)
         {
             _context = context;
         }
@@ -294,7 +294,7 @@ namespace KineStat.Controllers
         /// <returns>A redirect to the patient list view. If the patient is not found or an error occurs during deletion, an
         /// error message is provided via TempData.</returns>
         [HttpPost]
-        [Route("Patients/{id}/Delete")]
+        [Route("Index/{id}/Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {

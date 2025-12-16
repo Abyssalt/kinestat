@@ -57,7 +57,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dossier.PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             _context.Dossiers.Add(dossier);
