@@ -71,22 +71,31 @@
                         <div class="list-group list-group-flush">
                             @foreach (var assessment in Model.Assessments.OrderByDescending(a => a.Date))
                             {
-                                <div class="list-group-item border-0 border-bottom px-0 py-3">
+                                <div class="list-group-item border-2 rounded-1 mb-2 px-3 py-3">
 
                                     <div class="d-flex justify-content-between align-items-center">
 
-                                        <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id"
-                                           class="text-decoration-none text-reset flex-grow-1">
-                                            <div>
-                                                <h6 class="mb-1 fw-semibold">
-                                                    <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
-                                                </h6>
-                                                <small class="text-secondary d-block">
-                                                    <i class="bi bi-person-badge me-1"></i>Kiné : @assessment.Physio?.FirstName
-                                                </small>
+                                        @if (assessment.Status == AssessmentStatus.EnCours)
+                                        {
+                                            <div class="flex-grow-1">
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold">
+                                                        <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
+                                                    </h6>
+                                                </div>
                                             </div>
-                                        </a>
-
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id"
+                                               class="text-decoration-none text-reset flex-grow-1">
+                                                <div>
+                                                    <h6 class="mb-1 fw-semibold">
+                                                        <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
+                                                    </h6>
+                                                </div>
+                                            </a>
+                                        }
                                         <div class="d-flex align-items-center ms-3">
 
                                             @if (assessment.Status == AssessmentStatus.EnCours)
@@ -99,17 +108,22 @@
                                                 <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 me-2 border border-success border-opacity-25">
                                                     En cours
                                                 </span>
+
+                                                <span class="text-muted opacity-25">
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </span>
                                             }
                                             else
                                             {
                                                 <span class="badge bg-danger px-3 py-2 rounded-pill fw-semibold me-2">
                                                     Clôturé
                                                 </span>
+
+                                                <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id" class="text-secondary">
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </a>
                                             }
 
-                                            <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id" class="text-secondary">
-                                                <i class="bi bi-chevron-right"></i>
-                                            </a>
                                         </div>
 
                                     </div>
