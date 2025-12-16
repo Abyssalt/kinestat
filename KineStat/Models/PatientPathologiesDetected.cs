@@ -17,7 +17,6 @@ namespace KineStat.Models
 
         public Pathology Pathology { get; set; }
         public Patient Patient { get; set; }
-        public Dossier Dossier { get; set; }
 
     }
 }
