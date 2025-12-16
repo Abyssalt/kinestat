@@ -102,6 +102,41 @@ namespace KineStat.Controllers
             }
 
             ViewBag.FirstTintivValues = firstTintivData;
+
+            var redFlagsAnswers = await _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Include(a => a.Question)
+                .ThenInclude(q => q.Category)
+                .Where(a => a.PatientId == assessment.PatientId && a.AssessmentId == assessment.Id)
+                .OrderBy(a => a.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.RedFlagsAnswers = redFlagsAnswers;
+
+            var clinicalAnswers = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Category)
+                .Where(t => t.PatientId == assessment.PatientId
+                            && t.AssessmentId == assessment.Id
+                            && t.Question.ClusterId == null
+                            && !t.IsCustomTest
+                            && t.Question.CategoryId >= 7
+                            && t.Question.CategoryId <= 15)
+                .OrderBy(t => t.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.ClinicalAnswers = clinicalAnswers;
+
+            var otherAssessments = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId
+                            && a.Id != assessment.Id
+                            && (firstAssessment == null || a.Id != firstAssessment.Id))
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id, a.Date })
+                .ToListAsync();
+
+            ViewBag.OtherAssessments = otherAssessments;
+
             return View(assessment);
         }
 
@@ -440,6 +475,45 @@ namespace KineStat.Controllers
             ViewData["FolderId"] = folderId;
 
             return View(assessment);
+        }
+
+        /// <summary>
+        /// Get comparison data for a specific assessment (TINTIV and Clinical values).
+        /// </summary>
+        /// <param name="id">The Id of the assessment to compare.</param>
+        /// <returns>JSON data with assessment date and values.</returns>
+        [Route("Assessment/{id}/ComparisonData")]
+        public async Task<IActionResult> GetComparisonData(int id)
+        {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return Forbid();
+            }
+
+            var assessment = await _context.Assessments.FindAsync(id);
+            if (assessment == null)
+                return NotFound();
+
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.AssessmentId == id && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.AssessmentId == id && cd.CategoryId >= 7 && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            return Json(new
+            {
+                date = assessment.Date.ToString("dd/MM/yyyy"),
+                tintivValues = tintivData,
+                clinicalValues = clinicalData
+            });
         }
     }
 }

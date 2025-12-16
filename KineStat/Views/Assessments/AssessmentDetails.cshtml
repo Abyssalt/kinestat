@@ -1,4 +1,5 @@
-﻿@model KineStat.Models.Assessment
+﻿@using Microsoft.EntityFrameworkCore
+@model KineStat.Models.Assessment
 
 @{
     ViewData["Title"] = "Détails du bilan";
@@ -221,6 +222,41 @@
             </div>
 
             <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-12 col-md-6 mx-auto">
+                        <label class="form-label fw-medium text-secondary">
+                            <i class="bi bi-graph-up me-2"></i>Comparer avec un autre bilan :
+                        </label>
+                        <select id="comparisonAssessmentSelect" class="form-select">
+                            <option value="">-- Aucune comparaison --</option>
+                            @if (ViewBag.FirstTintivValues != null)
+                            {
+                                var firstAssessmentLocal = await Context.RequestServices
+                                .GetService<KineStat.Data.KineDbContext>()
+                                .Assessments
+                                .Where(a => a.DossierId == Model.DossierId)
+                                .OrderBy(a => a.Date)
+                                .FirstOrDefaultAsync();
+
+                                if (firstAssessmentLocal != null && firstAssessmentLocal.Id != Model.Id)
+                                {
+                                    <option value="@firstAssessmentLocal.Id" selected>
+                                        ⭐ Premier bilan - @firstAssessmentLocal.Date.ToString("dd/MM/yyyy")
+                                    </option>
+                                }
+                            }
+                            @if (ViewBag.OtherAssessments != null)
+                            {
+                                foreach (var otherAssessment in ViewBag.OtherAssessments)
+                                {
+                                    <option value="@otherAssessment.Id">
+                                        Bilan du @otherAssessment.Date.ToString("dd/MM/yyyy")
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
                 <div class="row text-center">
                     <div class="col-lg-6 mb-4">
                         <h6 class="fw-bold mb-2">Profil clinique</h6>
@@ -325,8 +361,154 @@
         </div>
     </div>
 </div>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="accordion shadow-sm" id="redFlagsAccordion">
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingRedFlags">
+                    <button class="accordion-button collapsed fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseRedFlags">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        Red Flags – Réponses
+                    </button>
+                </h2>
+
+                <div id="collapseRedFlags"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#redFlagsAccordion">
+                    <div class="accordion-body">
+                        @if (ViewBag.RedFlagsAnswers != null && ((List<PatientAnswerBool>)ViewBag.RedFlagsAnswers).Any())
+                        {
+                            var groupedRedFlags = ((List<PatientAnswerBool>)ViewBag.RedFlagsAnswers)
+                            .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
+                            .ToList();
+
+                            int rfIndex = 0;
+
+                            foreach (var group in groupedRedFlags)
+                            {
+                                var collapseId = $"rf-collapse-{rfIndex++}";
+
+                                <div class="mb-3">
+                                    <button class="btn btn-link fw-bold text-decoration-none w-100 text-start"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId">
+                                        <i class="bi bi-folder2-open me-2"></i>
+                                        @group.Key
+                                        <span class="badge bg-danger ms-2">@group.Count()</span>
+                                    </button>
+
+                                    <div class="collapse mt-2" id="@collapseId">
+                                        <ul class="list-group">
+                                            @foreach (var answer in group)
+                                            {
+                                                <li class="list-group-item">
+                                                    <strong>@answer.Question?.Title</strong>
+                                                    <div class="text-muted small">
+                                                        Réponse : @(answer.Value ? "Oui" : "Non")
+                                                    </div>
+                                                    @if (!string.IsNullOrWhiteSpace(answer.Comment))
+                                                    {
+                                                        <div class="fst-italic text-secondary small">
+                                                            💬 @answer.Comment
+                                                        </div>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">
+                                Aucune réponse Red Flags enregistrée pour ce bilan.
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="accordion shadow-sm" id="clinicalExamAccordion">
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header" id="headingClinicalExam">
+                    <button class="accordion-button collapsed fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseClinicalExam">
+                        <i class="bi bi-clipboard-check text-primary me-2"></i>
+                        Examen Clinique – Réponses
+                    </button>
+                </h2>
+
+                <div id="collapseClinicalExam"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#clinicalExamAccordion">
+                    <div class="accordion-body">
+                        @if (ViewBag.ClinicalAnswers != null && ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers).Any())
+                        {
+                            var groupedClinical = ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers)
+                            .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
+                            .ToList();
+
+                            int clinIndex = 0;
+
+                            foreach (var group in groupedClinical)
+                            {
+                                var collapseId = $"clin-collapse-{clinIndex++}";
+
+                                <div class="mb-3">
+                                    <button class="btn btn-link fw-bold text-decoration-none w-100 text-start"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId">
+                                        <i class="bi bi-folder2-open me-2"></i>
+                                        @group.Key
+                                        <span class="badge bg-primary ms-2">@group.Count()</span>
+                                    </button>
+
+                                    <div class="collapse mt-2" id="@collapseId">
+                                        <ul class="list-group">
+                                            @foreach (var answer in group)
+                                            {
+                                                <li class="list-group-item">
+                                                    <strong>@answer.Question?.Title</strong>
+                                                    <div class="text-muted small">
+                                                        Réponse : @answer.ResponseValue
+                                                    </div>
+                                                    @if (!string.IsNullOrWhiteSpace(answer.Observations))
+                                                    {
+                                                        <div class="fst-italic text-secondary small">
+                                                            💬 @answer.Observations
+                                                        </div>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">
+                                Aucune réponse d'examen clinique enregistrée pour ce bilan.
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="deleteAssessmentModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -384,107 +566,206 @@
     document.addEventListener("DOMContentLoaded", () => {
         const tintivValues = @Html.Raw(tintivJson);
         const clinicalValues = @Html.Raw(clinicalJson);
+        const firstTintivValues = @Html.Raw(ViewBag.FirstTintivValues != null ? System.Text.Json.JsonSerializer.Serialize(ViewBag.FirstTintivValues) : "null");
+
+        let radarChart9, radarChart6;
+
+        const colors = {
+            current: {
+                background: "rgba(13,110,253,0.25)",
+                border: "rgb(13,110,253)"
+            },
+            first: {
+                background: "rgba(108,117,125,0.25)",
+                border: "rgb(108,117,125)"
+            },
+            comparison: {
+                background: "rgba(40,167,69,0.25)",
+                border: "rgb(40,167,69)"
+            }
+        };
+
+        const colorsTintiv = {
+            current: {
+                background: "rgba(255,99,132,0.30)",
+                border: "rgb(255,99,132)"
+            },
+            first: {
+                background: "rgba(108,117,125,0.25)",
+                border: "rgb(108,117,125)"
+            },
+            comparison: {
+                background: "rgba(255,193,7,0.30)",
+                border: "rgb(255,193,7)"
+            }
+        };
+
         const defaultOptions = {
             responsive: true,
             maintainAspectRatio: false,
-            elements: {
-                line: { tension: 0.3 },
-                point: { radius: 5, hoverRadius: 7 }
-            },
             scales: {
                 r: {
                     min: 0,
+                    max: 10,
+                    ticks: {
+                        stepSize: 2,
+                        backdropColor: "transparent",
+                        showLabelBackdrop: false
+                    },
                     grid: {
                         color: "rgba(0,0,0,0.1)"
                     },
                     angleLines: {
                         color: "rgba(0,0,0,0.2)"
-                    },
-                    ticks: {
-                        backdropColor: "transparent",
-                        showLabelBackdrop: false
                     }
                 }
             },
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
             }
         };
 
-        new Chart(document.getElementById("radarChart9"), {
-            type: 'radar',
-            data: {
-                labels: [  "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
-                                "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
-                                "Socio-environnemental", "Émotionnel/Affectif"
-                ],
-                datasets: [{
-                    label: "Profil clinique",
-                    data: clinicalValues,
-                    backgroundColor: "rgba(13,110,253,0.25)",
-                    borderColor: "rgb(13,110,253)",
+        initCharts();
+
+        const selector = document.getElementById('comparisonAssessmentSelect');
+        if (selector) {
+            if (selector.value && firstTintivValues) {
+                loadFirstAssessment();
+            }
+
+            selector.addEventListener('change', async (e) => {
+                const selectedAssessmentId = e.target.value;
+
+                if (selectedAssessmentId) {
+
+                    if (e.target.options[e.target.selectedIndex].text.includes('⭐')) {
+                        loadFirstAssessment();
+                    } else {
+                        await loadComparisonData(selectedAssessmentId);
+                    }
+                } else {
+
+                    initCharts();
+                }
+            });
+        }
+
+        function initCharts() {
+
+            if (radarChart9) radarChart9.destroy();
+            if (radarChart6) radarChart6.destroy();
+
+            radarChart9 = new Chart(document.getElementById("radarChart9"), {
+                type: 'radar',
+                data: {
+                    labels: ["Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
+                             "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
+                             "Socio-environnemental", "Émotionnel/Affectif"],
+                    datasets: [{
+                        label: "Bilan actuel",
+                        data: clinicalValues,
+                        backgroundColor: colors.current.background,
+                        borderColor: colors.current.border,
+                        borderWidth: 3,
+                        pointBackgroundColor: colors.current.border,
+                        pointBorderColor: "#fff"
+                    }]
+                },
+                options: defaultOptions
+            });
+
+            radarChart6 = new Chart(document.getElementById("radarChart6"), {
+                type: 'radar',
+                data: {
+                    labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
+                    datasets: [{
+                        label: "Bilan actuel",
+                        data: tintivValues,
+                        backgroundColor: colorsTintiv.current.background,
+                        borderColor: colorsTintiv.current.border,
+                        borderWidth: 4,
+                        pointRadius: 6,
+                        pointHoverRadius: 9,
+                        pointBackgroundColor: colorsTintiv.current.border,
+                        pointBorderColor: "#fff",
+                        tension: 0.25
+                    }]
+                },
+                options: defaultOptions
+            });
+        }
+
+        function loadFirstAssessment() {
+            if (!firstTintivValues) return;
+
+            initCharts();
+
+            radarChart9.data.datasets.push({
+                label: "Premier bilan",
+                data: firstTintivValues.slice(6),                 backgroundColor: colors.first.background,
+                borderColor: colors.first.border,
+                borderWidth: 2,
+                pointBackgroundColor: colors.first.border,
+                pointBorderColor: "#fff",
+                borderDash: [5, 5]
+            });
+            radarChart9.update();
+
+            radarChart6.data.datasets.push({
+                label: "Premier bilan",
+                data: firstTintivValues.slice(0, 6),                backgroundColor: colorsTintiv.first.background,
+                borderColor: colorsTintiv.first.border,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: colorsTintiv.first.border,
+                pointBorderColor: "#fff",
+                borderDash: [5, 5],
+                tension: 0.25
+            });
+            radarChart6.update();
+        }
+
+        async function loadComparisonData(assessmentId) {
+            try {
+                const response = await fetch(`/Assessment/${assessmentId}/ComparisonData`);
+                if (!response.ok) {
+                    console.error('Erreur lors du chargement des données');
+                    return;
+                }
+
+                const data = await response.json();
+
+                initCharts();
+
+                radarChart9.data.datasets.push({
+                    label: `Bilan du ${data.date}`,
+                    data: data.clinicalValues,
+                    backgroundColor: colors.comparison.background,
+                    borderColor: colors.comparison.border,
                     borderWidth: 3,
-                    pointBackgroundColor: "rgb(13,110,253)",
+                    pointBackgroundColor: colors.comparison.border,
                     pointBorderColor: "#fff"
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        min: 0,
-                        max: 10,
-                        ticks: {
-                            stepSize: 2,
-                            backdropColor: "transparent"
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
+                });
+                radarChart9.update();
+                radarChart6.data.datasets.push({
+                    label: `Bilan du ${data.date}`,
+                    data: data.tintivValues,
+                    backgroundColor: colorsTintiv.comparison.background,
+                    borderColor: colorsTintiv.comparison.border,
+                    borderWidth: 4,
+                    pointRadius: 6,
+                    pointBackgroundColor: colorsTintiv.comparison.border,
+                    pointBorderColor: "#fff",
+                    tension: 0.25
+                });
+                radarChart6.update();
 
-        new Chart(document.getElementById("radarChart6"), {
-            type: 'radar',
-            data: {
-                labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
-                datasets: [{
-                    label: "Profil TINTIV",
-                                data: data,
-                                backgroundColor: "rgba(255,99,132,0.30)",
-                                borderColor: "rgb(255,99,132)",
-                                borderWidth: 4,
-                                pointRadius: 6,
-                                pointHoverRadius: 9,
-                                pointBackgroundColor: "rgb(255,99,132)",
-                                pointBorderColor: "#fff",
-                                tension: 0.25
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        min: 0,
-                        max: 10,
-                        ticks: {
-                            stepSize: 2,
-                            backdropColor: "transparent"
-                        }
-                         pointLabels: {
-                             font: { size: 13 }
-                         }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
+            } catch (error) {
+                console.error('Erreur:', error);
             }
-        });
-
+        }
     });
 </script>
