@@ -55,16 +55,14 @@ namespace KineStat.Models
         /// <param name="dossierId">ID of the dossier.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>A list of patient boolean answers for the specified pathology and no cluster.</returns>
-        private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int pathologyId)
+        private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int pathologyId, int folderId)
         {
             var patient = _context.Patients
                .Where(p => p.Id == patientId)
                .FirstOrDefault();
             if (patient == null) return null;
             var assessment = _context.Assessments
-                    .Where(a => a.PatientId == patientId)
-                    .OrderByDescending(a => a.Date)
-                    .ThenByDescending(a => a.Id)
+                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.DossierId == folderId)
                     .FirstOrDefault();
             if (assessment == null)
             {
@@ -72,7 +70,9 @@ namespace KineStat.Models
             }
             var answerByPathology = await _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.Question.Pathologies.Any(p => p.Id == pathologyId)
+                .Where(a => a.PatientId == patientId
+                && a.AssessmentId == assessmentId
+                && a.Question.QuestionPathologies.Any(p => p.PathologyId == pathologyId)
                 && a.Question.ClusterId == null)
                 .Include(a => a.Question)
                 .ToListAsync();
@@ -84,19 +84,17 @@ namespace KineStat.Models
         /// </summary>
         /// <param name="patientId">ID of the patient.</param>
         /// <param name="assessmentId">ID of the assessment.</param>
-        /// <param name="dossierId">ID of the dossier.</param>
+        /// <param name="folderId">ID of the folder </param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>A list of clusters associated with the specified pathology.</returns>
-        private async Task<List<Cluster>> GetClustersByPathology(int patientId, int assessmentId, int pathologyId)
+        private async Task<List<Cluster>> GetClustersByPathology(int patientId, int assessmentId, int pathologyId, int folderId)
         {
             var patient = await _context.Patients
               .Where(p => p.Id == patientId)
               .FirstOrDefaultAsync();
             if (patient == null) return null;
             var assessment = await _context.Assessments
-                    .Where(a => a.PatientId == patientId)
-                    .OrderByDescending(a => a.Date)
-                    .ThenByDescending(a => a.Id)
+                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.DossierId == folderId)
                     .FirstOrDefaultAsync();
             if (assessment == null)
             {
@@ -118,16 +116,21 @@ namespace KineStat.Models
         /// <param name="cluster">The cluster object containing its RV+ / RV- values and minimum positive tests.</param>
         /// <param name="prior">The prior probability before considering this cluster.</param>
         /// <returns>The posterior probability after evaluating the cluster.</returns>
-        public async Task<double> CalculateClusterProbability(Cluster cluster, double prior)
+        public async Task<double> CalculateClusterProbability(Cluster cluster, double prior, int patientId, int assessmentId)
         {
 
             int nbPositiveBools = await _context.PatientAnswerBools
-                .Where(a => a.Question.ClusterId == cluster.Id && a.Value)
+                .Where(a => a.PatientId == patientId
+                && a.AssessmentId == assessmentId
+                &&a.Question.ClusterId == cluster.Id 
+                && a.Value)
                 .CountAsync();
             int nbPositiveTests = await _context.PatientAnswerTests
-                .Where(a => a.Question.ClusterId == cluster.Id &&
-                  !string.IsNullOrEmpty(a.ResponseValue) &&
-                 (a.ResponseValue.ToLower() == "true" || a.ResponseValue.ToLower() == "oui"))
+                .Where(a => a.PatientId == patientId
+                &&a.AssessmentId == assessmentId
+                && a.Question.ClusterId == cluster.Id
+                && !string.IsNullOrEmpty(a.ResponseValue)
+                && (a.ResponseValue.ToLower() == "true" || a.ResponseValue.ToLower() == "oui"))
                 .CountAsync();
 
 
@@ -147,10 +150,10 @@ namespace KineStat.Models
         /// <param name="dossierId">ID of the dossier.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>The final posterior probability for the pathology after evaluating all answers and clusters.</returns>
-        public async Task<double> CalculateProbabilityByPathology(double prior, int patientId, int assessmentId,int pathologyId)
+        public async Task<double> CalculateProbabilityByPathology(double prior, int patientId, int assessmentId,int pathologyId, int folderId)
         {
             double posterior = prior;
-            var boolAnswers = await GetPatientAnswersByPathology(patientId, assessmentId, pathologyId);
+            var boolAnswers = await GetPatientAnswersByPathology(patientId, assessmentId, pathologyId, folderId);
             if (boolAnswers != null && boolAnswers.Any())
             {
                 foreach( var a in boolAnswers)
@@ -160,12 +163,12 @@ namespace KineStat.Models
             
             }
 
-            var clusters = await GetClustersByPathology(patientId, assessmentId, pathologyId);
+            var clusters = await GetClustersByPathology(patientId, assessmentId, pathologyId, folderId);
             if (clusters != null && clusters.Any())
             {
                 foreach (var cluster in clusters)
                 {
-                    posterior = await CalculateClusterProbability(cluster, posterior);
+                    posterior = await CalculateClusterProbability(cluster, posterior, patientId, assessmentId);
                 }
             }
             return posterior;
