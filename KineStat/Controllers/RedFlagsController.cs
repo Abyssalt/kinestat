@@ -96,12 +96,9 @@ namespace KineStat.Controllers
         /// <returns>A partial view containing a collection of question and answer view models for the specified patient and
         /// category. Returns a 404 Not Found response if the patient or their latest assessment does not exist.</returns>
         [HttpGet]
-        [Route("RedFlags/{patientId}/RedFlagsQuestions/{categoryId}")]
-        public async  Task<IActionResult> GetRedFlagsQuestions(int patientId, int categoryId)
+        [Route("RedFlags/{patientId}/Assessment/{assessmentId}/Questions/{categoryId}")]
+        public async Task<IActionResult> GetRedFlagsQuestions(int patientId, int assessmentId, int categoryId)
         {
-
-            var patient = _context.Patients.Find(patientId);
-
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, patientId))
@@ -109,20 +106,17 @@ namespace KineStat.Controllers
                 return Unauthorized();
             }
 
+            var patient = _context.Patients.Find(patientId);
             if (patient == null) return NotFound();
+
             var boolQuestions = _context.Questions
                 .OfType<QuestionBool>()
                 .Where(q => q.CategoryId == categoryId)
                 .ToList();
-            var lastAssessment = _context.Assessments
-                .Where(a => a.PatientId == patientId)
-                .OrderByDescending(a => a.Date)
-                .ThenByDescending(a => a.Id)
-                .FirstOrDefault();
-            if (lastAssessment == null) return NotFound();
+
             var boolAnswers = _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
-                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId && a.AssessmentId == lastAssessment.Id)
+                .Where(a => a.PatientId == patientId && a.Question.CategoryId == categoryId && a.AssessmentId == assessmentId)
                 .ToList();
 
             var questionAndAnswers = boolQuestions.Select(q => new QuestionPatientAnswerVM
@@ -134,7 +128,6 @@ namespace KineStat.Controllers
                 .ToList();
 
             return PartialView("_QuestionsPartial", questionAndAnswers);
-
         }
 
 
