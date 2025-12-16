@@ -40,7 +40,7 @@ ViewData["Breadcrumbs"] =
                         <i class="bi bi-graph-up me-2"></i>Résultat
                     </h1>
                 </div>
-                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Tests" asp-action="Tests" asp-route-id="@Model.PatientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -256,7 +256,7 @@ ViewData["Breadcrumbs"] =
          <div class="modal-content border-0 shadow">
 
              <div class="modal-header bg-primary text-white">
-                 <h5 class="modal-title fw-bold">
+                <h5 class="modal-title fw-bold btn-tablet-lg">
                      <i class="bi bi-save me-2"></i>
                      Clôturer le bilan
                  </h5>
@@ -272,7 +272,7 @@ ViewData["Breadcrumbs"] =
              </div>
 
              <div class="modal-footer">
-                 <button class="btn btn-outline-secondary"
+                <button class="btn btn-outline-secondary btn-tablet-lg"
                          data-bs-dismiss="modal">
                      Annuler
                  </button>
@@ -293,7 +293,7 @@ ViewData["Breadcrumbs"] =
                             name="redFlagsPercentage"/>
 
                      <button type="submit"
-                             class="btn btn-primary fw-medium">
+                            class="btn btn-primary fw-medium btn-tablet-lg">
                          <i class="bi bi-check-circle me-2"></i>
                          Clôturer le bilan
                      </button>
