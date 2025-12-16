@@ -98,13 +98,14 @@ namespace KineStat.Controllers
                 firstTintivData = await _context.ClinicalDatas
                     .Where(cd =>
                         cd.AssessmentId == firstAssessment.Id &&
-                        cd.CategoryId <= 6)
+                        cd.CategoryId>=1 && cd.CategoryId <= 15)
                     .OrderBy(cd => cd.CategoryId)
                     .Select(cd => cd.Value)
                     .ToListAsync();
             }
 
             ViewBag.FirstTintivValues = firstTintivData;
+
             var detectedPathologiesProbabilities = await _context.PatientPathologiesDetecteds
              .Include(p => p.Pathology)
              .Where(p => p.PatientId == assessment.PatientId
@@ -112,6 +113,43 @@ namespace KineStat.Controllers
              .ToListAsync();
 
             ViewBag.DetectedPathologies = detectedPathologiesProbabilities;
+
+
+            var redFlagsAnswers = await _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Include(a => a.Question)
+                .ThenInclude(q => q.Category)
+                .Where(a => a.PatientId == assessment.PatientId && a.AssessmentId == assessment.Id)
+                .OrderBy(a => a.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.RedFlagsAnswers = redFlagsAnswers;
+
+            var clinicalAnswers = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Category)
+                .Where(t => t.PatientId == assessment.PatientId
+                            && t.AssessmentId == assessment.Id
+                            && t.Question.ClusterId == null
+                            && !t.IsCustomTest
+                            && t.Question.CategoryId >= 7
+                            && t.Question.CategoryId <= 15)
+                .OrderBy(t => t.Question.CategoryId)
+                .ToListAsync();
+
+            ViewBag.ClinicalAnswers = clinicalAnswers;
+
+            var otherAssessments = await _context.Assessments
+                .Where(a => a.DossierId == assessment.DossierId
+                            && a.Id != assessment.Id
+                            && (firstAssessment == null || a.Id != firstAssessment.Id))
+                .OrderBy(a => a.Date)
+                .Select(a => new { a.Id, a.Date })
+                .ToListAsync();
+
+            ViewBag.OtherAssessments = otherAssessments;
+
+
             return View(assessment);
         }
 
@@ -137,7 +175,7 @@ namespace KineStat.Controllers
             if (patient == null)
             {
                 TempData["Error"] = "Patient introuvable.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (assessment == null)
@@ -236,7 +274,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce bilan.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (assessment != null)
@@ -282,7 +320,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
-                return RedirectToAction("Index", "Patients");
+                return RedirectToAction("Index", "Index");
             }
 
             if (patient == null)
@@ -549,6 +587,131 @@ namespace KineStat.Controllers
             await _context.SaveChangesAsync();
 
             return detectedPathologies;
+        }
+
+
+        /// Get comparison data for a specific assessment (TINTIV and Clinical values).
+        /// </summary>
+        /// <param name="id">The Id of the assessment to compare.</param>
+        /// <returns>JSON data with assessment date and values.</returns>
+        [Route("Assessment/{id}/ComparisonData")]
+        public async Task<IActionResult> GetComparisonData(int id)
+        {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return Forbid();
+            }
+
+            var assessment = await _context.Assessments.FindAsync(id);
+            if (assessment == null)
+                return NotFound();
+
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.AssessmentId == id && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.AssessmentId == id && cd.CategoryId >= 7 && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            return Json(new
+            {
+                date = assessment.Date.ToString("dd/MM/yyyy"),
+                tintivValues = tintivData,
+                clinicalValues = clinicalData
+            });
+        }
+
+        /// <summary>
+        /// Exports the complete assessment report (Anamnesis, SOCRATE, Results) to PDF format from Assessment Details page.
+        /// </summary>
+        /// <param name="id">The assessment ID.</param>
+        /// <returns>A PDF file download.</returns>
+        [Route("Assessment/{id}/ExportPdf")]
+        public async Task<IActionResult> ExportAssessmentDetailsPdf(int id)
+        {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
+            // Getting assessment with all its relations
+            var assessment = await _context.Assessments
+                .Include(a => a.Patient)
+                .Include(a => a.Dossier)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (assessment == null)
+            {
+                TempData["Error"] = "Bilan introuvable.";
+                return RedirectToAction("AssessmentDetails", new { id });
+            }
+
+            var patient = assessment.Patient;
+
+            // Getting Socrate
+            var socrate = await _context.Socrates
+                .FirstOrDefaultAsync(s => s.AssessmentId == id);
+
+            // Getting tests
+            var tests = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Cluster)
+                .Where(t =>
+                    t.PatientId == patient.Id &&
+                    t.AssessmentId == id &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
+                .OrderBy(t => t.IsCustomTest
+                    ? "Tests personnalisés"
+                    : t.Question!.Cluster!.Name)
+                .ThenBy(t => t.DateResponse)
+                .ToListAsync();
+
+            // Getting Tintiv data
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == patient.Id
+                             && cd.AssessmentId == id
+                             && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            // Getting clinical data
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == patient.Id
+                             && cd.AssessmentId == id
+                             && cd.CategoryId >= 7
+                             && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            // Generate PDF
+            var pdfService = new Services.AssessmentCompletePdfService();
+            var pdfBytes = pdfService.GenerateCompletePdf(
+                patient,
+                socrate,
+                assessment,
+                tests,
+                tintivData,
+                clinicalData
+            );
+
+            var fileName = $"Bilan_Complet_{patient.LastName}_{patient.FirstName}_{assessment.Date:yyyyMMdd}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
     }

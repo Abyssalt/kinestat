@@ -1,0 +1,267 @@
+﻿.clusters-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.cluster-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    scroll-margin-top: 20px;
+}
+
+    .cluster-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-color: #d1d5db;
+    }
+
+    .cluster-card.has-progress {
+        border-left: 3px solid #3b82f6;
+    }
+
+    .cluster-card.completed {
+        border-left: 3px solid #10b981;
+        background: #f0fdf4;
+    }
+
+.cluster-card-header {
+    background: #f9fafb;
+    color: #1f2937;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cluster-card.has-progress .cluster-card-header {
+    background: #eff6ff;
+}
+
+.cluster-card.completed .cluster-card-header {
+    background: #f0fdf4;
+}
+
+.cluster-title {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0;
+    color: #111827;
+}
+
+.cluster-icon {
+    font-size: 1.75rem;
+}
+
+.cluster-badge-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.cluster-progress-badge {
+    background: #e5e7eb;
+    color: #374151;
+    padding: 0.375rem 0.875rem;
+    border-radius: 12px;
+    font-size: 0.938rem;
+    font-weight: 600;
+}
+
+.cluster-card.has-progress .cluster-progress-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.cluster-card.completed .cluster-progress-badge {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.cluster-status-badge {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 0.375rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.813rem;
+    font-weight: 500;
+}
+
+.cluster-card.has-progress .cluster-status-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.cluster-card.completed .cluster-status-badge {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.cluster-card-body {
+    padding: 1rem 1.5rem;
+}
+
+.cluster-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.cluster-progress-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.cluster-progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.cluster-card.completed .cluster-progress-fill {
+    background: #10b981;
+}
+
+.cluster-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.btn-cluster-action {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-start {
+    background: #3b82f6;
+    color: white;
+}
+
+    .btn-start:hover {
+        background: #2563eb;
+    }
+
+.btn-continue {
+    background: #f59e0b;
+    color: white;
+}
+
+    .btn-continue:hover {
+        background: #d97706;
+    }
+
+.btn-review {
+    background: #10b981;
+    color: white;
+}
+
+    .btn-review:hover {
+        background: #059669;
+    }
+
+.btn-back-to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+    .btn-back-to-top:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+        transform: translateY(-2px);
+    }
+
+    .btn-back-to-top i {
+        transition: transform 0.2s ease;
+    }
+
+    .btn-back-to-top:hover i {
+        transform: translateY(-2px);
+    }
+
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.cluster-card {
+    animation: fadeIn 0.3s ease;
+}
+
+@@media (max-width: 768px) {
+    .cluster-card-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .cluster-card-body {
+        padding: 0.875rem 1rem;
+    }
+
+    .cluster-badge-group {
+        align-self: flex-end;
+    }
+
+    .cluster-title {
+        font-size: 1.125rem;
+    }
+
+    .cluster-icon {
+        font-size: 1.5rem;
+    }
+}
+
+.test-card {
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+    .test-card .card-header {
+        border-radius: 8px 8px 0 0 !important;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb !important;
+    }
+
+    .test-card.border-success {
+        border-color: #10b981 !important;
+        border-width: 2px !important;
+        border-left-width: 3px !important;
+    }

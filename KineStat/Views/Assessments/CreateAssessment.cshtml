@@ -7,8 +7,8 @@
     var pName = ViewBag.PatientName ?? "Patient";
 
     ViewData["Breadcrumbs"] =
-        $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{Model.PatientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Index'>Patients</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{Model.PatientId}/Anamnese'>Anamnèse</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Dossier/{Model.DossierId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item active'>Nouveau Bilan</li>";
 }

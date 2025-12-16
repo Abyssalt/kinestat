@@ -7,7 +7,7 @@
     ViewData["ShowClinicalFloatingEye"] = true;
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/Anamnese/{patientId}'>Anamnèse</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
@@ -69,7 +69,7 @@
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Croyances & Cognition" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Croyances et Cognition" style="min-height: 80px;">
                         <div style="font-size: 0.9rem;">CROYANCES<br />ET<br />COGNITION</div>
                     </button>
                 </div>

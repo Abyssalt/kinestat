@@ -4,7 +4,7 @@
     ViewData["Title"] = "Anamnèse";
     ViewData["PatientId"] = Model.Id.ToString();
     ViewData["HideFloatingEye"] = true;
-    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse</li>";
+    ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Index'>Patients</a></li><li class='breadcrumb-item active' aria-current='page'>Anamnèse</li>";
     var patientId = ViewData["PatientId"];
 }
 
@@ -19,7 +19,7 @@
                 </h1>
                 <p class="text-secondary mb-0">@Model.FirstName @Model.LastName</p>
             </div>
-            <a asp-controller="Patients" asp-action="Index" class="btn btn-outline-secondary fw-medium">
+            <a asp-controller="Index" asp-action="Index" class="btn btn-outline-secondary fw-medium">
                 <i class="bi bi-arrow-left me-2"></i>Retour à la liste
             </a>
         </div>
