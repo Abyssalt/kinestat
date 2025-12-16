@@ -515,5 +515,91 @@ namespace KineStat.Controllers
                 clinicalValues = clinicalData
             });
         }
+
+        /// <summary>
+        /// Exports the complete assessment report (Anamnesis, SOCRATE, Results) to PDF format from Assessment Details page.
+        /// </summary>
+        /// <param name="id">The assessment ID.</param>
+        /// <returns>A PDF file download.</returns>
+        [Route("Assessment/{id}/ExportPdf")]
+        public async Task<IActionResult> ExportAssessmentDetailsPdf(int id)
+        {
+            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+
+            if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
+            {
+                return RedirectToAction("AccessDenied", "Error");
+            }
+
+            // Getting assessment with all its relations
+            var assessment = await _context.Assessments
+                .Include(a => a.Patient)
+                .Include(a => a.Dossier)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (assessment == null)
+            {
+                TempData["Error"] = "Bilan introuvable.";
+                return RedirectToAction("AssessmentDetails", new { id });
+            }
+
+            var patient = assessment.Patient;
+
+            // Getting Socrate
+            var socrate = await _context.Socrates
+                .FirstOrDefaultAsync(s => s.AssessmentId == id);
+
+            // Getting tests
+            var tests = await _context.PatientAnswerTests
+                .Include(t => t.Question)
+                .ThenInclude(q => q.Cluster)
+                .Where(t =>
+                    t.PatientId == patient.Id &&
+                    t.AssessmentId == id &&
+                    (
+                        t.IsCustomTest ||
+                        (t.Question != null && t.Question.Cluster != null)
+                    )
+                )
+                .OrderBy(t => t.IsCustomTest
+                    ? "Tests personnalisés"
+                    : t.Question!.Cluster!.Name)
+                .ThenBy(t => t.DateResponse)
+                .ToListAsync();
+
+            // Getting Tintiv data
+            var tintivData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == patient.Id
+                             && cd.AssessmentId == id
+                             && cd.CategoryId <= 6)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            // Getting clinical data
+            var clinicalData = await _context.ClinicalDatas
+                .Where(cd => cd.PatientId == patient.Id
+                             && cd.AssessmentId == id
+                             && cd.CategoryId >= 7
+                             && cd.CategoryId <= 15)
+                .OrderBy(cd => cd.CategoryId)
+                .Select(cd => cd.Value)
+                .ToListAsync();
+
+            // Generate PDF
+            var pdfService = new Services.AssessmentCompletePdfService();
+            var pdfBytes = pdfService.GenerateCompletePdf(
+                patient,
+                socrate,
+                assessment,
+                tests,
+                tintivData,
+                clinicalData
+            );
+
+            var fileName = $"Bilan_Complet_{patient.LastName}_{patient.FirstName}_{assessment.Date:yyyyMMdd}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
+        }
     }
 }
