@@ -161,22 +161,29 @@ ViewData["Breadcrumbs"] =
                  <div class="card-header bg-info text-white py-3">
                      <h5 class="mb-0 fw-bold"><i class="bi bi-clipboard2-pulse me-2"></i>Pathologies suspectées</h5>
                  </div>
+                @{
+                    var detectedPathologies = ViewBag.DetectedPathologies
+                    as List<KineStat.Models.DTO.DetectedPathologyDTO>;
+                }
                 <ul class="list-group list-group-flush">
-                    @if (ViewBag.DetectedPathologies != null && ((List<DetectedPathologyDTO>)ViewBag.DetectedPathologies).Any())
+                    @if (detectedPathologies != null && detectedPathologies.Any())
                     {
-                        foreach (var pathology in (List<DetectedPathologyDTO>)ViewBag.DetectedPathologies)
+                        foreach (var pathology in detectedPathologies.OrderByDescending(p => p.PathologyProbability))
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                <span class="fw-semibold">@pathology.PathologyName</span>
-                                <span class="badge bg-primary bg-opacity-75 fs-6" style="min-width: 60px;">
-                                    @($"{pathology.PathologyPercentage:F0}%")
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>@pathology.PathologyName</span>
+                                <span class="badge bg-primary">
+                                    @(Math.Round(pathology.PathologyProbability * 100, 2, MidpointRounding.AwayFromZero).ToString("0.00")) %
                                 </span>
+                           
                             </li>
                         }
                     }
                     else
                     {
-                        <li class="list-group-item text-muted">Aucune pathologie détectée</li>
+                        <li class="list-group-item text-muted">
+                            Aucune pathologie détectée
+                        </li>
                     }
                 </ul>
 
