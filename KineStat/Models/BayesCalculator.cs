@@ -34,5 +34,18 @@ namespace KineStat.Models
 
         }
 
+        //This method is used for tests only
+        public double CalculateCategoryProbability (List<PatientAnswerBool> answers, double categoryPrior)
+        {
+            double posterior = categoryPrior;
+            foreach (var answer in answers)
+            {
+                posterior = CalculatePosterior(posterior, answer.Question.RVPositive, answer.Question.RVNegative, answer.Value);
+            }
+            return posterior;
+
+        }
+      
+
     }
 }
