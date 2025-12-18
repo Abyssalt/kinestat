@@ -152,6 +152,7 @@ namespace KineStat.Controllers
                     existingPatient.Height = patient.Height;
                     existingPatient.DoctorId = patient.DoctorId;  // Nouvelle relation
                     existingPatient.Address = patient.Address;
+                    existingPatient.Country = patient.Country;
 
                     _context.Update(existingPatient);
                     await _context.SaveChangesAsync();

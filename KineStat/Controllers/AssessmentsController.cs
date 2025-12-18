@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KineStat.Filters;
 using KineStat.Helpers;
-
+using KineStat.Models.DTO;
+using KineStat.Models.ViewModels;
+using KineStat.Services;
 
 namespace KineStat.Controllers
 {
@@ -12,10 +14,12 @@ namespace KineStat.Controllers
     public class AssessmentsController : Controller
     {
         private readonly KineDbContext _context;
+        private readonly BayesService _bayesService;
 
         public AssessmentsController(KineDbContext context)
         {
             _context = context;
+            _bayesService = new BayesService(context, new BayesCalculator());   
         }
 
         /// <summary>
@@ -103,6 +107,15 @@ namespace KineStat.Controllers
 
             ViewBag.FirstTintivValues = firstTintivData;
 
+            var detectedPathologies = await GetOrCalculateDetectedPathologies(
+                patientId: assessment.PatientId,
+                assessmentId: assessment.Id,
+                folderId: assessment.DossierId);
+
+
+            ViewBag.DetectedPathologies = detectedPathologies;
+
+
             var redFlagsAnswers = await _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
                 .Include(a => a.Question)
@@ -136,6 +149,7 @@ namespace KineStat.Controllers
                 .ToListAsync();
 
             ViewBag.OtherAssessments = otherAssessments;
+
 
             return View(assessment);
         }
@@ -473,11 +487,150 @@ namespace KineStat.Controllers
             ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessment.Id;
             ViewData["FolderId"] = folderId;
+            var detectedPathologies = await GetOrCalculateDetectedPathologies(
+                patientId: id,
+                assessmentId: assessmentId,
+                folderId: folderId
+             );
+           
+            ViewBag.DetectedPathologies = detectedPathologies;
 
             return View(assessment);
         }
 
         /// <summary>
+        /// Calculates and saves the detected pathologies for a patient assessment,
+        /// considering only the pathologies actually present in the patient's answers.
+        /// </summary>
+        private async Task<List<DetectedPathologyDTO>> CalculateAndSaveDetectedPathologies(int patientId, int assessmentId, int folderId)
+        {
+            var assessment = await _context.Assessments
+                .Where(a => a.Id == assessmentId && a.DossierId == folderId)
+                .Include(a => a.Patient)
+                .Include(a => a.Dossier)
+                .FirstOrDefaultAsync();
+            if (assessment == null) throw new Exception("Erreur bilan inexistant");
+
+            var priorContext = await _context.PriorContexts
+                .Where(m => m.MedicalContextId == assessment.MedicalContextId)
+                .FirstOrDefaultAsync();
+            if (priorContext == null) throw new Exception("Erreur prior inexistant pour ce contexte");
+
+            var priorProbability = priorContext.Value;
+
+            var detectedPathologies = new List<DetectedPathologyDTO>();
+
+            // Take PathologiesId in PatientAnswers
+            var patientPathologyIds = await _context.PatientAnswers
+                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Assessment.DossierId == folderId)
+                .SelectMany(a => a.Question.QuestionPathologies.Select(qp => qp.PathologyId))
+                .Distinct()
+                .ToListAsync();
+
+            // Take all pathologies linked to Patient's pathologies
+            var relevantPathologies = await _context.Pathologies
+                .Where(p => patientPathologyIds.Contains(p.Id))
+                .ToListAsync();
+
+
+            //For every patient detected pathologie calculate pathology probability
+            foreach (var pathology in relevantPathologies)
+            {
+              
+                double probability = await _bayesService.CalculateProbabilityByPathology(
+                    prior: priorProbability,
+                    patientId: patientId,
+                    assessmentId: assessmentId,
+                    folderId : folderId,
+                    pathologyId: pathology.Id
+                );
+
+                var dto = new DetectedPathologyDTO
+                {
+                    PatientId = patientId,
+                    AssessmentId = assessmentId,
+                    PathologyName = pathology.Name,
+                    PathologyProbability = probability
+                };
+                detectedPathologies.Add(dto);
+
+              
+                var existing = await _context.PatientPathologiesDetecteds
+                    .FirstOrDefaultAsync(ppd =>
+                        ppd.PatientId == patientId &&
+                        ppd.AssessmentId == assessmentId &&
+                        ppd.PathologyId == pathology.Id
+
+                    );
+
+                if (existing != null)
+                {
+                    existing.PathologyProbability = probability;
+                }
+                else
+                {
+                    var newEntry = new PatientPathologiesDetected
+                    {
+                        PatientId = patientId,
+                        AssessmentId = assessmentId,
+                        PathologyId = pathology.Id,
+                        PathologyProbability = probability,
+                        
+                    };
+                    await _context.PatientPathologiesDetecteds.AddAsync(newEntry);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return detectedPathologies;
+        }
+
+        /// <summary>
+        /// Gets detected pathologies with intelligent caching strategy.
+        /// - If assessment is closed (Status != EnCours): uses saved data from database
+        /// - If assessment is in progress (Status == EnCours): recalculates probabilities
+        /// </summary>
+        private async Task<List<DetectedPathologyDTO>> GetOrCalculateDetectedPathologies(
+            int patientId, int assessmentId, int folderId)
+        {
+            var assessment = await _context.Assessments
+                .FirstOrDefaultAsync(a => a.Id == assessmentId);
+
+            if (assessment == null)
+                throw new Exception("Assessment not found");
+
+            if (assessment.Status != AssessmentStatus.EnCours)
+            {
+                return await GetSavedDetectedPathologies(patientId, assessmentId);
+            }
+            return await CalculateAndSaveDetectedPathologies(patientId, assessmentId, folderId);
+        }
+
+        /// <summary>
+        /// Retrieves saved pathology probabilities from database.
+        /// </summary>
+        private async Task<List<DetectedPathologyDTO>> GetSavedDetectedPathologies(int patientId, int assessmentId)
+        {
+            var detectedPathologies = await _context.PatientPathologiesDetecteds
+                .Include(p => p.Pathology)
+                .Where(p => p.PatientId == patientId && p.AssessmentId == assessmentId)
+                .Select(p => new DetectedPathologyDTO
+                {
+                    PatientId = p.PatientId,
+                    AssessmentId = p.AssessmentId,
+                    PathologyId = p.PathologyId,
+                    PathologyName = p.Pathology.Name,
+                    PathologyProbability = p.PathologyProbability
+                })
+                .OrderByDescending(p => p.PathologyProbability)
+                .ToListAsync();
+
+            return detectedPathologies;
+        }
+
+
+
         /// Get comparison data for a specific assessment (TINTIV and Clinical values).
         /// </summary>
         /// <param name="id">The Id of the assessment to compare.</param>
@@ -601,5 +754,6 @@ namespace KineStat.Controllers
 
             return File(pdfBytes, "application/pdf", fileName);
         }
+
     }
 }
