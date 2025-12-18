@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using KineStat.Filters;
 using KineStat.Helpers;
+using KineStat.Services;
 
 namespace KineStat.Controllers
 {
