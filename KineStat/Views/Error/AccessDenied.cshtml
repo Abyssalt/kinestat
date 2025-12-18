@@ -22,7 +22,7 @@
                         </a>
                         @if (Context.Session.GetString("UserRole") == "Physio")
                         {
-                            <a asp-controller="Index" asp-action="Index" class="btn btn-primary">
+                            <a asp-controller="Patients" asp-action="Index" class="btn btn-primary">
                                 <i class="bi bi-house-door me-2"></i>Accueil
                             </a>
                         }

@@ -33,7 +33,7 @@ namespace KineStat.Controllers
             {
                 string userRole = HttpContext.Session.GetString("UserRole");
                 if (userRole == "Physio")
-                    return RedirectToAction("Index", "Index");
+                    return RedirectToAction("Index", "Patients");
                 else if (userRole == "Admin")
                     return RedirectToAction("Index", "Admin");
             }
@@ -78,7 +78,7 @@ namespace KineStat.Controllers
                     HttpContext.Session.SetString("UserEmail", physio.Email);
 
                     TempData["SuccessMessage"] = $"Bienvenue, {physio.FirstName} !";
-                    return RedirectToAction("Index", "Index");
+                    return RedirectToAction("Index", "Patients");
                 }
 
                 var admin = await _context.Administrators

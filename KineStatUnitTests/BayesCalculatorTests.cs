@@ -40,7 +40,6 @@ namespace KineStatUnitTests
             double rvMinus = 0.5;
             bool answer = false;
 
-            // odd prior = 1 → odd post = 0.5 → posterior = 0.3333
             double expected = 0.5 / 1.5;
 
             // Act
@@ -59,7 +58,6 @@ namespace KineStatUnitTests
             double rvMinus = 1;
             bool answer = true;
 
-            // prior devient 0.001
             double oddPrior = 0.001 / 0.999;
             double expected = (oddPrior * 2) / (1 + oddPrior * 2);
 
@@ -79,7 +77,6 @@ namespace KineStatUnitTests
             double rvMinus = 1;
             bool answer = true;
 
-            // rvPlus devient 1 → posterior reste 0.5
             double expected = 0.5;
 
             // Act
