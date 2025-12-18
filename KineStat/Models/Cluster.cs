@@ -12,13 +12,13 @@ namespace KineStat.Models
 
         public string Description { get; set; }
 
-        [Required]
-        public int MinNumberOfPositiveTests { get; set; }
+       
+        public int ?  MinNumberOfPositiveTests { get; set; }
         
-        [Required]
-        public int RVPositive {  get; set; }
-        [Required]
-        public int RVNegative { get; set; }
+      
+        public double ? RVPositive {  get; set; }
+   
+        public double ? RVNegative { get; set; }
 
         public List<Question> Questions { get; set; } = new List<Question>();
 
