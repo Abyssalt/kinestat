@@ -417,31 +417,7 @@
             }
         }
 
-            function updatePathologiesList(categoriesArray) {
-                const pathologies = [
-                    { name: "Tumoral", index: 0 },
-                    { name: "Infectieux", index: 1 },
-                    { name: "Neurologique", index: 2 },
-                    { name: "Traumatique", index: 3 },
-                    { name: "Inflammatoire", index: 4 },
-                    { name: "Vasculaire", index: 5 }
-                ];
-
-                const listContainer = document.querySelector('.card-header.bg-info + ul.list-group');
-                if (!listContainer) return;
-
-                const listItems = listContainer.querySelectorAll('.list-group-item');
-                pathologies.forEach((p, index) => {
-                    if (listItems[index]) {
-                        const badge = listItems[index].querySelector('.badge');
-                        if (badge) {
-                            const percentage = Math.round((categoriesArray[p.index] || 0) * 10);
-                            badge.textContent = `${percentage}%`;
-                        }
-                    }
-                });
-            }
-
+          
        
             initOrUpdateRadarChart9();
             initOrUpdateRadarChart6();
@@ -452,7 +428,7 @@
                 RedFlagsStore.subscribeCategories(categoriesArray => {
                     initOrUpdateRadarChart6();
                     initOrUpdateRadarChart6Eye();
-                    updatePathologiesList(categoriesArray);
+                   // updatePathologiesList(categoriesArray);
                 });
             }
             if (window.ClinicalProfileStore) {
