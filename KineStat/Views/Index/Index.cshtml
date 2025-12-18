@@ -23,7 +23,7 @@
 <div class="container-fluid px-3 px-md-4 mt-5">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-3">
         <h2 class="fw-light text-uppercase letter-spacing-wide mb-0">Patients</h2>
-        <button class="btn btn-primary btn-touch" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+        <button class="btn btn-primary btn-touch btn-tablet-lg" data-bs-toggle="modal" data-bs-target="#addPatientModal">
             <i class="bi bi-plus-circle me-2"></i>Nouveau patient
         </button>
     </div>
@@ -322,11 +322,9 @@
                                     }
                                 }
                             </select>
-                            <div class="mt-2" id="addDoctorBtnContainer" style="display: none;">
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="addDoctorBtn">
-                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
-                                </button>
-                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-tablet-lg" id="addDoctorBtn">
+                                <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
+                            </button>
                         </div>
 
                         <div class="col-12 collapse" id="addDoctorSection">
@@ -361,8 +359,8 @@
                 </form>
             </div>
             <div class="modal-footer border-0 sticky-bottom bg-white py-3 px-4 gap-2">
-                <button type="button" class="btn btn-light flex-grow-1 flex-sm-grow-0" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-secondary flex-grow-1 flex-sm-grow-0" id="createPatientBtn" disabled>
+                <button type="button" class="btn btn-light btn-tablet-lg flex-grow-1 flex-sm-grow-0" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-secondary btn-tablet-lg flex-grow-1 flex-sm-grow-0" id="createPatientBtn" disabled>
                     <i class="bi bi-check-circle me-2"></i>Créer le patient
                 </button>
             </div>
