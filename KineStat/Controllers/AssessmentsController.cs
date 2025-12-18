@@ -176,7 +176,7 @@ namespace KineStat.Controllers
             if (patient == null)
             {
                 TempData["Error"] = "Patient introuvable.";
-                return RedirectToAction("Index", "Index");
+                return RedirectToAction("Index", "Patients");
             }
 
             if (assessment == null)
@@ -275,7 +275,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsAssessmentOwnedByPhysio(_context, physioId, id))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce bilan.";
-                return RedirectToAction("Index", "Index");
+                return RedirectToAction("Index", "Patients");
             }
 
             if (assessment != null)
@@ -321,7 +321,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
-                return RedirectToAction("Index", "Index");
+                return RedirectToAction("Index", "Patients");
             }
 
             if (patient == null)

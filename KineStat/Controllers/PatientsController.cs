@@ -10,11 +10,11 @@ using KineStat.Helpers;
 namespace KineStat.Controllers
 {
     [AuthorizePhysio]
-    public class IndexController : Controller
+    public class PatientsController : Controller
     {
         private readonly KineDbContext _context;
 
-        public IndexController(KineDbContext context)
+        public PatientsController(KineDbContext context)
         {
             _context = context;
         }

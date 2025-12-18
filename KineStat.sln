@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KineStat", "KineStat\KineStat.csproj", "{4E143667-117A-4DDD-86D6-077070B312AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KineStatUnitTests", "KineStatUnitTests\KineStatUnitTests.csproj", "{544B014F-227D-43E7-AD92-B347272AA53B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{4E143667-117A-4DDD-86D6-077070B312AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E143667-117A-4DDD-86D6-077070B312AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E143667-117A-4DDD-86D6-077070B312AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544B014F-227D-43E7-AD92-B347272AA53B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544B014F-227D-43E7-AD92-B347272AA53B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544B014F-227D-43E7-AD92-B347272AA53B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544B014F-227D-43E7-AD92-B347272AA53B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -86,7 +86,7 @@ namespace KineStat.Controllers
                     {
                         TempData["Error"] = "Vous n'avez pas accès à ce patient.";
                         await transaction.RollbackAsync();
-                        return RedirectToAction("Index", "Index");
+                        return RedirectToAction("Index", "Patients");
                     }
 
                     var existingPatient = await _context.Patients.FindAsync(patient.Id);
@@ -203,7 +203,7 @@ namespace KineStat.Controllers
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
-                return RedirectToAction("Index", "Index");
+                return RedirectToAction("Index", "Patients");
             }
 
             var patient = await _context.Patients.FindAsync(PatientId);
