@@ -196,7 +196,7 @@ function displayQuestions(category) {
 
 function createQuestionCard(question, uniqueId, category) {
 
-    
+    uniqueId = uniqueId.replace(/[&\/]/g, '');
     const card = document.createElement('div');
     card.className = 'card border-0 shadow-sm mb-3';
     card.dataset.questionId = question.id;
