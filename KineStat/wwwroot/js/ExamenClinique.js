@@ -5,87 +5,6 @@ let globalPatientId = null;
 let globalAssessmentId = null;
 let saveTimeout = null;
 
-const testSuggestions = {
-    'Articulaire / Structurel': {
-        'Oui': [
-            'Test de mobilité active lombaire',
-            'Test de mobilité passive lombaire',
-            'Test de reproduction McKenzie',
-            'Mesure expansion thoracique',
-            'Test de Romberg',
-            'Prone instability test'
-        ]
-    },
-    'Myofascial': {
-        'Oui': [
-            'Palpation points gâchettes (Travell/Simons)',
-            'Test de tension musculaire',
-            'Test Sorensen',
-            'Side-bridge test',
-            'Test compression musculaire'
-        ]
-    },
-    'Douleur Nociceptive': {
-        'Oui': [
-            'Test de provocation mécanique',
-            'Évaluation douleur au repos vs mouvement',
-            'Test de charge progressive'
-        ]
-    },
-    'Douleur Neuropathique': {
-        'Oui': [
-            'Test SLR (Straight Leg Raise)',
-            'Test Slump',
-            'Évaluation réflexes ostéo-tendineux',
-            'Test sensibilité (piqûre, toucher)',
-            'Évaluation dermatomes L4/L5/S1',
-            'Prone knee bending test',
-            'Test Lasègue croisé'
-        ]
-    },
-    'Douleur Nociplastique': {
-        'Oui': [
-            'Évaluation allodynie',
-            'Test de sommation temporelle',
-            'Évaluation seuil douleur'
-        ]
-    },
-    'Controle Sensorimoteur': {
-        'Oui': [
-            'Tests proprioceptifs Luomajoki',
-            'Test équilibre postural',
-            'Test force isométrique',
-            'Test endurance gainage',
-            '6MWT (6-Minute Walk Test)',
-            'Test pression biofeedback (40-44 mmHg)',
-            'Règle prédiction clinique Hicks'
-        ]
-    },
-    'Croyances et Cognition': {
-        'Oui': [
-            'Questionnaire Tampa (kinésiophobie)',
-            'Questionnaire PCS (catastrophisme)',
-            'Questionnaire PSEQ (auto-efficacité)',
-            'Questionnaire Start Back / Orebro'
-        ]
-    },
-    'Socio-environnemental': {
-        'Oui': [
-            'Questionnaire IPAQ (activité physique)',
-            'Évaluation contraintes professionnelles',
-            'Questionnaire MOS-SSS (soutien social)',
-            'Évaluation satisfaction travail'
-        ]
-    },
-    'Emotionnel / Affectif': {
-        'Oui': [
-            'Questionnaire HADS (anxiété/dépression)',
-            'Questionnaire PSQI (qualité sommeil)',
-            'Questionnaire SF-36 (qualité de vie)',
-            'Évaluation tension émotionnelle'
-        ]
-    }
-};
 
 function initializeTabs() {
     document.querySelectorAll('button[data-category]').forEach(btn => {
@@ -130,11 +49,6 @@ async function loadQuestionnaire() {
 
         displayQuestions(firstCategory);
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                refreshSuggestionsForCategory(currentCategory);
-            });
-        });
     } catch (error) {
         console.error('Erreur:', error);
         document.getElementById('questionnaireContainer').innerHTML = `
@@ -278,8 +192,6 @@ function displayQuestions(category) {
             container.appendChild(questionCard);
         });
     });
-
-    refreshSuggestionsForCategory(category);
 }
 
 function createQuestionCard(question, uniqueId, category) {
@@ -394,8 +306,7 @@ function createQuestionCard(question, uniqueId, category) {
             }
 
             radioInput.addEventListener('change', function () {
-                const cardCategory = card.dataset.category;
-                updateSuggestions(cardCategory, opt, question.id);
+                const cardCategory = card.dataset.category;              
                 saveResponseLocally(question.id, opt, cardCategory);
             });
 
@@ -490,72 +401,9 @@ function saveResponseLocally(questionId, response, category) {
     }, 500);
 }
 
-function updateSuggestions(category, response, questionId) {
-    if (!userResponses[category]) {
-        userResponses[category] = {};
-    }
-    userResponses[category][questionId] = response;
 
-    const yesCount = Object.entries(userResponses[category])
-        .filter(([key, value]) => !key.includes('_notes'))
-        .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
-        .length;
 
-    displaySuggestions(category, yesCount);
 
-    autoSaveResponses();
-}
-
-function refreshSuggestionsForCategory(category) {
-    if (userResponses[category]) {
-        const yesCount = Object.entries(userResponses[category])
-            .filter(([key, value]) => !key.includes('_notes'))
-            .filter(([key, value]) => typeof value === 'string' && value === 'Oui')
-            .length;
-
-        displaySuggestions(category, yesCount);
-    } else {
-        displaySuggestions(category, 0);
-    }
-}
-
-function displaySuggestions(category, yesCount) {
-    const container = document.getElementById('suggestedTestsContainer');
-
-    if (yesCount > 0 && testSuggestions[category] && testSuggestions[category]['Oui']) {
-        const tests = testSuggestions[category]['Oui'];
-
-        container.innerHTML = `
-            <div class="mb-3">
-                <p class="text-success fw-medium mb-2">
-                    <i class="bi bi-check-circle me-2"></i>${yesCount} réponse(s) positive(s)
-                </p>
-                <p class="small text-muted mb-3">Tests physiques recommandés :</p>
-            </div>
-            <ul class="list-unstyled mb-0">
-                ${tests.map(test => `
-                    <li class="mb-2 pb-2 border-bottom">
-                        <i class="bi bi-arrow-right-circle text-info me-2"></i>
-                        <span class="small">${test}</span>
-                    </li>
-                `).join('')}
-            </ul>
-            <div class="mt-3 p-2 bg-light rounded">
-                <small class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Ces tests seront disponibles dans la page "Tests physiques"
-                </small>
-            </div>
-        `;
-    } else {
-        container.innerHTML = `
-            <p class="text-muted small mb-0">
-                <i class="bi bi-info-circle me-2"></i>
-                Répondez aux questions pour voir les tests recommandés
-            </p>
-        `;
-    }
-}
 
 window.ExamenClinique = {
     init: function (patientId, assessmentId) {
