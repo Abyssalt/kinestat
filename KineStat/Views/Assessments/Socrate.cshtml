@@ -7,7 +7,7 @@
     var firstName = ViewBag.FirstName;
     var lastName = ViewBag.LastName;
     var patientId = ViewData["PatientId"];
-
+    ViewData["ShowSuspendButton"] = true;
 
     ViewData["Breadcrumbs"] = 
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
@@ -17,7 +17,6 @@
 
     var assessmentId = ViewData["AssessmentId"];
     ViewData["HideFloatingEye"] = true;
-    ViewData["ShowSuspendButton"] = true;
 }
 
 <div class="container-fluid px-3 px-md-4 py-4">

@@ -32,6 +32,14 @@
                 <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
+                
+                <a asp-controller="Folder" 
+                   asp-action="DossierDetails" 
+                   asp-route-id="@ViewData["FolderId"]"
+                   class="btn btn-warning shadow-sm">
+                    <i class="bi bi-pause-circle-fill me-1"></i>
+                    Suspendre le bilan
+                </a>
                 <div>
                     <h1 class="h2 fw-bold text-primary mb-2">
                         <i class="bi bi-clipboard2-pulse me-2"></i>Évaluation complète
