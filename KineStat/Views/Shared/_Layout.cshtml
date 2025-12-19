@@ -585,25 +585,46 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.categories) {
-                            if (window.RedFlagsStore) {
+                            const hasValues = data.categories.some(cat => cat > 0);
+                            if(hasValues && window.RedFlagsStore){
                                 RedFlagsStore.setCategories(data.categories);
-
                                 if (data.totalPercentage !== undefined) {
                                     RedFlagsStore.set(data.totalPercentage);
                                 }
-                           }
+                            }else {
+                                if(window.RedFlagesStore){
+                                    RedFlagsStore.clear();
+                                }
+                            }
+                        }else {
+                            if(window.RedFlagesStore){
+                                RedFlagsStore.clear();
+                            }
                         }
                     })
                     .catch(error => {
                         console.error("Erreur lors du chargement des catégories:", error);
+                         if (window.RedFlagsStore) {
+                            RedFlagsStore.clear();
+                        }
                     });
 
                 fetch(`/Patient/${patientId}/Assessment/${assessmentId}/ClinicalCategoryPercentages`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.clinicalCategories) {
-                            if (window.ClinicalProfileStore) {
+                            const hasValues = data.clinicalCategories.some(cat => cat > 0);
+
+                            if (hasValues && window.ClinicalProfileStore) {
                                 ClinicalProfileStore.set(data.clinicalCategories);
+                            } else {
+                                if (window.ClinicalProfileStore) {
+                                    ClinicalProfileStore.set([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                                }
+                            }
+                        } else {
+                            if (window.ClinicalProfileStore) {
+                                ClinicalProfileStore.set([0, 0, 0, 0, 0, 0, 0, 0, 0]);
                             }
                         }
                     })
