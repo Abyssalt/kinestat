@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Tests";
     ViewData["HideFloatingEye"] = true;
+    ViewData["ShowSuspendButton"] = true;
     var clusters = Model;
     var patientNom = ViewData["PatientNom"]?.ToString() ?? "Patient";
     var patientId = ViewData["PatientId"] != null ? Convert.ToInt32(ViewData["PatientId"]) : 0;

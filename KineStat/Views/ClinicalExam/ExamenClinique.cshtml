@@ -5,6 +5,7 @@
     var assessmentId = ViewData["AssessmentId"];
     var folderId = ViewData["FolderId"];
     ViewData["ShowClinicalFloatingEye"] = true;
+    ViewData["ShowSuspendButton"] = true;
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +

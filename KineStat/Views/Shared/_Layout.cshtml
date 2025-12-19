@@ -47,6 +47,24 @@
     <body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+            
+            @if (ViewData["AssessmentId"] != null && ViewData["ShowSuspendButton"] != null)
+            {
+                var patientId = ViewData["PatientId"];
+                var dossierId = ViewData["FolderId"];
+    
+                <div class="position-fixed top-50 start-0 translate-middle-y ms-3" style="z-index: 1040;">
+                    <a asp-controller="Folder" 
+                       asp-action="DossierDetails" 
+                       asp-route-id="@dossierId"
+                       class="btn btn-warning shadow d-flex align-items-center justify-content-center text-decoration-none"
+                       style="writing-mode: horizontal-tb; text-orientation: mixed; padding: 1rem 0.5rem; border-radius: 0.5rem;"
+                       title="Suspendre et retourner à l'anamnèse">
+                        <i class="bi bi-pause-circle-fill me-2" style="writing-mode: horizontal-tb; "></i>
+                        <span class="fw-bold">Suspendre le bilan</span>
+                    </a>
+                </div>
+            }
             <div class="container-fluid px-3 px-lg-4">
 
                 @{
@@ -65,7 +83,7 @@
                    asp-area=""
                    asp-controller="@controller"
                    asp-action="Index">
-                    <img src="~/images/logo.png" alt="Logo KineStat" height="32" class="me-2" />
+                    <img src="~/images/logo.png" alt="Logo KineStat" height="32" class="me-2"/>
                     KineStat
                 </a>
 
