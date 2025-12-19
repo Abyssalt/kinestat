@@ -67,7 +67,7 @@
                         data-height="@(Model.Height?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "")"
                         data-doctorid="@(Model.DoctorId?.ToString() ?? "")"
                         data-address="@(Model.Address ?? "")"
-                        data-country="@(Model.Country)">
+                        data-country="@((int)Model.Country)">
                     <i class="bi bi-pencil me-1"></i>Modifier
                 </button>
             </div>
@@ -306,7 +306,7 @@
     </div>
 </div>
 
-<!--Add modal-->
+<!--Edit modal-->
 <div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
