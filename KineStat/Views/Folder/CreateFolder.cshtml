@@ -26,7 +26,7 @@
                         <input type="hidden" asp-for="PatientId" />
                         <div class="mb-4">
                             <label asp-for="Titre" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Titre du dossier <span class="text-danger">*</span></label>
-                            <input asp-for="Titre" class="form-control form-control-lg" />
+                            <input asp-for="Titre" class="form-control form-control-lg" required/>
                             <span asp-validation-for="Titre" class="text-danger small"></span>
                         </div>
                         <div class="mb-4">
@@ -37,7 +37,7 @@
                             <a asp-controller="Patient" asp-action="Anamnese" asp-route-id="@Model.PatientId" class="btn btn-outline-secondary btn-lg fw-medium">
                                 <i class="bi bi-arrow-left me-2"></i>Annuler
                             </a>
-                            <button type="submit" class="btn btn-info btn-lg fw-medium text-white">
+                            <button type="submit" id="submitBtn" class="btn btn-info btn-lg fw-medium text-white" disabled>
                                 <i class="bi bi-check-circle me-2"></i>Créer le dossier
                             </button>
                         </div>
@@ -47,3 +47,27 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // This script will make the submit button not available if the title textarea is empty, it will be available otherwise
+        document.addEventListener('DOMContentLoaded', function() {
+            const titreInput = document.getElementById('Titre');
+            const submitBtn = document.getElementById('submitBtn');
+
+            function updateButtonState() {
+                if (titreInput.value.trim().length > 0) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50');
+                }
+            }
+
+            updateButtonState();
+
+            titreInput.addEventListener('input', updateButtonState);
+        });
+    </script>
+}
