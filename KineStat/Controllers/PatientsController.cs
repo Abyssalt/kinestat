@@ -49,21 +49,29 @@ namespace KineStat.Controllers
                 .Where(p => p.PhysioId == physioId)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var searchLower = search.ToLower();
-                query = query.Where(p =>
-                    p.FirstName.ToLower().Contains(searchLower) ||
-                    p.LastName.ToLower().Contains(searchLower)
-                );
-            }
+            List<Patient> patients = new List<Patient>();
 
-            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<PatientStatus>(status, out var patientStatus))
-            {
-                query = query.Where(p => p.Status == patientStatus);
-            }
+            bool hasSearch = !string.IsNullOrWhiteSpace(search);
+            bool hasFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
 
-            var patients = await query.OrderBy(p => p.LastName).ToListAsync();
+            if (hasSearch || hasFilter)
+            {
+                if (hasSearch)
+                {
+                    var searchLower = search.ToLower();
+                    query = query.Where(p =>
+                        p.FirstName.ToLower().Contains(searchLower) ||
+                        p.LastName.ToLower().Contains(searchLower)
+                    );
+                }
+
+                if (hasFilter && Enum.TryParse<PatientStatus>(status, out var patientStatus))
+                {
+                    query = query.Where(p => p.Status == patientStatus);
+                }
+
+                patients = await query.OrderBy(p => p.LastName).ToListAsync();
+            }
 
             ViewBag.Physios = await _context.Physios
                 .OrderBy(p => p.LastName)
