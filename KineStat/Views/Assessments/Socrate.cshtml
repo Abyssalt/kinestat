@@ -7,7 +7,7 @@
     var firstName = ViewBag.FirstName;
     var lastName = ViewBag.LastName;
     var patientId = ViewData["PatientId"];
-
+    ViewData["ShowSuspendButton"] = true;
 
     ViewData["Breadcrumbs"] = 
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
