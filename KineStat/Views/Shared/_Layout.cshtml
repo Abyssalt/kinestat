@@ -51,8 +51,8 @@
             @if (ViewData["AssessmentId"] != null && ViewData["ShowSuspendButton"] != null)
             {
                 var dossierId = ViewData["FolderId"];
-    
-                <div class="position-fixed bottom-0 start-0 ms-3 ms-md-4 mb-5" style="z-index: 1030; margin-bottom: 100px !important;">
+
+                <div class="position-fixed top-0 end-0 mt-5 me-3 me-md-4" style="z-index: 1025; padding-top: 70px;">
                     <a asp-controller="Folder" 
                        asp-action="DossierDetails" 
                        asp-route-id="@dossierId"
