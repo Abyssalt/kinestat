@@ -195,10 +195,10 @@ function displayQuestions(category) {
 }
 
 function createQuestionCard(question, uniqueId, category) {
-
     uniqueId = uniqueId.replace(/[&\/]/g, '');
     const card = document.createElement('div');
-    card.className = 'card border-0 shadow-sm mb-3';
+    card.className = 'card border shadow-sm mb-3';
+    card.style.borderWidth = '2px';
     card.dataset.questionId = question.id;
     card.dataset.category = category;
 
@@ -206,7 +206,7 @@ function createQuestionCard(question, uniqueId, category) {
     cardBody.className = 'card-body p-3 p-md-4';
 
     const mainContainer = document.createElement('div');
-    mainContainer.className = 'd-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mb-3';
+    mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3';
 
     const questionText = document.createElement('div');
     questionText.className = 'fw-medium flex-grow-1';
@@ -247,12 +247,10 @@ function createQuestionCard(question, uniqueId, category) {
         `;
 
         mainContainer.appendChild(responseContainer);
-        cardBody.appendChild(mainContainer);
 
         const inputElem = responseContainer.querySelector(`#input_${uniqueId}`);
         const rangeElem = responseContainer.querySelector(`#range_${uniqueId}`);
         const displayElem = responseContainer.querySelector(`#display_${uniqueId}`);
-
 
         if (userResponses[category] && userResponses[category][question.id]) {
             const savedValue = userResponses[category][question.id];
@@ -318,35 +316,31 @@ function createQuestionCard(question, uniqueId, category) {
 
         responseContainer.appendChild(optionsDiv);
         mainContainer.appendChild(responseContainer);
-        cardBody.appendChild(mainContainer);
     }
+
+    const notesSection = document.createElement('div');
+    notesSection.className = 'flex-shrink-0 d-flex align-items-center gap-2';
+    notesSection.style.minWidth = '200px';
 
     const toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
-    toggleBtn.className = 'btn btn-sm btn-outline-secondary fw-medium';
-    toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
-    cardBody.appendChild(toggleBtn);
-
-    const notesContainer = document.createElement('div');
-    notesContainer.style.display = 'none';
-    notesContainer.className = 'mt-3';
-
-    const notesLabel = document.createElement('label');
-    notesLabel.className = 'form-label fw-medium small text-secondary';
-    notesLabel.textContent = 'Notes';
-    notesContainer.appendChild(notesLabel);
+    toggleBtn.className = 'btn btn-sm btn-outline-secondary';
+    toggleBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+    toggleBtn.title = 'Ajouter/Modifier une note';
 
     const textarea = document.createElement('textarea');
-    textarea.className = 'form-control';
+    textarea.className = 'form-control form-control-sm';
     textarea.name = `notes_${uniqueId}`;
-    textarea.rows = 3;
-    textarea.placeholder = 'Notes (optionnel)';
-    notesContainer.appendChild(textarea);
+    textarea.rows = 1;
+    textarea.placeholder = 'Note...';
+    textarea.style.display = 'none';
+    textarea.style.resize = 'vertical';
+    textarea.style.minWidth = '150px';
 
     if (userResponses[category] && userResponses[category][question.id + '_notes']) {
         textarea.value = userResponses[category][question.id + '_notes'];
-        notesContainer.style.display = 'block';
-        toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer la note';
+        textarea.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
     }
 
     textarea.addEventListener('input', function () {
@@ -364,17 +358,22 @@ function createQuestionCard(question, uniqueId, category) {
         }, 1000);
     });
 
-    cardBody.appendChild(notesContainer);
     toggleBtn.addEventListener('click', () => {
-        if (notesContainer.style.display === 'none') {
-            notesContainer.style.display = 'block';
-            toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer la note';
+        if (textarea.style.display === 'none') {
+            textarea.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+            textarea.focus();
         } else {
-            notesContainer.style.display = 'none';
-            toggleBtn.innerHTML = '<i class="bi bi-pencil me-1"></i>Ajouter une note';
+            textarea.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="bi bi-pencil"></i>';
         }
     });
 
+    notesSection.appendChild(toggleBtn);
+    notesSection.appendChild(textarea);
+    mainContainer.appendChild(notesSection);
+
+    cardBody.appendChild(mainContainer);
     card.appendChild(cardBody);
     return card;
 }
