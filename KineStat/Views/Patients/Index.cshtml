@@ -58,156 +58,152 @@
             <div id="noResultsMessage" class="alert alert-warning border-0 py-3" style="display:none;">
                 <i class="bi bi-info-circle me-2"></i>Aucun patient ne correspond à votre recherche.
             </div>
-
-            @if (Model != null && Model.Any())
-            {
-                <div class="d-block d-lg-none" id="patientsCardsView">
-                    @foreach (Patient patient in Model)
-                    {
-                        <div class="card mb-3 patient-card border-0 shadow-sm clickable-card"
-                             data-href="@Url.Action("Anamnese", "Patient", new { id = patient.Id })">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h5 class="card-title mb-1 fw-semibold">
-                                            @patient.LastName @patient.FirstName
-                                        </h5>
-                                        <p class="card-text text-muted small mb-0">
-                                            <i class="bi bi-calendar3 me-1"></i>
-                                            @patient.BirthDate.ToString("dd/MM/yyyy")
-                                        </p>
-                                    </div>
-                                    <div class="d-flex gap-2 align-items-center">
-                                        @switch (patient.Gender)
-                                        {
-                                            case Gender.Homme:
-                                                <span class="badge bg-primary rounded-pill">H</span>
-                                                break;
-                                            case Gender.Femme:
-                                                <span class="badge bg-danger rounded-pill">F</span>
-                                                break;
-                                            case Gender.Autre:
-                                                <span class="badge bg-secondary rounded-pill">A</span>
-                                                break;
-                                        }
-                                        @switch (patient.Status)
-                                        {
-                                            case PatientStatus.Actif:
-                                                <span class="badge bg-success rounded-pill">Actif</span>
-                                                break;
-                                            case PatientStatus.Terminé:
-                                                <span class="badge bg-secondary rounded-pill">Terminé</span>
-                                                break;
-                                            case PatientStatus.Inactif:
-                                                <span class="badge bg-dark rounded-pill">Suspendu</span>
-                                                break;
-                                            case PatientStatus.Abandonné:
-                                                <span class="badge bg-danger rounded-pill">Abandonné</span>
-                                                break;
-                                        }
-                                    </div>
+            <div class="d-block d-lg-none" id="patientsCardsView">
+                @foreach (Patient patient in Model)
+                {
+                    <div class="card mb-3 patient-card border-0 shadow-sm clickable-card"
+                         data-href="@Url.Action("Anamnese", "Patient", new { id = patient.Id })">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1 fw-semibold">
+                                        @patient.LastName @patient.FirstName
+                                    </h5>
+                                    <p class="card-text text-muted small mb-0">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        @patient.BirthDate.ToString("dd/MM/yyyy")
+                                    </p>
                                 </div>
-
-                                <div class="row g-2 mb-3 small">
-                                    <div class="col-12">
-                                        <span class="text-muted">
-                                            <i class="bi bi-envelope me-2"></i>@patient.Email
-                                        </span>
-                                    </div>
-                                    <div class="col-12">
-                                        <span class="text-muted">
-                                            <i class="bi bi-telephone me-2"></i>@patient.PhoneNumber
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end">
-                                    <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id"
-                                          method="post" class="delete-form">
-                                        <button type="submit" class="btn btn-outline-danger btn-touch"
-                                                onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');">
-                                            <i class="bi bi-trash me-2"></i>Supprimer
-                                        </button>
-                                    </form>
+                                <div class="d-flex gap-2 align-items-center">
+                                    @switch (patient.Gender)
+                                    {
+                                        case Gender.Homme:
+                                            <span class="badge bg-primary rounded-pill">H</span>
+                                            break;
+                                        case Gender.Femme:
+                                            <span class="badge bg-danger rounded-pill">F</span>
+                                            break;
+                                        case Gender.Autre:
+                                            <span class="badge bg-secondary rounded-pill">A</span>
+                                            break;
+                                    }
+                                    @switch (patient.Status)
+                                    {
+                                        case PatientStatus.Actif:
+                                            <span class="badge bg-success rounded-pill">Actif</span>
+                                            break;
+                                        case PatientStatus.Terminé:
+                                            <span class="badge bg-secondary rounded-pill">Terminé</span>
+                                            break;
+                                        case PatientStatus.Inactif:
+                                            <span class="badge bg-dark rounded-pill">Suspendu</span>
+                                            break;
+                                        case PatientStatus.Abandonné:
+                                            <span class="badge bg-danger rounded-pill">Abandonné</span>
+                                            break;
+                                    }
                                 </div>
                             </div>
+
+                            <div class="row g-2 mb-3 small">
+                                <div class="col-12">
+                                    <span class="text-muted">
+                                        <i class="bi bi-envelope me-2"></i>@patient.Email
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted">
+                                        <i class="bi bi-telephone me-2"></i>@patient.PhoneNumber
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id"
+                                      method="post" class="delete-form">
+                                    <button type="submit" class="btn btn-outline-danger btn-touch"
+                                            onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');">
+                                        <i class="bi bi-trash me-2"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
+            </div>
 
-                <div class="d-none d-lg-block table-responsive">
-                    <table class="table table-hover align-middle" id="patientsTable">
-                        <thead>
-                            <tr class="text-uppercase small text-muted">
-                                <th class="fw-semibold py-3">Nom</th>
-                                <th class="fw-semibold py-3">Prénom</th>
-                                <th class="fw-semibold py-3">Email</th>
-                                <th class="fw-semibold py-3">Genre</th>
-                                <th class="fw-semibold py-3">Statut</th>
-                                <th class="fw-semibold py-3">Naissance</th>
-                                <th class="fw-semibold py-3">Téléphone</th>
-                                <th class="fw-semibold py-3 text-end">Actions</th>
+            <div class="d-none d-lg-block table-responsive">
+                <table class="table table-hover align-middle" id="patientsTable">
+                    <thead>
+                        <tr class="text-uppercase small text-muted">
+                            <th class="fw-semibold py-3">Nom</th>
+                            <th class="fw-semibold py-3">Prénom</th>
+                            <th class="fw-semibold py-3">Email</th>
+                            <th class="fw-semibold py-3">Genre</th>
+                            <th class="fw-semibold py-3">Statut</th>
+                            <th class="fw-semibold py-3">Naissance</th>
+                            <th class="fw-semibold py-3">Téléphone</th>
+                            <th class="fw-semibold py-3 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        @foreach (Patient patient in Model)
+                        {
+                            <tr class="clickable-row" data-href="@Url.Action("Anamnese", "Patient", new { id = patient.Id })">
+                                <td class="fw-medium py-3">@patient.LastName</td>
+                                <td class="py-3">@patient.FirstName</td>
+                                <td class="py-3">@patient.Email</td>
+                                <td class="py-3">
+                                    @switch (patient.Gender)
+                                    {
+                                        case Gender.Homme:
+                                            <span class="badge bg-primary rounded-pill px-3 py-2">H</span>
+                                            break;
+                                        case Gender.Femme:
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">F</span>
+                                            break;
+                                        case Gender.Autre:
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">A</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="py-3">
+                                    @switch (patient.Status)
+                                    {
+                                        case PatientStatus.Actif:
+                                            <span class="badge bg-success rounded-pill px-3 py-2">Actif</span>
+                                            break;
+                                        case PatientStatus.Terminé:
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">Terminé</span>
+                                            break;
+                                        case PatientStatus.Inactif:
+                                            <span class="badge bg-muted text-dark rounded-pill px-3 py-2">Suspendu</span>
+                                            break;
+                                        case PatientStatus.Abandonné:
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">Abandonné</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="py-3">@patient.BirthDate.ToString("dd/MM/yyyy")</td>
+                                <td class="py-3">@patient.PhoneNumber</td>
+                                <td class="py-3 text-end actions-cell">
+                                    <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id"
+                                          method="post" class="delete-form d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody id="patientsTableBody">
-                            @foreach (Patient patient in Model)
-                            {
-                                <tr class="clickable-row" data-href="@Url.Action("Anamnese", "Patient", new { id = patient.Id })">
-                                    <td class="fw-medium py-3">@patient.LastName</td>
-                                    <td class="py-3">@patient.FirstName</td>
-                                    <td class="py-3">@patient.Email</td>
-                                    <td class="py-3">
-                                        @switch (patient.Gender)
-                                        {
-                                            case Gender.Homme:
-                                                <span class="badge bg-primary rounded-pill px-3 py-2">H</span>
-                                                break;
-                                            case Gender.Femme:
-                                                <span class="badge bg-danger rounded-pill px-3 py-2">F</span>
-                                                break;
-                                            case Gender.Autre:
-                                                <span class="badge bg-secondary rounded-pill px-3 py-2">A</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td class="py-3">
-                                        @switch (patient.Status)
-                                        {
-                                            case PatientStatus.Actif:
-                                                <span class="badge bg-success rounded-pill px-3 py-2">Actif</span>
-                                                break;
-                                            case PatientStatus.Terminé:
-                                                <span class="badge bg-secondary rounded-pill px-3 py-2">Terminé</span>
-                                                break;
-                                            case PatientStatus.Inactif:
-                                                <span class="badge bg-muted text-dark rounded-pill px-3 py-2">Suspendu</span>
-                                                break;
-                                            case PatientStatus.Abandonné:
-                                                <span class="badge bg-danger rounded-pill px-3 py-2">Abandonné</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td class="py-3">@patient.BirthDate.ToString("dd/MM/yyyy")</td>
-                                    <td class="py-3">@patient.PhoneNumber</td>
-                                    <td class="py-3 text-end actions-cell">
-                                        <form asp-controller="Patients" asp-action="Delete" asp-route-id="@patient.Id"
-                                              method="post" class="delete-form d-inline">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                    onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-                <nav aria-label="Page navigation" id="paginationContainer" class="mt-4">
-                    <ul class="pagination justify-content-center gap-1" id="paginationControls"></ul>
-                </nav>
-            }
+            <nav aria-label="Page navigation" id="paginationContainer" class="mt-4">
+                <ul class="pagination justify-content-center gap-1" id="paginationControls"></ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -579,7 +575,7 @@
 
         function loadPatients() {
             document.getElementById('loadingIndicator').style.display = 'block';
-            fetch(`/Index/SearchPatients?search=${currentSearch}&status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`)
+            fetch(`/Patients/SearchPatients?search=${currentSearch}&status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`)
                 .then(r => r.json())
                 .then(data => {
                     document.getElementById('loadingIndicator').style.display = 'none';
@@ -617,7 +613,7 @@
                     <td class="fw-medium py-3">${p.lastName}</td><td class="py-3">${p.firstName}</td><td class="py-3">${p.email}</td>
                     <td class="py-3">${getGenderBadge(p.gender, true)}</td><td class="py-3">${getStatusBadge(p.status, true)}</td>
                     <td class="py-3">${formatDate(p.birthDate)}</td><td class="py-3">${p.phoneNumber}</td>
-                    <td class="py-3 text-end actions-cell"><form action="/Index/${p.id}/Delete" method="post" class="delete-form d-inline"><input type="hidden" name="__RequestVerificationToken" value="${token}"><button type="submit" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');"><i class="bi bi-trash"></i></button></form></td>
+                    <td class="py-3 text-end actions-cell"><form action="/Patients/${p.id}/Delete" method="post" class="delete-form d-inline"><input type="hidden" name="__RequestVerificationToken" value="${token}"><button type="submit" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');"><i class="bi bi-trash"></i></button></form></td>
                 </tr>`).join('');
             attachRowEvents();
         }
@@ -632,7 +628,7 @@
                             <div class="d-flex gap-2">${getGenderBadge(p.gender, false)}${getStatusBadge(p.status, false)}</div>
                         </div>
                         <div class="row g-2 mb-3 small"><div class="col-12"><span class="text-muted"><i class="bi bi-envelope me-2"></i>${p.email}</span></div><div class="col-12"><span class="text-muted"><i class="bi bi-telephone me-2"></i>${p.phoneNumber}</span></div></div>
-                        <div class="d-flex justify-content-end"><form action="/Index/${p.id}/Delete" method="post" class="delete-form"><input type="hidden" name="__RequestVerificationToken" value="${token}"><button type="submit" class="btn btn-outline-danger btn-touch" onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');"><i class="bi bi-trash me-2"></i>Supprimer</button></form></div>
+                        <div class="d-flex justify-content-end"><form action="/Patients/${p.id}/Delete" method="post" class="delete-form"><input type="hidden" name="__RequestVerificationToken" value="${token}"><button type="submit" class="btn btn-outline-danger btn-touch" onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');"><i class="bi bi-trash me-2"></i>Supprimer</button></form></div>
                     </div>
                 </div>`).join('');
             attachCardEvents();
