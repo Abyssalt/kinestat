@@ -3,7 +3,7 @@
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     ViewData["ShowFloatingEye"] = true;
-    var patientId = ViewData["PatientId"]; 
+    var patientId = ViewData["PatientId"];
     var assessmentId = ViewData["AssessmentId"];
     var folderId = ViewData["FolderId"];
     ViewData["Breadcrumbs"] =
@@ -39,31 +39,29 @@
         <div class="col-12">
             <div class="row g-2" id="redflagsTabs">
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-primary w-100 h-100 py-3" data-category="1">Tumeur / Métastase</button>
+                    <button class="btn btn-primary w-100 h-100 py-3 fw-medium" data-category="1">Tumeur / Métastase</button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="2">Infection</button>
+                    <button class="btn btn-outline-primary w-100 h-100 py-3 fw-medium" data-category="2">Infection</button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="3">Neurologique</button>
+                    <button class="btn btn-outline-primary w-100 h-100 py-3 fw-medium" data-category="3">Neurologique</button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="4">Traumatisme / Fracture</button>
+                    <button class="btn btn-outline-primary w-100 h-100 py-3 fw-medium" data-category="4">Traumatisme / Fracture</button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="5">Inflammatoire</button>
+                    <button class="btn btn-outline-primary w-100 h-100 py-3 fw-medium" data-category="5">Inflammatoire</button>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <button class="btn btn-outline-primary w-100 h-100 py-3" data-category="6">Vasculaire / Circulatoire</button>
+                    <button class="btn btn-outline-primary w-100 h-100 py-3 fw-medium" data-category="6">Vasculaire / Circulatoire</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div id="questionnaireContainer" class="col-12 col-lg-8 mb-4 mb-lg-0">
-        </div>
-        <div id="testsContainer" class="col-12 col-lg-4">
+        <div id="questionnaireContainer" class="col-12">
         </div>
     </div>
 </div>
@@ -97,207 +95,11 @@
     </div>
 </div>
 
-<script src="~/js/gauge.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        if (window.RedFlagsStore) {
-            RedFlagsStore.clear();
-        }
-    });
-</script>
-
-<script>
-    let hasDisplayedCriticalModal = false;
-    let criticalRedflagThreshold = 20;
-
-    async function loadQuestionsByCategory(categoryId) {
-        const patientId = @patientId;
-        const assessmentId = @assessmentId;
-        const response = await fetch(`/RedFlags/${patientId}/Assessment/${assessmentId}/Questions/${categoryId}`);
-        const html = await response.text();
-        document.getElementById("questionnaireContainer").innerHTML = html;
-        attachNoteToggleEvents();
-        attachAnswerListeners();
-        initializeTooltips();
-    }
-
-    function initializeTooltips() {
-        const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipElements.forEach(el => {
-            new bootstrap.Tooltip(el);
-        });
-    }
-
-    function attachNoteToggleEvents() {
-        document.querySelectorAll("[id^='notes_button_']").forEach(btn => {
-            if (btn.dataset.listenersAdded === "true") return;
-            btn.dataset.listenersAdded = "true";
-            const targetSelector = btn.getAttribute("data-bs-target");
-            const target = document.querySelector(targetSelector);
-
-            if (!target) return;
-
-            const textarea = target.querySelector('textarea');
-            let btnText = "";
-            if (textarea && textarea.value.trim() !== "") {
-                btnText = "Afficher la note";
-            } else {
-                btnText = "Ajouter une note";
-            }
-            btn.textContent = btnText;
-
-            target.addEventListener('shown.bs.collapse', () => {
-                btn.textContent = "Masquer la note";
-            });
-
-            target.addEventListener('hidden.bs.collapse', () => {
-                btn.textContent = btnText;
-            });
-        });
-    }
-
-    function showCriticalRedFlagModal(patientId) {
-        if (hasDisplayedCriticalModal) return;
-        hasDisplayedCriticalModal = true;
-        const assessmentId = @assessmentId;
-        const folderId = @folderId;
-        const btn = document.getElementById("redirectToSummaryBtn");
-        btn.href = `/Patient/${patientId}/Dossier/${folderId}/Resultat/${assessmentId}`;
-
-        const modal = new bootstrap.Modal(document.getElementById("redFlagCriticalModal"));
-        modal.show();
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        initializeTabs();
-        loadQuestionsByCategory(1);
-        initializeGauge();
-
-        fetchInitialState();
-
-        RedFlagsStore.subscribe(function(newValue) {
-            updateGauge(newValue);
-        });
-    });
-
-    function fetchInitialState() {
-        const patientId = @patientId;
-        const assessmentId = @assessmentId;
-
-        fetch(`/Patient/${patientId}/Assessment/${assessmentId}/CategoryPercentages`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.totalPercentage !== undefined) {
-                        RedFlagsStore.set(data.totalPercentage);
-                    } else if (data.redflags !== undefined) {
-                         RedFlagsStore.set(data.redflags);
-                    }
-
-                    if (data.categories) {
-                        RedFlagsStore.setCategories(data.categories);
-                    }
-                }
-            });
-    }
-
-    function attachAnswerListeners() {
-        const radios = document.querySelectorAll('input[name^="q_"]');
-        radios.forEach(radio => {
-            radio.addEventListener('change', handleRadioChange);
-        });
-        const textareas = document.querySelectorAll('textarea[name^="note_"]');
-        textareas.forEach(textarea => {
-            textarea.addEventListener('change', handleTextareaInput);
-        });
-    }
-
-    function handleRadioChange(event) {
-        const radio = event.target;
-        const questionId = radio.dataset.questionId;
-        const value = radio.value === "true";
-        const patientId = @ViewData["PatientId"];
-        const comment = getCommentForQuestion(questionId);
-        saveAnswer(patientId, questionId, value, comment);
-    }
-
-    function handleTextareaInput(event) {
-        const textarea = event.target;
-        const questionId = textarea.dataset.questionId;
-        const comment = textarea.value;
-        const patientId = @ViewData["PatientId"];
-        const value = getRadioValueForQuestion(questionId);
-
-        saveAnswer(patientId, questionId, value, comment);
-    }
-
-    function getCommentForQuestion(questionId) {
-        const textarea = document.querySelector(`textarea[name="note_${questionId}"]`);
-        return textarea ? textarea.value : "";
-    }
-
-    function getRadioValueForQuestion(questionId) {
-        const radio = document.querySelector(`input[name="q_${questionId}"]:checked`);
-        return radio ? (radio.value === "true") : null;
-    }
-
-    function saveAnswer(patientId, questionId, boolValue, comment) {
-        const assessmentId = @assessmentId;
-        const dto = {
-            PatientId: patientId,
-            QuestionId: questionId,
-            BoolValue: boolValue,
-            Comment: comment,
-            AssessmentId: assessmentId
-        };
-        fetch(`/Patient/SaveOrUpdateAnswer`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dto)
-        })
-        .then(async response => {
-            if (!response.ok) {
-                throw new Error('Erreur serveur');
-            }
-            return response.json();
-        })
-        .then(data => {
-            RedFlagsStore.set(data.redflags);
-            if (data.categories) {
-                RedFlagsStore.setCategories(data.categories);
-            }
-            if (data.redflags >= criticalRedflagThreshold) {
-                showCriticalRedFlagModal(patientId);
-            }
-        });
-    }
-
-    function updateGauge(newValue) {
-        if (typeof moveNeedle === 'function') {
-            moveNeedle(newValue);
-        }
-        const elem = document.getElementById('probabilityValue');
-        if (elem) elem.textContent = newValue.toFixed(2) + '%';
-    }
-
-    function initializeTabs() {
-        document.querySelectorAll('#redflagsTabs button[data-category]').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                document.querySelectorAll('#redflagsTabs button')
-                    .forEach(el => {
-                        el.classList.remove('btn-primary');
-                        el.classList.add('btn-outline-primary');
-                    });
-                this.classList.remove('btn-outline-primary');
-                this.classList.add('btn-primary');
-
-                const categoryId = this.dataset.category;
-                loadQuestionsByCategory(categoryId);
-            });
-        });
-    }
-</script>
+@section Scripts {
+    <script src="~/js/gauge.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/redflags.js"></script>
+    <script>
+        RedFlags.init(@patientId, @assessmentId, @folderId);
+    </script>
+}
