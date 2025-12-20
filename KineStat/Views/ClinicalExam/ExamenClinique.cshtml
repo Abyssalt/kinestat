@@ -5,6 +5,7 @@
     var assessmentId = ViewData["AssessmentId"];
     var folderId = ViewData["FolderId"];
     ViewData["ShowClinicalFloatingEye"] = true;
+    ViewData["ShowSuspendButton"] = true;
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
@@ -22,6 +23,7 @@
                 <a asp-controller="RedFlags" asp-action="RedFlags" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
+               
                 <div>
                     <h1 class="h2 fw-bold text-primary mb-2">
                         <i class="bi bi-search me-2"></i>Examen clinique
