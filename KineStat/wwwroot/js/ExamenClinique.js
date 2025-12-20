@@ -205,50 +205,54 @@ function createQuestionCard(question, uniqueId, category) {
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body p-3 p-md-4';
 
-    const questionText = document.createElement('p');
-    questionText.className = 'fw-medium mb-3';
+    const mainContainer = document.createElement('div');
+    mainContainer.className = 'd-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mb-3';
+
+    const questionText = document.createElement('div');
+    questionText.className = 'fw-medium flex-grow-1';
     questionText.textContent = question.question;
-    cardBody.appendChild(questionText);
+    mainContainer.appendChild(questionText);
+
+    const responseContainer = document.createElement('div');
+    responseContainer.className = 'flex-shrink-0';
+    responseContainer.style.minWidth = '300px';
 
     if (question.type === 'ladder') {
         const min = parseInt(question.options[0]) || 0;
         const max = parseInt(question.options[question.options.length - 1]) || 10;
 
-        const ladderContainer = document.createElement('div');
-        ladderContainer.className = 'mb-3';
-
-        ladderContainer.innerHTML = `
-            <label class="form-label fw-medium">Valeur (${min} - ${max})</label>
-            <input type="number"
-                   class="form-control form-control-lg mb-3"
-                   name="q_${uniqueId}_value"
-                   id="input_${uniqueId}"
-                   min="${min}"
-                   max="${max}"
-                   placeholder="Entrez la valeur"
-                   value="${min}">
-            
-            <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
-            <input type="range"
-                   class="form-range"
-                   id="range_${uniqueId}"
-                   min="${min}"
-                   max="${max}"
-                   value="${min}"
-                   step="1">
-            <div class="d-flex justify-content-between align-items-center mt-2">
-                <small class="text-secondary fw-semibold">${min}</small>
-                <span class="badge bg-primary fs-5" id="display_${uniqueId}">${min}</span>
-                <small class="text-secondary fw-semibold">${max}</small>
+        responseContainer.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <input type="number"
+                       class="form-control"
+                       style="width: 80px;"
+                       name="q_${uniqueId}_value"
+                       id="input_${uniqueId}"
+                       min="${min}"
+                       max="${max}"
+                       placeholder="${min}"
+                       value="${min}">
+                
+                <input type="range"
+                       class="form-range flex-grow-1"
+                       id="range_${uniqueId}"
+                       min="${min}"
+                       max="${max}"
+                       value="${min}"
+                       step="1"
+                       style="max-width: 200px;">
+                
+                <span class="badge bg-primary" id="display_${uniqueId}" style="min-width: 40px;">${min}</span>
             </div>
         `;
 
-        cardBody.appendChild(ladderContainer);
-        card.appendChild(cardBody);
+        mainContainer.appendChild(responseContainer);
+        cardBody.appendChild(mainContainer);
 
-        const inputElem = card.querySelector(`#input_${uniqueId}`);
-        const rangeElem = card.querySelector(`#range_${uniqueId}`);
-        const displayElem = card.querySelector(`#display_${uniqueId}`);
+        const inputElem = responseContainer.querySelector(`#input_${uniqueId}`);
+        const rangeElem = responseContainer.querySelector(`#range_${uniqueId}`);
+        const displayElem = responseContainer.querySelector(`#display_${uniqueId}`);
+
 
         if (userResponses[category] && userResponses[category][question.id]) {
             const savedValue = userResponses[category][question.id];
@@ -273,7 +277,7 @@ function createQuestionCard(question, uniqueId, category) {
 
     } else if (question.options && question.options.length > 0) {
         const optionsDiv = document.createElement('div');
-        optionsDiv.className = 'btn-group w-100 mb-3';
+        optionsDiv.className = 'btn-group';
         optionsDiv.setAttribute('role', 'group');
 
         question.options.forEach(opt => {
@@ -291,10 +295,9 @@ function createQuestionCard(question, uniqueId, category) {
             }
 
             const wrapper = document.createElement('div');
-            wrapper.className = 'flex-fill';
             wrapper.innerHTML = `
                 <input type="radio" class="btn-check" name="q_${uniqueId}" id="q_${uniqueId}_${safeOpt}" value="${safeOpt}" autocomplete="off">
-                <label class="btn btn-outline-${btnColor} fw-bold w-100" for="q_${uniqueId}_${safeOpt}">
+                <label class="btn btn-outline-${btnColor} fw-bold" for="q_${uniqueId}_${safeOpt}">
                     <i class="bi ${iconClass} me-2"></i>${opt.toUpperCase()}
                 </label>
             `;
@@ -306,14 +309,16 @@ function createQuestionCard(question, uniqueId, category) {
             }
 
             radioInput.addEventListener('change', function () {
-                const cardCategory = card.dataset.category;              
+                const cardCategory = card.dataset.category;
                 saveResponseLocally(question.id, opt, cardCategory);
             });
 
             optionsDiv.appendChild(wrapper);
         });
 
-        cardBody.appendChild(optionsDiv);
+        responseContainer.appendChild(optionsDiv);
+        mainContainer.appendChild(responseContainer);
+        cardBody.appendChild(mainContainer);
     }
 
     const toggleBtn = document.createElement('button');
@@ -349,13 +354,6 @@ function createQuestionCard(question, uniqueId, category) {
             userResponses[category] = {};
         }
         userResponses[category][question.id + '_notes'] = this.value;
-    });
-
-    textarea.addEventListener('input', function () {
-        if (!userResponses[category]) {
-            userResponses[category] = {};
-        }
-        userResponses[category][question.id + '_notes'] = this.value;
 
         if (saveTimeout) {
             clearTimeout(saveTimeout);
@@ -367,7 +365,6 @@ function createQuestionCard(question, uniqueId, category) {
     });
 
     cardBody.appendChild(notesContainer);
-
     toggleBtn.addEventListener('click', () => {
         if (notesContainer.style.display === 'none') {
             notesContainer.style.display = 'block';
@@ -378,10 +375,7 @@ function createQuestionCard(question, uniqueId, category) {
         }
     });
 
-    if (!card.contains(cardBody)) {
-        card.appendChild(cardBody);
-    }
-
+    card.appendChild(cardBody);
     return card;
 }
 
