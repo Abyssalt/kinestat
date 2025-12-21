@@ -345,8 +345,55 @@ namespace KineStat.Controllers
 
             _context.Assessments.Add(assessment);
             await _context.SaveChangesAsync();
+            await CopyPermanentBoolAnswers(PatientId, assessment.Id);
 
             return RedirectToAction("Socrate", new { id = PatientId, assessmentId = assessment.Id });
+        }
+
+
+        private async Task CopyPermanentBoolAnswers(int patientId, int assessmentId)
+        {
+            var lastAssessment = _context.Assessments
+                .Where(a => a.PatientId == patientId && a.Id != assessmentId)
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Id)
+                .FirstOrDefault();
+            
+            if (lastAssessment == null) return;
+            
+            var permanentAnswers = _context.PatientAnswerBools
+                .OfType<PatientAnswerBool>()
+                .Where(p => p.AssessmentId == lastAssessment.Id && p.Question.HasPermanentAnswer == true)
+                .ToList();
+            
+            if (permanentAnswers.Any())
+            {
+                foreach (var answer in permanentAnswers)
+                {
+                    if (answer.Value)
+                    {
+                        bool exists = await _context.PatientAnswerBools.AnyAsync(a => a.PatientId == patientId
+                        && a.AssessmentId == assessmentId
+                        && a.QuestionId == answer.QuestionId);
+
+                        if (!exists)
+                        {
+                            _context.PatientAnswerBools.Add(new PatientAnswerBool
+                            {
+                                PatientId = patientId,
+                                AssessmentId = assessmentId,
+                                QuestionId = answer.QuestionId,
+                                Value = true,
+                                Comment = answer.Comment
+                            });
+
+                        }
+                    }
+
+                }
+            }
+            await _context.SaveChangesAsync();
+
         }
 
         /// <summary>

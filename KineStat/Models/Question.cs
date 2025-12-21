@@ -21,6 +21,8 @@ namespace KineStat.Models
 
         public int CategoryId { get; set; }
 
+        public bool ? HasPermanentAnswer { get; set; }
+
         public int? ClusterId { get; set; }
 
         public virtual Cluster? Cluster { get; set; }

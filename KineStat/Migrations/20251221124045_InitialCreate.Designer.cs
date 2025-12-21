@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     [DbContext(typeof(KineDbContext))]
-    [Migration("20251221004927_Anonymisation")]
-    partial class Anonymisation
+    [Migration("20251221124045_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -631,6 +631,9 @@ namespace KineStat.Migrations
                         .IsRequired()
                         .HasMaxLength(21)
                         .HasColumnType("character varying(21)");
+
+                    b.Property<bool?>("HasPermanentAnswer")
+                        .HasColumnType("boolean");
 
                     b.Property<double>("RVNegative")
                         .HasColumnType("double precision");

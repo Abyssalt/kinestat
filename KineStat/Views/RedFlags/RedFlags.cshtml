@@ -112,7 +112,7 @@
 
 <script>
     let hasDisplayedCriticalModal = false;
-    let criticalRedflagThreshold = 20;
+    const criticalRedflagThreshold = 20;
 
     async function loadQuestionsByCategory(categoryId) {
         const patientId = @patientId;
@@ -282,6 +282,18 @@
         }
         const elem = document.getElementById('probabilityValue');
         if (elem) elem.textContent = newValue.toFixed(2) + '%';
+
+        const eyeBadge = document.getElementById("eyeBadge");
+        if (eyeBadge) {
+            if (newValue >= criticalRedflagThreshold) {
+                eyeBadge.classList.remove("d-none");
+            } else {
+                eyeBadge.classList.add("d-none");
+            }
+        }
+
+
+
     }
 
     function initializeTabs() {

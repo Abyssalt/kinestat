@@ -6,6 +6,7 @@ using System.Globalization;
 using KineStat.Filters;
 using KineStat.Helpers;
 using KineStat.Services;
+using System.Threading.Tasks;
 
 namespace KineStat.Controllers
 {
@@ -181,10 +182,7 @@ namespace KineStat.Controllers
                 }
 
                 var assessment = await _context.Assessments
-    .FirstOrDefaultAsync(a =>
-        a.Id == answerDto.AssessmentId &&
-        a.PatientId == answerDto.PatientId
-    );
+                    .FirstOrDefaultAsync(a => a.Id == answerDto.AssessmentId && a.PatientId == answerDto.PatientId);
                 if (assessment == null)
                 {
                     return StatusCode(400, new
@@ -350,28 +348,6 @@ namespace KineStat.Controllers
 
             return posterior;
         }
-
-        /// <summary>
-        /// Retrieves the probability values for all categories associated with the specified patient and assessment.
-        /// </summary>
-        /// <param name="patientId">The unique identifier of the patient for whom category probabilities are calculated.</param>
-        /// <param name="assessmentId">The unique identifier of the assessment used to determine category probabilities.</param>
-        /// <returns>A dictionary mapping each category identifier to its calculated probability value for the given patient and
-        /// assessment.</returns>
-        private async Task<Dictionary<int, double>> GetAllCategoriesProbability(int patientId, int assessmentId)
-        {
-            Dictionary<int, double> CategoryRedFlags = new Dictionary<int, double>();
-            var categoryIds = _context.Categories
-                .Select(c => c.Id)
-                .ToList();
-            foreach (var id in categoryIds)
-            {
-                double result = await CalculateRedFlagCategory(patientId, assessmentId, id);
-                CategoryRedFlags[id] = result;
-            }
-            return CategoryRedFlags;
-        }
-
 
         /// <summary>
         /// Retrieves the red flags percentages for all TINTIV categories (categories 1-6)
