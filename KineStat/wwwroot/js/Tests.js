@@ -100,6 +100,84 @@ function updateProgress() {
     }
 }
 
+function calculateClusterProgress(clusterId) {
+    const container = document.getElementById('testsContainer-' + clusterId);
+    if (!container) return { completed: 0, total: 0, percentage: 0 };
+
+    const tests = container.querySelectorAll('.test-card');
+    const total = tests.length;
+    const completed = container.querySelectorAll('.answered-badge[style*="inline-block"]').length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    return { completed, total, percentage };
+}
+
+function updateClusterCard(clusterId) {
+    const progress = calculateClusterProgress(clusterId);
+    const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
+
+    if (!card) return;
+
+    const progressBadge = card.querySelector('.cluster-progress-badge');
+    if (progressBadge) {
+        progressBadge.textContent = `${progress.completed}/${progress.total}`;
+    }
+
+    const progressFill = card.querySelector('.cluster-progress-fill');
+    if (progressFill) {
+        progressFill.style.width = `${progress.percentage}%`;
+    }
+
+    const statusBadge = card.querySelector('.cluster-status-badge');
+    const actionBtn = card.querySelector('.btn-cluster-action');
+
+    if (progress.percentage === 0) {
+        if (statusBadge) statusBadge.textContent = 'Non commencé';
+        if (actionBtn) {
+            actionBtn.textContent = '▶ Commencer';
+            actionBtn.className = 'btn-cluster-action btn-start btn-tablet-lg';
+        }
+        card.classList.remove('has-progress', 'completed');
+    } else if (progress.percentage === 100) {
+        if (statusBadge) statusBadge.textContent = '✓ Complété';
+        if (actionBtn) {
+            actionBtn.textContent = '✓ Revoir les tests';
+            actionBtn.className = 'btn-cluster-action btn-review btn-tablet-lg';
+        }
+        card.classList.remove('has-progress');
+        card.classList.add('completed');
+    } else {
+        if (statusBadge) statusBadge.textContent = 'En cours';
+        if (actionBtn) {
+            actionBtn.textContent = '→ Continuer';
+            actionBtn.className = 'btn-cluster-action btn-continue btn-tablet-lg';
+        }
+        card.classList.add('has-progress');
+        card.classList.remove('completed');
+    }
+}
+
+function toggleClusterTests(clusterId) {
+    const collapseId = 'collapse-cluster-' + clusterId;
+    const collapse = document.getElementById(collapseId);
+
+    if (!collapse) return;
+
+    const bsCollapse = new bootstrap.Collapse(collapse, {
+        toggle: true
+    });
+}
+
+function scrollToClusterTop(clusterId) {
+    const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
+    if (card) {
+        card.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
 
 function loadExistingResponses(responses) {
 
@@ -173,3 +251,37 @@ function loadExistingResponses(responses) {
     });
 
 }
+
+function initTests(patientId, assessmentId, existingResponses) {
+    globalPatientId = patientId;
+    globalAssessmentId = assessmentId;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadExistingResponses(existingResponses);
+
+        const originalUpdateProgress = window.updateProgress;
+        window.updateProgress = function () {
+            if (originalUpdateProgress) {
+                originalUpdateProgress();
+            }
+
+            document.querySelectorAll('[data-cluster-id]').forEach(card => {
+                const clusterId = card.getAttribute('data-cluster-id');
+                updateClusterCard(clusterId);
+            });
+        };
+
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                document.querySelectorAll('[data-cluster-id]').forEach(card => {
+                    const clusterId = card.getAttribute('data-cluster-id');
+                    updateClusterCard(clusterId);
+                });
+            }, 100);
+        });
+    });
+}
+
+window.Tests = {
+    init: initTests
+};
