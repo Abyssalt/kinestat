@@ -1,5 +1,6 @@
 ﻿using KineStat.Data;
 using KineStat.Models;
+using KineStat.Models.ViewModels;
 using KineStat.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -337,6 +338,90 @@ namespace KineStat.Controllers
                 .ToListAsync();
 
             return Json(questions);
+        }
+
+        /// <summary>
+        /// Displays the change password form for the administrator
+        /// </summary>
+        /// <returns>View with ChangePasswordViewModel</returns>
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordViewModel());
+        }
+
+        /// <summary>
+        /// Processes the password change request for the administrator
+        /// </summary>
+        /// <param name="model">ChangePasswordViewModel containing current and new password</param>
+        /// <returns>Redirect to Index with success or error message</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var userIdString = HttpContext.Session.GetString("UserId");
+                var userRole = HttpContext.Session.GetString("UserRole");
+
+                if (string.IsNullOrEmpty(userIdString) || userRole != "Admin")
+                {
+                    TempData["Error"] = "Session expirée. Veuillez vous reconnecter.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                if (!int.TryParse(userIdString, out int adminId))
+                {
+                    TempData["Error"] = "Identifiant administrateur invalide.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var admin = await _context.Administrators.FindAsync(adminId);
+
+                if (admin == null)
+                {
+                    TempData["Error"] = "Administrateur introuvable.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                if (!PasswordHasher.VerifyPassword(model.CurrentPassword, admin.Password))
+                {
+                    ModelState.AddModelError("CurrentPassword", "Le mot de passe actuel est incorrect.");
+                    return View(model);
+                }
+
+                if (!IsPasswordStrong(model.NewPassword, out List<string> errors))
+                {
+                    foreach (var error in errors)
+                    {
+                        ModelState.AddModelError("NewPassword", error);
+                    }
+                    return View(model);
+                }
+
+                if (PasswordHasher.VerifyPassword(model.NewPassword, admin.Password))
+                {
+                    ModelState.AddModelError("NewPassword", "Le nouveau mot de passe doit être différent de l'ancien.");
+                    return View(model);
+                }
+
+                admin.Password = PasswordHasher.HashPassword(model.NewPassword);
+                _context.Update(admin);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Mot de passe changé avec succès !";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erreur lors du changement de mot de passe : {ex.Message}";
+                return View(model);
+            }
         }
 
     }
