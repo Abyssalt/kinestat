@@ -636,11 +636,29 @@
 
         function updatePagination(current, total) {
             const ul = document.getElementById('paginationControls');
-            let html = `<li class="page-item ${current === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${current-1}"><i class="bi bi-chevron-left"></i></a></li>`;
-            for (let i = 1; i <= total; i++) html += `<li class="page-item ${i === current ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
-            html += `<li class="page-item ${current === total ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${current+1}"><i class="bi bi-chevron-right"></i></a></li>`;
+            let html = '';
+
+            if (current > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" data-page="${current-1}"><i class="bi bi-chevron-left"></i></a></li>`;
+            }
+
+            for (let i = 1; i <= total; i++) {
+                html += `<li class="page-item ${i === current ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+
+            if (current < total) {
+                html += `<li class="page-item"><a class="page-link" href="#" data-page="${current+1}"><i class="bi bi-chevron-right"></i></a></li>`;
+            }
+
             ul.innerHTML = html;
-            ul.querySelectorAll('a.page-link').forEach(a => a.addEventListener('click', e => { e.preventDefault(); if (!a.parentElement.classList.contains('disabled') && !a.parentElement.classList.contains('active')) { currentPage = parseInt(a.dataset.page); loadPatients(); } }));
+
+            ul.querySelectorAll('a.page-link').forEach(a => a.addEventListener('click', e => {
+                e.preventDefault();
+                if (!a.parentElement.classList.contains('active')) {
+                    currentPage = parseInt(a.dataset.page);
+                    loadPatients();
+                }
+            }));
         }
 
         function attachRowEvents() { document.querySelectorAll('.clickable-row').forEach(row => row.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = row.dataset.href; })); }

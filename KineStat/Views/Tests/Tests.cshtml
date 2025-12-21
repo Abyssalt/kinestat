@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Tests";
     ViewData["HideFloatingEye"] = true;
+    ViewData["ShowSuspendButton"] = true;
     var clusters = Model;
     var patientNom = ViewData["PatientNom"]?.ToString() ?? "Patient";
     var patientId = ViewData["PatientId"] != null ? Convert.ToInt32(ViewData["PatientId"]) : 0;
@@ -31,6 +32,7 @@
                 <a asp-controller="ClinicalExam" asp-action="ExamenClinique" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
+
                 <div>
                     <h1 class="h2 fw-bold text-primary mb-2">
                         <i class="bi bi-clipboard2-pulse me-2"></i>Évaluation complète

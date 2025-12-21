@@ -22,7 +22,7 @@ namespace KineStat.Models
     {
         Belgique,
         France,
-        Luxembourg, 
+        Luxembourg,
         Suisse
     }
     public class Patient
@@ -58,7 +58,7 @@ namespace KineStat.Models
         [Required]
         public Country Country { get; set; }
 
-        
+
         //Medical Informations
         public string? Profession { get; set; }
         public string? ActivitesPhysiques { get; set; }
@@ -90,5 +90,8 @@ namespace KineStat.Models
         public bool IsAnonymized { get; set; } = false;
 
         public DateTime? AnonymizedDate { get; set; }
+
+        [DataType(DataType.DateTime)]
+        public DateTime? InactiveSinceDate { get; set; }
     }
 }

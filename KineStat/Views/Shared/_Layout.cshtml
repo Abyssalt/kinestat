@@ -47,6 +47,24 @@
     <body class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+            
+            @if (ViewData["AssessmentId"] != null && ViewData["ShowSuspendButton"] != null)
+            {
+                var dossierId = ViewData["FolderId"];
+
+                <div class="position-fixed top-0 end-0 mt-5 me-3 me-md-4" style="z-index: 1025; padding-top: 70px;">
+                    <a asp-controller="Folder" 
+                       asp-action="DossierDetails" 
+                       asp-route-id="@dossierId"
+                       class="btn btn-warning rounded-circle shadow d-flex align-items-center justify-content-center"
+                       style="width: 50px; height: 50px;"
+                       title="Suspendre le bilan"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right">
+                        <i class="bi bi-pause-circle-fill fs-5"></i>
+                    </a>
+                </div>
+            }
             <div class="container-fluid px-3 px-lg-4">
 
                 @{
@@ -65,7 +83,7 @@
                    asp-area=""
                    asp-controller="@controller"
                    asp-action="Index">
-                    <img src="~/images/logo.png" alt="Logo KineStat" height="32" class="me-2" />
+                    <img src="~/images/logo.png" alt="Logo KineStat" height="32" class="me-2"/>
                     KineStat
                 </a>
 
@@ -141,6 +159,9 @@
                                 <h6 class="mb-0 fw-bold">
                                     <i class="bi bi-bar-chart-line text-warning me-2"></i>Graphiques
                                 </h6>
+                                <button class="btn btn-sm btn-outline-primary" onclick="openChartModal()">
+                                    <i class="bi bi-zoom-in"></i> Agrandir
+                                </button>
                             </div>
                             <hr class="my-2">
                             <div class="flex-grow-1 overflow-auto">
@@ -168,6 +189,24 @@
                 </button>
             </div>
         }
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-bar-chart-line text-primary me-2"></i>
+                        <span id="modalChartTitle">Graphique</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+                    <div style="width: 90%; max-width: 800px; height: 80vh;">
+                        <canvas id="modalRadarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="border-top bg-light mt-auto">
         <div class="container">
@@ -204,6 +243,7 @@
             let radarChart9Instance = null;
             let radarChart6EyeInstance = null; 
             let radarChart9EyeInstance = null;
+            let modalChartInstance = null;
             function initOrUpdateRadarChart6() {
                 const ctx = document.getElementById("radarChart6");
                 if (!ctx) return;
@@ -422,9 +462,118 @@
             }
         }
 
-          
-       
-            initOrUpdateRadarChart9();
+        window.openChartModal = function() {
+                    const modal = new bootstrap.Modal(document.getElementById('chartModal'));
+                    const isClinical = document.getElementById("radarChart9Eye") !== null;
+
+                    if (modalChartInstance) {
+                        modalChartInstance.destroy();
+                    }
+
+                    const ctx = document.getElementById("modalRadarChart");
+                    document.getElementById("modalChartTitle").textContent = isClinical ? "Profil Clinique" : "Profil TINTIV";
+
+                    if (isClinical) {
+                        const clinicalCategories = window.ClinicalProfileStore ? ClinicalProfileStore.get() : [0, 0, 0, 0, 0, 0, 0, 0, 0];
+                        modalChartInstance = new Chart(ctx, {
+                            type: 'radar',
+                            data: {
+                                labels: [
+                                    "Articulaire/structurel", "Myofascial", "Nociceptif", "Neuropathique",
+                                    "Nociplastique", "Contrôle sensorimoteur", "Croyance & cognition",
+                                    "Socio-environnemental", "Émotionnel/Affectif"
+                                ],
+                                datasets: [{
+                                    label: "Profil clinique",
+                                    data: clinicalCategories,
+                                    backgroundColor: "rgba(13,110,253,0.25)",
+                                    borderColor: "rgb(13,110,253)",
+                                    borderWidth: 4,
+                                    pointRadius: 8,
+                                    pointHoverRadius: 12,
+                                    pointBackgroundColor: "rgb(13,110,253)",
+                                    pointBorderColor: "#fff",
+                                    tension: 0.25
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    r: {
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            stepSize: 1,
+                                            backdropColor: "transparent",
+                                            font: { size: 14 }
+                                        },
+                                        pointLabels: {
+                                            font: { size: 16, weight: 'bold' }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top',
+                                        labels: { font: { size: 16 } }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        const categoriesArray = window.RedFlagsStore ? RedFlagsStore.getCategories() : [0, 0, 0, 0, 0, 0];
+                        modalChartInstance = new Chart(ctx, {
+                            type: 'radar',
+                            data: {
+                                labels: ["Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire"],
+                                datasets: [{
+                                    label: "Profil TINTIV",
+                                    data: categoriesArray,
+                                    backgroundColor: "rgba(255,99,132,0.30)",
+                                    borderColor: "rgb(255,99,132)",
+                                    borderWidth: 4,
+                                    pointRadius: 8,
+                                    pointHoverRadius: 12,
+                                    pointBackgroundColor: "rgb(255,99,132)",
+                                    pointBorderColor: "#fff",
+                                    tension: 0.25
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    r: {
+                                        min: 0,
+                                        max: 5,
+                                        ticks: {
+                                            stepSize: 1,
+                                            backdropColor: "transparent",
+                                            font: { size: 14 }
+                                        },
+                                        pointLabels: {
+                                            font: { size: 16, weight: 'bold' }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top',
+                                        labels: { font: { size: 16 } }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    modal.show();
+                };
+
+
+                    initOrUpdateRadarChart9();
             initOrUpdateRadarChart6();
             initOrUpdateRadarChart6Eye(); 
             initOrUpdateRadarChart9Eye();
@@ -433,7 +582,7 @@
                 RedFlagsStore.subscribeCategories(categoriesArray => {
                     initOrUpdateRadarChart6();
                     initOrUpdateRadarChart6Eye();
-                   // updatePathologiesList(categoriesArray);
+                   //updatePathologiesList(categoriesArray);
                 });
             }
             if (window.ClinicalProfileStore) {
@@ -454,25 +603,46 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.categories) {
-                            if (window.RedFlagsStore) {
+                            const hasValues = data.categories.some(cat => cat > 0);
+                            if(hasValues && window.RedFlagsStore){
                                 RedFlagsStore.setCategories(data.categories);
-
                                 if (data.totalPercentage !== undefined) {
                                     RedFlagsStore.set(data.totalPercentage);
                                 }
-                           }
+                            }else {
+                                if(window.RedFlagesStore){
+                                    RedFlagsStore.clear();
+                                }
+                            }
+                        }else {
+                            if(window.RedFlagesStore){
+                                RedFlagsStore.clear();
+                            }
                         }
                     })
                     .catch(error => {
                         console.error("Erreur lors du chargement des catégories:", error);
+                         if (window.RedFlagsStore) {
+                            RedFlagsStore.clear();
+                        }
                     });
 
                 fetch(`/Patient/${patientId}/Assessment/${assessmentId}/ClinicalCategoryPercentages`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.clinicalCategories) {
-                            if (window.ClinicalProfileStore) {
+                            const hasValues = data.clinicalCategories.some(cat => cat > 0);
+
+                            if (hasValues && window.ClinicalProfileStore) {
                                 ClinicalProfileStore.set(data.clinicalCategories);
+                            } else {
+                                if (window.ClinicalProfileStore) {
+                                    ClinicalProfileStore.set([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                                }
+                            }
+                        } else {
+                            if (window.ClinicalProfileStore) {
+                                ClinicalProfileStore.set([0, 0, 0, 0, 0, 0, 0, 0, 0]);
                             }
                         }
                     })

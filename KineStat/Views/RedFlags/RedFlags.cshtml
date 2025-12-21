@@ -3,7 +3,10 @@
     ViewData["Title"] = "Red Flags";
     ViewData["PatientId"] = ViewContext.RouteData.Values["id"]?.ToString();
     ViewData["ShowFloatingEye"] = true;
-    var patientId = ViewData["PatientId"];
+
+    ViewData["ShowSuspendButton"] = true;
+    var patientId = ViewData["PatientId"]; 
+
     var assessmentId = ViewData["AssessmentId"];
     var folderId = ViewData["FolderId"];
     ViewData["Breadcrumbs"] =
@@ -22,6 +25,7 @@
                 <a asp-controller="Assessments" asp-action="Socrate" asp-route-id="@patientId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
+
                 <div>
                     <h1 class="h2 fw-bold text-danger mb-2">
                         <i class="bi bi-exclamation-triangle me-2"></i>Red Flags
@@ -65,7 +69,7 @@
         </div>
     </div>
 </div>
-<!-- Modal Red Flag Critique -->
+
 <div class="modal fade" id="redFlagCriticalModal" tabindex="-1" aria-labelledby="redFlagCriticalModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
