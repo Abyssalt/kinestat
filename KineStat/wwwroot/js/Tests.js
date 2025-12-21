@@ -415,27 +415,4 @@ function loadExistingResponses(responses) {
 
     });
 
-
-    if (loadedCount > 0) {
-        updateProgress();
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'alert alert-success alert-dismissible fade show';
-        infoDiv.innerHTML = `
-            <i class="bi bi-check-circle me-2"></i>
-            <strong>${loadedCount} réponse(s) précédente(s) chargée(s)</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-
-        const container = document.querySelector('.container-fluid');
-        if (container) {
-            container.insertBefore(infoDiv, container.firstChild.nextSibling);
-
-            setTimeout(() => {
-                infoDiv.remove();
-            }, 5000);
-        }
-    }
-
-
 }

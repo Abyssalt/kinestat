@@ -137,14 +137,16 @@
                             @cluster.Questions.Count test(s) à effectuer
                         </p>
 
-                        <div class="cluster-progress-bar">
-                            <div class="cluster-progress-fill" style="width: 0%"></div>
-                        </div>
+                        <div class="cluster-progress-container">
+                            <div class="cluster-progress-bar">
+                                <div class="cluster-progress-fill" style="width: 0%"></div>
+                            </div>
 
-                        <div class="cluster-actions">
-                            <button class="btn-cluster-action btn-start btn-tablet-lg" onclick="toggleClusterTests(@cluster.Id)">
-                                ▶ Commencer
-                            </button>
+                            <div class="cluster-actions">
+                                <button class="btn-cluster-action btn-start btn-tablet-lg" onclick="toggleClusterTests(@cluster.Id)">
+                                    ▶ Commencer
+                                </button>
+                            </div>
                         </div>
 
                         <div id="@collapseId" class="collapse mt-3">
@@ -283,40 +285,7 @@
                                                     </div>
                                                 </div>
                                             }
-                                            else if (question is QuestionQCM qcm)
-                                            {
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-medium">Observation</label>
-                                                    <select class="form-select form-select-lg"
-                                                            name="test-@question.Id-value"
-                                                            onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)">
-                                                        <option value="">-- Sélectionnez une observation --</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="mb-2">
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
-                                                            onclick="toggleObservations(@question.Id)">
-                                                        <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
-                                                    </button>
-                                                </div>
-
-                                                <div class="collapse" id="observations-@question.Id">
-                                                    <div class="card border-0 bg-light mt-3">
-                                                        <div class="card-body p-3">
-                                                            <label class="form-label fw-medium">
-                                                                <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
-                                                            </label>
-                                                            <textarea class="form-control"
-                                                          name="test-@question.Id-observations"
-                                                          rows="3"
-                                                          placeholder="Notez ici vos observations..."
-                                                          oninput="autoSaveTest(@question.Id)"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            }
+                                            
                                         </div>
                                     </div>
                                 }
