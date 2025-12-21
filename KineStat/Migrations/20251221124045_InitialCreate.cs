@@ -124,9 +124,9 @@ namespace KineStat.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    MinNumberOfPositiveTests = table.Column<int>(type: "integer", nullable: false),
-                    RVPositive = table.Column<int>(type: "integer", nullable: false),
-                    RVNegative = table.Column<int>(type: "integer", nullable: false),
+                    MinNumberOfPositiveTests = table.Column<int>(type: "integer", nullable: true),
+                    RVPositive = table.Column<double>(type: "double precision", nullable: true),
+                    RVNegative = table.Column<double>(type: "double precision", nullable: true),
                     CategoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -192,7 +192,8 @@ namespace KineStat.Migrations
                     PhysioId = table.Column<int>(type: "integer", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsAnonymized = table.Column<bool>(type: "boolean", nullable: false),
-                    AnonymizedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    AnonymizedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    InactiveSinceDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -378,6 +379,7 @@ namespace KineStat.Migrations
                     RVNegative = table.Column<double>(type: "double precision", nullable: false),
                     SourceRv = table.Column<string>(type: "text", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    HasPermanentAnswer = table.Column<bool>(type: "boolean", nullable: true),
                     ClusterId = table.Column<int>(type: "integer", nullable: true),
                     AssessmentId = table.Column<int>(type: "integer", nullable: true),
                     Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),

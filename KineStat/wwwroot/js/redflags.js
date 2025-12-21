@@ -22,22 +22,22 @@ function transformQuestionsToCompactFormat() {
         const cardBody = card.querySelector('.card-body');
         if (!cardBody) return;
 
-        card.classList.add('border', 'shadow-sm');
+        card.classList.add('border', 'shadow-sm', 'mb-3');
         card.style.borderWidth = '2px';
 
         const questionText = cardBody.querySelector('p, .fw-medium');
         const btnGroup = cardBody.querySelector('.btn-group');
-        const noteButton = cardBody.querySelector('[id^="notes_button_"]');
         const collapseDiv = cardBody.querySelector('.collapse');
 
         if (!questionText || !btnGroup) return;
 
         const mainContainer = document.createElement('div');
-        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3';
+        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3 w-100';
 
         const questionContainer = document.createElement('div');
         questionContainer.className = 'fw-medium flex-grow-1';
         questionContainer.innerHTML = questionText.innerHTML;
+
 
         const tooltip = questionText.querySelector('[data-bs-toggle="tooltip"]');
         if (tooltip) {
@@ -48,14 +48,21 @@ function transformQuestionsToCompactFormat() {
             questionContainer.appendChild(icon);
         }
 
+
         const responseContainer = document.createElement('div');
         responseContainer.className = 'flex-shrink-0';
-        responseContainer.style.minWidth = '200px';
+
+
+        btnGroup.classList.remove('w-100', 'd-grid');
+        btnGroup.classList.add('btn-group');
+
         responseContainer.appendChild(btnGroup);
+
 
         const notesSection = document.createElement('div');
         notesSection.className = 'flex-shrink-0 d-flex align-items-center gap-2';
         notesSection.style.minWidth = '200px';
+
 
         const toggleBtn = document.createElement('button');
         toggleBtn.type = 'button';
@@ -91,15 +98,21 @@ function transformQuestionsToCompactFormat() {
                 }
             });
 
+ 
+            newTextarea.addEventListener('change', handleTextareaInput);
+
             notesSection.appendChild(toggleBtn);
             notesSection.appendChild(newTextarea);
         }
+
 
         mainContainer.appendChild(questionContainer);
         mainContainer.appendChild(responseContainer);
         mainContainer.appendChild(notesSection);
 
+
         cardBody.innerHTML = '';
+        cardBody.className = 'card-body p-3 p-md-4';
         cardBody.appendChild(mainContainer);
     });
 }
@@ -215,6 +228,15 @@ function updateGauge(newValue) {
     }
     const elem = document.getElementById('probabilityValue');
     if (elem) elem.textContent = newValue.toFixed(2) + '%';
+
+    const eyeBadge = document.getElementById("eyeBadge");
+    if (eyeBadge) {
+        if (newValue >= criticalRedflagThreshold) {
+            eyeBadge.classList.remove("d-none");
+        } else {
+            eyeBadge.classList.add("d-none");
+        }
+    }
 }
 
 function initializeTabs() {
@@ -236,6 +258,28 @@ function initializeTabs() {
     });
 }
 
+function initBackToTop() {
+    const backToTopBtn = document.getElementById('backToTop');
+
+    if (!backToTopBtn) return;
+
+    window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.opacity = '1';
+            backToTopBtn.style.pointerEvents = 'auto';
+        } else {
+            backToTopBtn.style.opacity = '0';
+            backToTopBtn.style.pointerEvents = 'none';
+        }
+    });
+
+    backToTopBtn.addEventListener('click', function () {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
 
 window.RedFlags = {
     init: function (patientId, assessmentId, folderId) {
@@ -252,6 +296,7 @@ window.RedFlags = {
             loadQuestionsByCategory(1);
             initializeGauge();
             fetchInitialState();
+            initBackToTop();
 
             RedFlagsStore.subscribe(function (newValue) {
                 updateGauge(newValue);

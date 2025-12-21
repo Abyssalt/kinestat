@@ -629,6 +629,9 @@ namespace KineStat.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("character varying(21)");
 
+                    b.Property<bool?>("HasPermanentAnswer")
+                        .HasColumnType("boolean");
+
                     b.Property<double>("RVNegative")
                         .HasColumnType("double precision");
 
