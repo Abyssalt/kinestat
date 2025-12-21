@@ -21,6 +21,7 @@ namespace KineStat.Controllers
 
         /// <summary>
         /// Handles HTTP GET requests to display a list of patients, optionally filtered by search term and status.
+        /// Excludes patients with "Terminé" status by default (anonymized patients).
         /// </summary>
         /// <remarks>The returned view includes a list of patients ordered by last name, as well as a list
         /// of available physiotherapists for display. The search term and status filter are preserved in the view for
@@ -49,10 +50,16 @@ namespace KineStat.Controllers
                 .Where(p => p.PhysioId == physioId)
                 .AsQueryable();
 
+            bool hasFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
+
+            if (!hasFilter || (hasFilter && status != "Terminé"))
+            {
+                query = query.Where(p => p.Status != PatientStatus.Terminé);
+            }
+
             List<Patient> patients = new List<Patient>();
 
             bool hasSearch = !string.IsNullOrWhiteSpace(search);
-            bool hasFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
 
             if (hasSearch || hasFilter)
             {
@@ -90,6 +97,7 @@ namespace KineStat.Controllers
 
         /// <summary>
         /// Searches for patients matching the specified criteria and returns a paginated list of results.
+        /// Excludes patients with "Terminé" status by default (anonymized patients).
         /// </summary>
         /// <remarks>The returned patient list is ordered by last name. If no patients match the criteria,
         /// the list will be empty. This method supports server-side paging for efficient data retrieval.</remarks>
@@ -125,6 +133,13 @@ namespace KineStat.Controllers
                 .Where(p => p.PhysioId == physioId)
                 .AsQueryable();
 
+            bool hasStatusFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
+
+            if (!hasStatusFilter || (hasStatusFilter && status != "Terminé"))
+            {
+                query = query.Where(p => p.Status != PatientStatus.Terminé);
+            }
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchLower = search.ToLower();
@@ -134,7 +149,7 @@ namespace KineStat.Controllers
                 );
             }
 
-            if (!string.IsNullOrWhiteSpace(status) && status != "Tous" && Enum.TryParse<PatientStatus>(status, out var patientStatus))
+            if (hasStatusFilter && Enum.TryParse<PatientStatus>(status, out var patientStatus))
             {
                 query = query.Where(p => p.Status == patientStatus);
             }
@@ -198,7 +213,7 @@ namespace KineStat.Controllers
             if (ModelState.IsValid)
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                
+
                 try
                 {
                     var existingPatientByNiss = await _context.Patients
@@ -221,8 +236,8 @@ namespace KineStat.Controllers
                         return RedirectToAction(nameof(Index));
                     }
 
-                    if (!string.IsNullOrWhiteSpace(NewDoctorLastName) && 
-                        !string.IsNullOrWhiteSpace(NewDoctorFirstName) && 
+                    if (!string.IsNullOrWhiteSpace(NewDoctorLastName) &&
+                        !string.IsNullOrWhiteSpace(NewDoctorFirstName) &&
                         !string.IsNullOrWhiteSpace(NewDoctorINAMI))
                     {
                         if (!System.Text.RegularExpressions.Regex.IsMatch(NewDoctorINAMI, @"^\d{11}$|^\d-\d{5}-\d{2}-\d{3}$"))
@@ -254,8 +269,8 @@ namespace KineStat.Controllers
 
                         patient.DoctorId = newDoctor.Id;
                     }
-                    else if (!string.IsNullOrWhiteSpace(NewDoctorLastName) || 
-                             !string.IsNullOrWhiteSpace(NewDoctorFirstName) || 
+                    else if (!string.IsNullOrWhiteSpace(NewDoctorLastName) ||
+                             !string.IsNullOrWhiteSpace(NewDoctorFirstName) ||
                              !string.IsNullOrWhiteSpace(NewDoctorINAMI))
                     {
                         TempData["Error"] = "Si vous souhaitez ajouter un nouveau médecin, tous les champs (Nom, Prénom, INAMI) doivent être remplis.";
@@ -266,9 +281,9 @@ namespace KineStat.Controllers
                     patient.Status = PatientStatus.Actif;
                     _context.Add(patient);
                     await _context.SaveChangesAsync();
-                    
+
                     await transaction.CommitAsync();
-                    
+
                     return RedirectToAction("Anamnese","Patient", new { id = patient.Id });
                 }
                 catch (Exception ex)

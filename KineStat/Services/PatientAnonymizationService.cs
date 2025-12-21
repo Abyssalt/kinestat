@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 namespace KineStat.Services
 {
     /// <summary>
-    /// Department responsible for the automatic anonymization of patient data 
-    /// in accordance with the GDPR (20 years of conservation)
+    /// Service responsible for the automatic anonymization of patient data 
+    /// in accordance with the GDPR (20 years of inactivity)
     /// </summary>
     public class PatientAnonymizationService
     {
@@ -24,8 +24,8 @@ namespace KineStat.Services
         }
 
         /// <summary>
-        /// Anonymise all patients whose creation date is more than 20 years old
-        /// Returns the number of anonymized patients
+        /// Anonymizes all patients whose status has been Inactive for more than 20 years.
+        /// Returns the number of anonymized patients.
         /// </summary>
         public async Task<int> AnonymizeExpiredPatientsAsync()
         {
@@ -36,10 +36,13 @@ namespace KineStat.Services
                 var cutoffDate = DateTime.UtcNow.AddYears(-RETENTION_YEARS);
 
                 var patientsToAnonymize = await _context.Patients
-                    .Where(p => p.CreatedDate < cutoffDate && !p.IsAnonymized)
+                    .Where(p => p.Status == PatientStatus.Inactif
+                                && p.InactiveSinceDate != null
+                                && p.InactiveSinceDate.Value < cutoffDate
+                                && !p.IsAnonymized)
                     .ToListAsync();
 
-                _logger.LogInformation($"Patients à anonymiser: {patientsToAnonymize.Count}");
+                _logger.LogInformation($"Patients inactifs depuis plus de {RETENTION_YEARS} ans à anonymiser: {patientsToAnonymize.Count}");
 
                 if (patientsToAnonymize.Count == 0)
                 {
@@ -58,7 +61,7 @@ namespace KineStat.Services
                         anonymizedCount++;
 
                         _logger.LogInformation(
-                            $"Patient ID {patient.Id} anonymisé (créé le {patient.CreatedDate:yyyy-MM-dd})");
+                            $"Patient ID {patient.Id} anonymisé (inactif depuis le {patient.InactiveSinceDate:yyyy-MM-dd})");
                     }
                     catch (Exception ex)
                     {
@@ -81,7 +84,7 @@ namespace KineStat.Services
         }
 
         /// <summary>
-        /// Anonymize a patient’s personal data
+        /// Anonymizes a patient’s personal data and changes their status to Done
         /// </summary>
         private void AnonymizePatient(Patient patient, DateTime anonymizationDate)
         {

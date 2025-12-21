@@ -64,7 +64,7 @@ namespace KineStat.Controllers
         /// <remarks>This action requires a valid anti-forgery token and is accessible via the
         /// 'Patient/Edit' route. If the patient does not exist or validation fails, the user is redirected with an
         /// appropriate error message. Concurrency and other exceptions are handled and reported through
-        /// TempData.</remarks>
+        /// TempData. This method also manages the InactiveSinceDate field for GDPR compliance.</remarks>
         /// <param name="patient">The patient entity containing updated information. The patient's Id must correspond to an existing record.
         /// All required fields must be valid; otherwise, the update will not be performed.</param>
         /// <returns>An <see cref="IActionResult"/> that redirects to the anamnesis view for the patient. If the update is
@@ -75,7 +75,7 @@ namespace KineStat.Controllers
         public async Task<IActionResult> Edit(Patient patient, string? NewDoctorLastName, string? NewDoctorFirstName, string? NewDoctorINAMI)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+
             try
             {
                 if (ModelState.IsValid)
@@ -97,8 +97,22 @@ namespace KineStat.Controllers
                         return RedirectToAction(nameof(Anamnese), new { id = patient.Id });
                     }
 
-                    if (!string.IsNullOrWhiteSpace(NewDoctorLastName) && 
-                        !string.IsNullOrWhiteSpace(NewDoctorFirstName) && 
+                    // ===== STATUS AND INACTIVITY MANAGEMENT (GDPR) =====
+                    var oldStatus = existingPatient.Status;
+                    var newStatus = patient.Status;
+
+                    if (newStatus == PatientStatus.Inactif && oldStatus != PatientStatus.Inactif)
+                    {
+                        existingPatient.InactiveSinceDate = DateTime.UtcNow;
+                    }
+                    else if (oldStatus == PatientStatus.Inactif && newStatus != PatientStatus.Inactif)
+                    {
+                        existingPatient.InactiveSinceDate = null; // Réinitialiser le compteur
+                    }
+                    // ===== END STATUS AND INACTIVITY MANAGEMENT =====
+
+                    if (!string.IsNullOrWhiteSpace(NewDoctorLastName) &&
+                        !string.IsNullOrWhiteSpace(NewDoctorFirstName) &&
                         !string.IsNullOrWhiteSpace(NewDoctorINAMI))
                     {
                         if (!System.Text.RegularExpressions.Regex.IsMatch(NewDoctorINAMI, @"^\d{11}$"))
@@ -130,8 +144,8 @@ namespace KineStat.Controllers
 
                         patient.DoctorId = newDoctor.Id;
                     }
-                    else if (!string.IsNullOrWhiteSpace(NewDoctorLastName) || 
-                             !string.IsNullOrWhiteSpace(NewDoctorFirstName) || 
+                    else if (!string.IsNullOrWhiteSpace(NewDoctorLastName) ||
+                             !string.IsNullOrWhiteSpace(NewDoctorFirstName) ||
                              !string.IsNullOrWhiteSpace(NewDoctorINAMI))
                     {
                         TempData["Error"] = "Si vous souhaitez ajouter un nouveau médecin, tous les champs (Nom, Prénom, INAMI) doivent être remplis.";
@@ -150,13 +164,13 @@ namespace KineStat.Controllers
                     existingPatient.PhysioId = patient.PhysioId;
                     existingPatient.Weight = patient.Weight;
                     existingPatient.Height = patient.Height;
-                    existingPatient.DoctorId = patient.DoctorId;  // Nouvelle relation
+                    existingPatient.DoctorId = patient.DoctorId;
                     existingPatient.Address = patient.Address;
                     existingPatient.Country = patient.Country;
 
                     _context.Update(existingPatient);
                     await _context.SaveChangesAsync();
-                    
+
                     await transaction.CommitAsync();
 
                     TempData["Success"] = $"Patient {patient.FirstName} {patient.LastName} modifié avec succès.";
