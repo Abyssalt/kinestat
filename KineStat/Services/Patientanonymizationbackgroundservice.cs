@@ -25,6 +25,9 @@ namespace KineStat.Services
         {
             _logger.LogInformation("Service d'anonymisation RGPD démarré");
 
+            _logger.LogInformation("Exécution de l'anonymisation au démarrage de l'application");
+            await RunAnonymizationAsync();
+
             await WaitForNextExecutionTime(stoppingToken);
 
             while (!stoppingToken.IsCancellationRequested)
@@ -32,17 +35,7 @@ namespace KineStat.Services
                 try
                 {
                     _logger.LogInformation("Exécution planifiée de l'anonymisation RGPD");
-
-                    using (var scope = _serviceProvider.CreateScope())
-                    {
-                        var anonymizationService = scope.ServiceProvider
-                            .GetRequiredService<PatientAnonymizationService>();
-
-                        var anonymizedCount = await anonymizationService.AnonymizeExpiredPatientsAsync();
-
-                        _logger.LogInformation(
-                            $"Anonymisation terminée: {anonymizedCount} patients anonymisés");
-                    }
+                    await RunAnonymizationAsync();
                 }
                 catch (Exception ex)
                 {
@@ -53,6 +46,30 @@ namespace KineStat.Services
             }
 
             _logger.LogInformation("Service d'anonymisation RGPD arrêté");
+        }
+
+        /// <summary>
+        /// Executes the anonymization process
+        /// </summary>
+        private async Task RunAnonymizationAsync()
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var anonymizationService = scope.ServiceProvider
+                        .GetRequiredService<PatientAnonymizationService>();
+
+                    var anonymizedCount = await anonymizationService.AnonymizeExpiredPatientsAsync();
+
+                    _logger.LogInformation(
+                        $"Anonymisation terminée: {anonymizedCount} patients anonymisés");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ERREUR lors de l'exécution de l'anonymisation");
+            }
         }
 
         /// <summary>
