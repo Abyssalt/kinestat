@@ -41,37 +41,37 @@
         <div class="col-12">
             <div class="row g-2 mb-2">
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-primary w-100 h-100 py-3 fw-medium" data-category="Articulaire / Structurel" style="min-height: 80px;">
+                    <button class="btn btn-primary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Articulaire / Structurel" style="min-height: 80px;">
                         <div style="font-size: 0.9rem;">ARTICULAIRE<br />/<br />STRUCTUREL</div>
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Myofascial" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Myofascial" style="min-height: 80px;">
                         MYOFASCIAL
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Nociceptive" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Douleur Nociceptive" style="min-height: 80px;">
                         NOCICEPTIF
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Neuropathique" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Douleur Neuropathique" style="min-height: 80px;">
                         NEUROPATHIQUE
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Douleur Nociplastique" style="min-height: 80px;">
-                        NOCIPLASTIQUE
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Emotionnel / Affectif" style="min-height: 80px;">
+                        <div style="font-size: 0.9rem;">ÉMOTIONNEL<br />/<br /> AFFECTIF</div>
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Controle Sensorimoteur" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Controle Sensorimoteur" style="min-height: 80px;">
                         <div style="font-size: 0.9rem;">CONTRÔLE<br />SENSORIMOTEUR</div>
                     </button>
                 </div>
                 <div class="col-6 col-md-3 col-xl">
-                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium" data-category="Croyances et Cognition" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 h-100 py-3 fw-medium border border-2 border-dark" data-category="Croyances et Cognition" style="min-height: 80px;">
                         <div style="font-size: 0.9rem;">CROYANCES<br />ET<br />COGNITION</div>
                     </button>
                 </div>
@@ -79,13 +79,13 @@
 
             <div class="row g-2">
                 <div class="col-6">
-                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium" data-category="Socio-environnemental" style="min-height: 80px;">
+                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium border border-2 border-dark" data-category="Socio-environnemental" style="min-height: 80px;">
                         SOCIO-ENVIRONNEMENTAL
                     </button>
                 </div>
                 <div class="col-6">
-                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium" data-category="Emotionnel / Affectif" style="min-height: 80px;">
-                        ÉMOTIONNEL / AFFECTIF
+                    <button class="btn btn-outline-secondary w-100 py-3 fw-medium border border-2 border-dark" data-category="Douleur Nociplastique" style="min-height: 80px;">
+                        NOCIPLASTIQUE
                     </button>
                 </div>
             </div>
@@ -93,31 +93,13 @@
     </div>
 
     <div class="row">
-        <div class="col-12 col-lg-8 mb-4 mb-lg-0">
+        <div class="col-12">
             <div id="questionnaireContainer">
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Chargement...</span>
                     </div>
                     <p class="text-muted mt-3">Chargement des questions...</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-lg-4">
-            <div class="card border-0 shadow sticky-top" style="top: 20px;">
-                <div class="card-header bg-info text-white py-3">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-lightbulb me-2"></i>Tests suggérés
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <div id="suggestedTestsContainer" class="p-3">
-                        <p class="text-muted small mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Répondez aux questions pour voir les tests recommandés
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -132,7 +114,6 @@
                 <a asp-controller="Tests" asp-action="Tests" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     Suivant<i class="bi bi-arrow-right ms-2"></i>
                 </a>
-                <hr class="border-primary border-2 opacity-25 mt-3">
             </div>
         </div>
     </div>

@@ -66,47 +66,6 @@
         </div>
     </div>
 
-    <div class="mb-4 d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-outline-primary fw-medium btn-tablet-lg" onclick="toggleAddTestForm()">
-            <i class="bi bi-plus-circle me-2"></i>Ajouter un test spécifique
-        </button>
-    </div>
-
-    <div class="collapse mt-3" id="addTestForm">
-        <div class="card border-0 shadow border-start border-primary border-4">
-            <div class="card-header bg-primary text-white py-3">
-                <h6 class="mb-0 fw-bold">
-                    <i class="bi bi-plus-square me-2"></i>Ajouter un test personnalisé
-                </h6>
-            </div>
-            <div class="card-body p-3 p-md-4">
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <label class="form-label fw-medium">
-                            <i class="bi bi-folder2-open me-1"></i>Dans quel cluster ajouter ce test ?
-                        </label>
-                        <select class="form-select" id="customTestCluster">
-                            <option value="">-- Sélectionnez un cluster --</option>
-                            @foreach (var cluster in clusters)
-                            {
-                                <option value="@cluster.Id">@cluster.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-column flex-sm-row gap-2">
-                    <button type="button" class="btn btn-primary fw-medium" onclick="addCustomTest()">
-                        <i class="bi bi-check-circle me-2"></i>Ajouter ce test
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary fw-medium" onclick="toggleAddTestForm()">
-                        <i class="bi bi-x-circle me-2"></i>Annuler
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="formTests">
         <input type="hidden" name="patientId" value="@patientId">
 
@@ -137,14 +96,16 @@
                             @cluster.Questions.Count test(s) à effectuer
                         </p>
 
-                        <div class="cluster-progress-bar">
-                            <div class="cluster-progress-fill" style="width: 0%"></div>
-                        </div>
+                        <div class="cluster-progress-container">
+                            <div class="cluster-progress-bar">
+                                <div class="cluster-progress-fill" style="width: 0%"></div>
+                            </div>
 
-                        <div class="cluster-actions">
-                            <button class="btn-cluster-action btn-start btn-tablet-lg" onclick="toggleClusterTests(@cluster.Id)">
-                                ▶ Commencer
-                            </button>
+                            <div class="cluster-actions">
+                                <button class="btn-cluster-action btn-start btn-tablet-lg" onclick="toggleClusterTests(@cluster.Id)">
+                                    ▶ Commencer
+                                </button>
+                            </div>
                         </div>
 
                         <div id="@collapseId" class="collapse mt-3">
@@ -180,16 +141,16 @@
                                         <div class="card-body p-3 p-md-4">
                                             @if (question is QuestionBool)
                                             {
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-medium">Résultat</label>
-                                                    <div class="btn-group w-100" role="group">
+                                                <div class="test-result-container">
+                                                    
+                                                    <div class="btn-group" role="group">
                                                         <input type="radio"
                                                                class="btn-check"
                                                                name="test-@question.Id-value"
                                                                id="oui-@question.Id"
                                                                value="true"
                                                                onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
-                                                        <label class="btn btn-outline-success btn-lg fw-medium" for="oui-@question.Id">
+                                                        <label class="btn btn-outline-success fw-medium" for="oui-@question.Id">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Positif
                                                         </label>
 
@@ -199,31 +160,28 @@
                                                                id="non-@question.Id"
                                                                value="false"
                                                                onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
-                                                        <label class="btn btn-outline-secondary btn-lg fw-medium" for="non-@question.Id">
+                                                        <label class="btn btn-outline-secondary fw-medium" for="non-@question.Id">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Négatif
                                                         </label>
                                                     </div>
-                                                </div>
-
-                                                <div class="mb-2">
+    
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
-                                                            onclick="toggleObservations(@question.Id)">
-                                                        <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
+                                                            class="btn btn-observation-toggle"
+                                                            onclick="toggleObservations(@question.Id); this.classList.toggle('active')"
+                                                            title="Ajouter une observation">
+                                                        <i class="bi bi-chat-left-text"></i>
                                                     </button>
                                                 </div>
 
                                                 <div class="collapse" id="observations-@question.Id">
-                                                    <div class="card border-0 bg-light mt-3">
-                                                        <div class="card-body p-3">
-                                                            <label class="form-label fw-medium">
-                                                                <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
-                                                            </label>
+                                                    <div class="card border-0 bg-light">
+                                                        <div class="card-body">
                                                             <textarea class="form-control"
-                                                          name="test-@question.Id-observations"
-                                                          rows="3"
-                                                          placeholder="Notez ici vos observations..."
-                                                          oninput="autoSaveTest(@question.Id)"></textarea>
+                                                                  name="test-@question.Id-observations"
+                                                                  rows="3"
+                                                                  placeholder="Notez ici vos observations..."
+                                                                  oninput="autoSaveTest(@question.Id)">
+                                                            </textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -231,49 +189,49 @@
                                             else if (question is QuestionLadder ladder)
                                             {
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-medium">
-                                                        Valeur mesurée (@ladder.Min - @ladder.Max)
-                                                    </label>
-                                                    <input type="number"
-                                                           class="form-control form-control-lg mb-3"
-                                                           name="test-@question.Id-value"
-                                                           min="@ladder.Min"
-                                                           max="@ladder.Max"
-                                                           placeholder="Entrez la valeur"
-                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
-                                                           oninput="autoSaveTest(@question.Id)"
-                                                           id="input-@question.Id">
+                                                    <label class="form-label fw-medium">Valeur (@ladder.Min - @ladder.Max)</label>
+                                                    <div class="ladder-container-with-obs">
+                                                        <div>
+                                                            <div class="ladder-input-group">
+                                                                <input type="number"
+                                                                       class="form-control"
+                                                                       name="test-@question.Id-value"
+                                                                       min="@ladder.Min"
+                                                                       max="@ladder.Max"
+                                                                       placeholder="@ladder.Min"
+                                                                       onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
+                                                                       oninput="autoSaveTest(@question.Id)"
+                                                                       id="input-@question.Id">
 
-                                                    <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
-                                                    <input type="range"
-                                                           class="form-range"
-                                                           id="range-@question.Id"
-                                                           min="@ladder.Min"
-                                                           max="@ladder.Max"
-                                                           value="@ladder.Min"
-                                                           step="1"
-                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
-                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                                        <small class="text-secondary fw-semibold">@ladder.Min</small>
-                                                        <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.Min</span>
-                                                        <small class="text-secondary fw-semibold">@ladder.Max</small>
+                                                                <input type="range"
+                                                                       class="form-range"
+                                                                       id="range-@question.Id"
+                                                                       min="@ladder.Min"
+                                                                       max="@ladder.Max"
+                                                                       value="@ladder.Min"
+                                                                       step="1"
+                                                                       oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
+
+                                                                <span class="badge bg-primary" id="display-@question.Id">@ladder.Min</span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <small class="text-secondary">@ladder.Min</small>
+                                                                <small class="text-secondary">@ladder.Max</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="button"
+                                                                class="btn btn-observation-toggle"
+                                                                onclick="toggleObservations(@question.Id); this.classList.toggle('active')"
+                                                                title="Ajouter une observation">
+                                                            <i class="bi bi-chat-left-text"></i>
+                                                        </button>
                                                     </div>
                                                 </div>
 
-                                                <div class="mb-2">
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
-                                                            onclick="toggleObservations(@question.Id)">
-                                                        <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
-                                                    </button>
-                                                </div>
-
                                                 <div class="collapse" id="observations-@question.Id">
-                                                    <div class="card border-0 bg-light mt-3">
-                                                        <div class="card-body p-3">
-                                                            <label class="form-label fw-medium">
-                                                                <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
-                                                            </label>
+                                                    <div class="card border-0 bg-light">
+                                                        <div class="card-body">
                                                             <textarea class="form-control"
                                                           name="test-@question.Id-observations"
                                                           rows="3"
@@ -283,40 +241,7 @@
                                                     </div>
                                                 </div>
                                             }
-                                            else if (question is QuestionQCM qcm)
-                                            {
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-medium">Observation</label>
-                                                    <select class="form-select form-select-lg"
-                                                            name="test-@question.Id-value"
-                                                            onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)">
-                                                        <option value="">-- Sélectionnez une observation --</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="mb-2">
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-outline-primary fw-medium btn-tablet-lg"
-                                                            onclick="toggleObservations(@question.Id)">
-                                                        <i class="bi bi-chat-left-text me-1"></i>Ajouter des observations
-                                                    </button>
-                                                </div>
-
-                                                <div class="collapse" id="observations-@question.Id">
-                                                    <div class="card border-0 bg-light mt-3">
-                                                        <div class="card-body p-3">
-                                                            <label class="form-label fw-medium">
-                                                                <i class="bi bi-chat-left-dots me-1"></i>Observations complémentaires
-                                                            </label>
-                                                            <textarea class="form-control"
-                                                          name="test-@question.Id-observations"
-                                                          rows="3"
-                                                          placeholder="Notez ici vos observations..."
-                                                          oninput="autoSaveTest(@question.Id)"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            }
+                                            
                                         </div>
                                     </div>
                                 }
@@ -356,149 +281,27 @@
     <script src="~/js/Tests.js"></script>
     <link rel="stylesheet" href="~/css/tests.css" />
     <script>
-        globalPatientId = @patientId;
-        globalAssessmentId = @assessmentId;
-
-
-
         @{
             var existingResponsesList = ViewData["ExistingResponses"] as IEnumerable<PatientAnswerTests>;
             var responsesData = new List<object>();
 
             if (existingResponsesList != null)
-            {
+            { 
                 foreach (var r in existingResponsesList)
-                {
+                { 
                     responsesData.Add(new
                     {
                         questionId = r.QuestionId,
                         answerId = r.AnswerId,
                         assessmentId = r.AssessmentId,
                         value = r.ResponseValue,
-                        observations = r.Observations,
-                        isCustom = r.IsCustomTest,
-                        customName = r.CustomTestName,
-                        customType = r.CustomTestType
+                        observations = r.Observations
                     });
                 }
             }
         }
 
-
-        const assessmentId = @assessmentId;
-
-        var existingResponses = @Html.Raw(Json.Serialize(responsesData));
-
-    document.addEventListener('DOMContentLoaded', function() {
-        loadExistingResponses(existingResponses);
-    });
-
-
-        function calculateClusterProgress(clusterId) {
-            const container = document.getElementById('testsContainer-' + clusterId);
-            if (!container) return { completed: 0, total: 0, percentage: 0 };
-
-            const tests = container.querySelectorAll('.test-card');
-            const total = tests.length;
-            const completed = container.querySelectorAll('.answered-badge[style*="inline-block"]').length;
-            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            return { completed, total, percentage };
-        }
-
-        function updateClusterCard(clusterId) {
-            const progress = calculateClusterProgress(clusterId);
-            const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
-
-            if (!card) return;
-
-            const progressBadge = card.querySelector('.cluster-progress-badge');
-            if (progressBadge) {
-                progressBadge.textContent = `${progress.completed}/${progress.total}`;
-            }
-
-            const progressFill = card.querySelector('.cluster-progress-fill');
-            if (progressFill) {
-                progressFill.style.width = `${progress.percentage}%`;
-            }
-
-
-            const statusBadge = card.querySelector('.cluster-status-badge');
-            const actionBtn = card.querySelector('.btn-cluster-action');
-
-            if (progress.percentage === 0) {
-                if (statusBadge) statusBadge.textContent = 'Non commencé';
-                if (actionBtn) {
-                    actionBtn.textContent = '▶ Commencer';
-                        actionBtn.className = 'btn-cluster-action btn-start btn-start btn-tablet-lg';
-                }
-                card.classList.remove('has-progress', 'completed');
-            } else if (progress.percentage === 100) {
-                if (statusBadge) statusBadge.textContent = '✓ Complété';
-                if (actionBtn) {
-                    actionBtn.textContent = '✓ Revoir les tests';
-                        actionBtn.className = 'btn-cluster-action btn-review btn-tablet-lg';
-                }
-                card.classList.remove('has-progress');
-                card.classList.add('completed');
-            } else {
-                if (statusBadge) statusBadge.textContent = 'En cours';
-                if (actionBtn) {
-                    actionBtn.textContent = '→ Continuer';
-                        actionBtn.className = 'btn-cluster-action btn-continue btn-tablet-lg';
-                }
-                card.classList.add('has-progress');
-                card.classList.remove('completed');
-            }
-        }
-
-        function toggleClusterTests(clusterId) {
-            const collapseId = 'collapse-cluster-' + clusterId;
-            const collapse = document.getElementById(collapseId);
-
-            if (!collapse) return;
-
-            const bsCollapse = new bootstrap.Collapse(collapse, {
-                toggle: true
-            });
-        }
-
-        function scrollToClusterTop(clusterId) {
-            const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
-            if (card) {
-                card.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-       
-
-
-        const originalUpdateProgress = window.updateProgress;
-        window.updateProgress = function() {
-    
-            if (originalUpdateProgress) {
-                originalUpdateProgress();
-            }
-
-            document.querySelectorAll('[data-cluster-id]').forEach(card => {
-                const clusterId = card.getAttribute('data-cluster-id');
-                updateClusterCard(clusterId);
-            });
-        };
-
-        window.addEventListener('load', function() {
-
-            setTimeout(function() {
-                document.querySelectorAll('[data-cluster-id]').forEach(card => {
-                    const clusterId = card.getAttribute('data-cluster-id');
-                    updateClusterCard(clusterId);
-                });
-            }, 100);
-        });
-
-
+        
+        Tests.init(@patientId, @assessmentId, @Html.Raw(Json.Serialize(responsesData)));
     </script>
-
 }
