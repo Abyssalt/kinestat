@@ -1,8 +1,4 @@
-﻿/* ========================================
-   CLUSTERS - DESIGN AMÉLIORÉ
-   ======================================== */
-
-.clusters-grid {
+﻿.clusters-grid {
     display: grid;
     gap: 1.5rem;
     margin-bottom: 2rem;
@@ -32,7 +28,6 @@
         background: linear-gradient(to right, #e8f5e9 0%, #ffffff 100%);
     }
 
-/* Header du cluster */
 .cluster-card-header {
     padding: 1.25rem 1.5rem;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -119,7 +114,6 @@
     background: #28a745;
 }
 
-/* Body du cluster */
 .cluster-card-body {
     padding: 1.5rem;
 }
@@ -130,8 +124,6 @@
     margin-bottom: 1rem;
     font-weight: 500;
 }
-
-/* Conteneur pour barre de progression + bouton sur la même ligne */
 .cluster-progress-container {
     display: flex;
     align-items: center;
@@ -139,7 +131,6 @@
     margin-bottom: 1.25rem;
 }
 
-/* Barre de progression personnalisée */
 .cluster-progress-bar {
     flex: 1;
     height: 8px;
@@ -165,7 +156,6 @@
     background: linear-gradient(90deg, #198754 0%, #28a745 100%);
 }
 
-/* Actions du cluster - VERSION COMPACTE SUR LA MÊME LIGNE */
 .cluster-actions {
     display: flex;
     flex-shrink: 0;
@@ -225,7 +215,6 @@
         box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
     }
 
-/* Bouton retour en haut de cluster */
 .btn-back-to-top {
     background: white;
     color: #6c757d;
@@ -253,11 +242,12 @@
         font-size: 1.125rem;
     }
 
-/* Cards de tests individuels */
+
 .test-card {
     border: 2px solid #dee2e6 !important;
     border-radius: 10px !important;
     transition: all 0.3s ease;
+    margin-bottom: 1rem !important;
 }
 
     .test-card:hover {
@@ -269,7 +259,135 @@
         background: linear-gradient(to right, #f0fdf4 0%, #ffffff 100%);
     }
 
-/* Boutons tablette */
+
+    .test-card .card-header {
+        padding: 0.875rem 1.25rem !important;
+        background: #f8f9fa !important;
+    }
+
+        .test-card .card-header h5 {
+            font-size: 1rem !important;
+            margin-bottom: 0.375rem !important;
+        }
+
+        .test-card .card-header .badge.bg-primary {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.5rem !important;
+        }
+
+        .test-card .card-header small {
+            font-size: 0.8125rem !important;
+        }
+
+        .test-card .card-header .badge.bg-danger {
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.5rem !important;
+        }
+
+    
+    .test-card .card-body {
+        padding: 1rem 1.25rem !important;
+    }
+
+    
+    .test-card .form-label {
+        margin-bottom: 0.5rem !important;
+        font-size: 0.9375rem !important;
+    }
+
+.test-result-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.test-result-label {
+    font-weight: 500;
+    font-size: 0.9375rem;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.test-card .btn-group {
+    flex: 0 0 auto;
+}
+
+    .test-card .btn-group .btn {
+        padding: 0.5rem 1.25rem !important;
+        font-size: 0.9375rem !important;
+    }
+
+.test-card input[type="number"] {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.9375rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.test-card input[type="range"] {
+    margin: 0.5rem 0 !important;
+}
+
+.test-card .form-range + .d-flex {
+    margin-top: 0.5rem !important;
+}
+
+.test-card .badge.fs-5 {
+    font-size: 1rem !important;
+    padding: 0.375rem 0.625rem !important;
+}
+
+.test-card .btn-sm {
+    padding: 0.375rem 0.875rem !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.test-card .collapse .card {
+    margin-top: 0.75rem !important;
+}
+
+.test-card .collapse .card-body {
+    padding: 0.875rem !important;
+}
+
+.test-card .collapse textarea {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+.answered-badge {
+    font-size: 0.8125rem !important;
+    padding: 0.375rem 0.75rem !important;
+}
+
+.test-card .card-header small .ms-2 {
+    margin-left: 0.5rem !important;
+}
+
+.ladder-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+    .ladder-input-group input[type="number"] {
+        width: 100px;
+        flex-shrink: 0;
+    }
+
+    .ladder-input-group input[type="range"] {
+        flex: 1;
+        margin: 0 !important;
+    }
+
+    .ladder-input-group .badge {
+        min-width: 45px;
+        text-align: center;
+    }
+
+
 @media (min-width: 768px) and (max-width: 1024px) {
     .btn-tablet-lg {
         padding: 1rem 1.5rem !important;
@@ -277,7 +395,7 @@
     }
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
     .cluster-card-header {
         flex-direction: column;
@@ -317,9 +435,33 @@
         padding: 0.625rem 1rem;
         min-width: auto;
     }
+    .test-card .card-header {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .test-card .card-body {
+        padding: 0.875rem 1rem !important;
+    }
+
+    .test-card .card-header h5 {
+        font-size: 0.9375rem !important;
+    }
+
+    .test-result-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .test-result-label {
+        min-width: auto;
+        margin-bottom: 0.5rem;
+    }
+
+    .test-card .btn-group {
+        width: 100%;
+    }
 }
 
-/* Animation shimmer pour progression */
 .cluster-card.has-progress .cluster-progress-fill {
     position: relative;
     overflow: hidden;

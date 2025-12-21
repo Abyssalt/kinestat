@@ -182,16 +182,16 @@
                                         <div class="card-body p-3 p-md-4">
                                             @if (question is QuestionBool)
                                             {
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-medium">Résultat</label>
-                                                    <div class="btn-group w-100" role="group">
+                                                <div class="test-result-container">
+                                                    
+                                                    <div class="btn-group" role="group">
                                                         <input type="radio"
                                                                class="btn-check"
                                                                name="test-@question.Id-value"
                                                                id="oui-@question.Id"
                                                                value="true"
                                                                onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
-                                                        <label class="btn btn-outline-success btn-lg fw-medium" for="oui-@question.Id">
+                                                        <label class="btn btn-outline-success fw-medium" for="oui-@question.Id">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Positif
                                                         </label>
 
@@ -201,7 +201,7 @@
                                                                id="non-@question.Id"
                                                                value="false"
                                                                onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
-                                                        <label class="btn btn-outline-secondary btn-lg fw-medium" for="non-@question.Id">
+                                                        <label class="btn btn-outline-secondary fw-medium" for="non-@question.Id">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Négatif
                                                         </label>
                                                     </div>
@@ -233,32 +233,32 @@
                                             else if (question is QuestionLadder ladder)
                                             {
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-medium">
-                                                        Valeur mesurée (@ladder.Min - @ladder.Max)
-                                                    </label>
-                                                    <input type="number"
-                                                           class="form-control form-control-lg mb-3"
-                                                           name="test-@question.Id-value"
-                                                           min="@ladder.Min"
-                                                           max="@ladder.Max"
-                                                           placeholder="Entrez la valeur"
-                                                           onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
-                                                           oninput="autoSaveTest(@question.Id)"
-                                                           id="input-@question.Id">
-
-                                                    <label class="form-label small text-secondary">Ou utilisez le curseur :</label>
-                                                    <input type="range"
-                                                           class="form-range"
-                                                           id="range-@question.Id"
-                                                           min="@ladder.Min"
-                                                           max="@ladder.Max"
-                                                           value="@ladder.Min"
-                                                           step="1"
-                                                           oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
-                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                                        <small class="text-secondary fw-semibold">@ladder.Min</small>
-                                                        <span class="badge bg-primary fs-5" id="display-@question.Id">@ladder.Min</span>
-                                                        <small class="text-secondary fw-semibold">@ladder.Max</small>
+                                                    <label class="form-label fw-medium">Valeur (@ladder.Min - @ladder.Max)</label>
+                                                    <div class="ladder-input-group">
+                                                        <input type="number"
+                                                               class="form-control"
+                                                               name="test-@question.Id-value"
+                                                               min="@ladder.Min"
+                                                               max="@ladder.Max"
+                                                               placeholder="@ladder.Min"
+                                                               onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
+                                                               oninput="autoSaveTest(@question.Id)"
+                                                               id="input-@question.Id">
+        
+                                                        <input type="range"
+                                                               class="form-range"
+                                                               id="range-@question.Id"
+                                                               min="@ladder.Min"
+                                                               max="@ladder.Max"
+                                                               value="@ladder.Min"
+                                                               step="1"
+                                                               oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
+        
+                                                        <span class="badge bg-primary" id="display-@question.Id">@ladder.Min</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-secondary">@ladder.Min</small>
+                                                        <small class="text-secondary">@ladder.Max</small>
                                                     </div>
                                                 </div>
 
