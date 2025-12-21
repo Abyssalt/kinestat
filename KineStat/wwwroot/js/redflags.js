@@ -236,6 +236,7 @@ function initializeTabs() {
     });
 }
 
+
 window.RedFlags = {
     init: function (patientId, assessmentId, folderId) {
         globalPatientId = patientId;
