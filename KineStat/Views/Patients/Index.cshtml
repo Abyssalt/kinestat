@@ -244,7 +244,7 @@
                         </div>
                         <div class="col-12 col-md-6 col-xl-4">
                             <label class="form-label small text-uppercase text-muted">Genre *</label>
-                            <select class="form-select cache-field" name="Genre" data-field="Genre" data-validation="select" required>
+                            <select class="form-select cache-field" name="Gender" data-field="Genre" data-validation="select" required>
                                 <option value="">-- Sélectionner --</option>
                                 <option value="0">Homme</option>
                                 <option value="1">Femme</option>
@@ -252,14 +252,27 @@
                             </select>
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <label class="form-label small text-uppercase text-muted">Date de naissance *</label>
-                            <input type="date" class="form-control cache-field" name="BirthDate" data-field="BirthDate" data-validation="date" required>
+                        <div class="col-12 col-xl-8">
+                            <label class="form-label small text-uppercase text-muted">Pays *</label>
+                            <select class="form-select cache-field" name="Country" data-field="Country" data-validation="select" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="0">Belgique</option>
+                                <option value="1">France</option>
+                                <option value="2">Luxembourg</option>
+                                <option value="3">Suisse</option>
+
+                            </select>
                         </div>
                         <div class="col-12 col-md-6 col-xl-4">
                             <label class="form-label small text-uppercase text-muted">N° Sécurité sociale *</label>
                             <input type="text" class="form-control cache-field" name="SocialSecurityNumber" data-field="SocialSecurityNumber" data-validation="SocialSecNumber" placeholder="XX.XX.XX-XXX.XX" required>
                         </div>
+
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <label class="form-label small text-uppercase text-muted">Date de naissance *</label>
+                            <input type="date" class="form-control cache-field" name="BirthDate" data-field="BirthDate" data-validation="date" required>
+                        </div>
+                       
                         <div class="col-12 col-md-6 col-xl-4">
                             <label class="form-label small text-uppercase text-muted">Téléphone *</label>
                             <input type="tel" class="form-control cache-field" name="PhoneNumber" data-field="PhoneNumber" data-validation="phone" required>
@@ -273,17 +286,7 @@
                             <label class="form-label small text-uppercase text-muted">Adresse</label>
                             <input type="text" class="form-control cache-field" data-field="Address" name="Address">
                         </div>
-                        <div class="col-12 col-xl-8">
-                            <label class="form-label small text-uppercase text-muted">Pays</label>
-                            <select class="form-select cache-field" name="Country" data-field="Country" data-validation="select" required>
-                                <option value="">-- Sélectionner --</option>
-                                <option value="0">Belgique</option>
-                                <option value="1">France</option>
-                                <option value="2">Luxembourg</option>
-                                <option value="3">Suisse</option>
-
-                            </select>
-                        </div>
+                       
 
                         <div class="col-12 mt-4">
                             <div class="section-header d-flex align-items-center mb-2">
@@ -318,9 +321,12 @@
                                     }
                                 }
                             </select>
-                            <button type="button" class="btn btn-sm btn-outline-primary btn-tablet-lg" id="addDoctorBtn">
-                                <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
-                            </button>
+                            <div class="col-12" id="addDoctorBtnContainer">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-tablet-lg" id="addDoctorBtn">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
+                                </button>
+                            </div>
+                            
                         </div>
 
                         <div class="col-12 collapse" id="addDoctorSection">
@@ -365,6 +371,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/patient.js"></script>
     <style>
         .letter-spacing-wide {
             letter-spacing: 0.1em;
@@ -504,7 +511,14 @@
         const ADD_STORAGE_KEY = 'addPatientFormData';
         let addFormData = {}, currentPage = 1, currentSearch = '', currentStatus = 'Tous', searchTimeout = null;
         const pageSize = 5;
+        const phoneCountryCodes = {
+            '0': '+32', 
+            '1': '+33',
+            '2': '+352', 
+            '3': '+41' 
+        };
 
+ 
         function validateField(input) {
             const type = input.dataset.validation, value = input.value.trim();
             if (!type) return true;
@@ -516,15 +530,11 @@
                 case 'date': return value && new Date(value) < new Date();
                 case 'select': return value !== '';
                 case 'SocialSecNumber':
-                    if (!value) return false;
-                    const n = value.replace(/[\s\.\-]/g, '');
-                    if (!/^\d{11}$/.test(n)) return false;
-                    const month = parseInt(n.substring(2, 4)), day = parseInt(n.substring(4, 6));
-                    const validMonth = (month >= 1 && month <= 12) || (month >= 21 && month <= 32) || (month >= 41 && month <= 52);
-                    if (!validMonth || day < 1 || day > 31) return false;
-                    let base = parseInt(n.substring(0, 9)), check = parseInt(n.substring(9, 11)), calc = 97 - (base % 97);
-                    if (calc !== check) calc = 97 - (parseInt('2' + n.substring(0, 9)) % 97);
-                    return calc === check;
+                     if (!value) return false;
+                     const countrySelect = document.querySelector('.cache-field[data-field="Country"]');
+                     const country = countrySelect ? countrySelect.value : '';
+                     if (!country) return false;
+                     return validateSocialSecurityNumber(value, country);
                 default: return value.length > 0;
             }
         }
@@ -536,7 +546,7 @@
         }
 
         function updateCreateButton() {
-            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'SocialSecurityNumber'];
+            const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'Country', 'SocialSecurityNumber'];
             const valid = required.every(f => { const input = document.querySelector(`.cache-field[data-field="${f}"]`); return input && input.value.trim() && validateField(input); });
             const btn = document.getElementById('createPatientBtn');
             btn.disabled = !valid;
@@ -665,12 +675,15 @@
         function attachCardEvents() { document.querySelectorAll('.clickable-card').forEach(card => card.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = card.dataset.href; })); }
 
         document.addEventListener('DOMContentLoaded', () => {
+            updatePhonePrefix();
+            setUpSocialSecurityByCountry();
+            autoFillBirthDate();
             attachRowEvents();
             attachCardEvents();
             document.querySelectorAll('.cache-field').forEach(input => ['input', 'blur', 'change'].forEach(evt => input.addEventListener(evt, () => saveField(input))));
             document.getElementById('createPatientBtn').addEventListener('click', async (e) => {
             e.preventDefault();
-
+            
             const selectedDoctorId = document.getElementById('doctorSelect').value;
 
             if (selectedDoctorId === '') {
