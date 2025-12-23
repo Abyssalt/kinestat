@@ -786,6 +786,13 @@ namespace KineStat.Controllers
                 .Select(cd => cd.Value)
                 .ToListAsync();
 
+            // Getting detected pathologies
+            var detectedPathologies = await GetOrCalculateDetectedPathologies(
+                patientId: patient.Id,
+                assessmentId: id,
+                folderId: assessment.DossierId
+            );
+
             // Generate PDF
             var pdfService = new Services.AssessmentCompletePdfService();
             var pdfBytes = pdfService.GenerateCompletePdf(
@@ -794,7 +801,8 @@ namespace KineStat.Controllers
                 assessment,
                 tests,
                 tintivData,
-                clinicalData
+                clinicalData,
+                detectedPathologies
             );
 
             var fileName = $"Bilan_Complet_{patient.LastName}_{patient.FirstName}_{assessment.Date:yyyyMMdd}.pdf";
