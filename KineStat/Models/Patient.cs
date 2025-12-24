@@ -61,9 +61,9 @@ namespace KineStat.Models
 
         //Medical Informations
         public string? Profession { get; set; }
-        public string? ActivitesPhysiques { get; set; }
-        public string? AntecedentsMedicaux { get; set; }
-        public string? MedicationActuelle { get; set; }
+        public string? PhysicalActivities { get; set; }
+        public string? MedicalHistory { get; set; }
+        public string? ActualMedication { get; set; }
 
         public PatientStatus Status { get; set; }
 
@@ -77,7 +77,7 @@ namespace KineStat.Models
 
         public Physio? Physio { get; set; }
 
-        public ICollection<Dossier>? Dossiers { get; set; } = new List<Dossier>();
+        public ICollection<Folder>? Folders { get; set; } = new List<Folder>();
 
         public ICollection<Assessment>? Assessments { get; set; } = new List<Assessment>();
 

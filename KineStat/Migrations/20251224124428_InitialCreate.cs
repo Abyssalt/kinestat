@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -154,9 +154,9 @@ namespace KineStat.Migrations
                     SocialSecurityNumber = table.Column<string>(type: "text", nullable: false),
                     Country = table.Column<int>(type: "integer", nullable: false),
                     Profession = table.Column<string>(type: "text", nullable: true),
-                    ActivitesPhysiques = table.Column<string>(type: "text", nullable: true),
-                    AntecedentsMedicaux = table.Column<string>(type: "text", nullable: true),
-                    MedicationActuelle = table.Column<string>(type: "text", nullable: true),
+                    PhysicalActivities = table.Column<string>(type: "text", nullable: true),
+                    MedicalHistory = table.Column<string>(type: "text", nullable: true),
+                    ActualMedication = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     DoctorId = table.Column<int>(type: "integer", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
@@ -208,21 +208,21 @@ namespace KineStat.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Dossiers",
+                name: "Folders",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Titre = table.Column<string>(type: "text", nullable: false),
-                    DateOuverture = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    OpeningDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Notes = table.Column<string>(type: "text", nullable: true),
                     PatientId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Dossiers", x => x.Id);
+                    table.PrimaryKey("PK_Folders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Dossiers_Patients_PatientId",
+                        name: "FK_Folders_Patients_PatientId",
                         column: x => x.PatientId,
                         principalTable: "Patients",
                         principalColumn: "Id",
@@ -267,7 +267,7 @@ namespace KineStat.Migrations
                     PatientId = table.Column<int>(type: "integer", nullable: false),
                     MedicalContextId = table.Column<int>(type: "integer", nullable: false),
                     PhysioId = table.Column<int>(type: "integer", nullable: false),
-                    DossierId = table.Column<int>(type: "integer", nullable: false),
+                    FolderId = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     RedFlagsPercentage = table.Column<double>(type: "double precision", nullable: true)
                 },
@@ -275,9 +275,9 @@ namespace KineStat.Migrations
                 {
                     table.PrimaryKey("PK_Assessments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Assessments_Dossiers_DossierId",
-                        column: x => x.DossierId,
-                        principalTable: "Dossiers",
+                        name: "FK_Assessments_Folders_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "Folders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -539,9 +539,9 @@ namespace KineStat.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assessments_DossierId",
+                name: "IX_Assessments_FolderId",
                 table: "Assessments",
-                column: "DossierId");
+                column: "FolderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assessments_MedicalContextId",
@@ -579,8 +579,8 @@ namespace KineStat.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Dossiers_PatientId",
-                table: "Dossiers",
+                name: "IX_Folders_PatientId",
+                table: "Folders",
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
@@ -738,7 +738,7 @@ namespace KineStat.Migrations
                 name: "Cluster");
 
             migrationBuilder.DropTable(
-                name: "Dossiers");
+                name: "Folders");
 
             migrationBuilder.DropTable(
                 name: "MedicalContexts");

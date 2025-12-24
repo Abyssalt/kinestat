@@ -160,7 +160,7 @@ namespace KineStat.Services
                     .Text(patient.Status.ToString()).FontSize(9);
             });
 
-            if (!string.IsNullOrWhiteSpace(patient.AntecedentsMedicaux))
+            if (!string.IsNullOrWhiteSpace(patient.MedicalHistory))
             {
                 column.Item().PaddingTop(5).Column(col =>
                 {
@@ -172,7 +172,7 @@ namespace KineStat.Services
                         .BorderLeft(2)
                         .BorderColor(Colors.Blue.Lighten3)
                         .PaddingLeft(8)
-                        .Text(patient.AntecedentsMedicaux)
+                        .Text(patient.MedicalHistory)
                         .FontSize(9);
                 });
             }

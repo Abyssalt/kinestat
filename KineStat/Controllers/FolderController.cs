@@ -34,33 +34,33 @@ namespace KineStat.Controllers
                 return RedirectToAction("AccessDenied", "Error");
             }
 
-            return View(new Dossier { PatientId = id });
+            return View(new Folder { PatientId = id });
         }
 
         /// <summary>
-        /// Creates a new patient folder by saving the specified dossier to the database.
+        /// Creates a new patient folder by saving the specified folder to the database.
         /// </summary>
         /// <remarks>This action requires a valid anti-forgery token and is intended to be called via HTTP
         /// POST. Success and error messages are provided through TempData for display in subsequent views.</remarks>
-        /// <param name="dossier">The dossier containing information about the patient folder to be created. Must not be null.</param>
+        /// <param name="folder">The folder containing information about the patient folder to be created. Must not be null.</param>
         /// <returns>An <see cref="IActionResult"/> that redirects to the folder details view if the operation succeeds, or to
         /// the patient anamnesis view with an error message if the operation fails.</returns>
         [HttpPost]
         [Route("Patient/SaveFolder")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveFolder(Dossier dossier)
+        public async Task<IActionResult> SaveFolder(Folder folder)
         {
-            dossier.DateOuverture = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
+            folder.OpeningDate = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc);
 
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
-            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dossier.PatientId))
+            if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, folder.PatientId))
             {
                 TempData["Error"] = "Vous n'avez pas accès à ce patient.";
                 return RedirectToAction("Index", "Patients");
             }
 
-            _context.Dossiers.Add(dossier);
+            _context.Folders.Add(folder);
 
             try
             {
@@ -69,23 +69,23 @@ namespace KineStat.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"Erreur: {ex.InnerException?.Message ?? ex.Message}";
-                return RedirectToAction("Anamnese", "Patient", new { id = dossier.PatientId });
+                return RedirectToAction("Anamnese", "Patient", new { id = folder.PatientId });
             }
-            return RedirectToAction("DossierDetails", "Folder", new { id = dossier.Id });
+            return RedirectToAction("DossierDetails", "Folder", new { id = folder.Id });
         }
 
         /// <summary>
-        /// Displays detailed information for the dossier with the specified identifier.
+        /// Displays detailed information for the folder with the specified identifier.
         /// </summary>
-        /// <remarks>The returned view includes related patient and assessment information. If no dossier
+        /// <remarks>The returned view includes related patient and assessment information. If no folder
         /// exists with the specified identifier, a 404 Not Found response is returned.</remarks>
-        /// <param name="id">The unique identifier of the dossier to retrieve. Must correspond to an existing dossier.</param>
-        /// <returns>An <see cref="IActionResult"/> that renders the dossier details view if the dossier is found; otherwise, a
+        /// <param name="id">The unique identifier of the folder to retrieve. Must correspond to an existing folder.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the folder details view if the folder is found; otherwise, a
         /// NotFound result.</returns>
-        [Route("Dossier/{id}/Details")]
+        [Route("Folder/{id}/Details")]
         public async Task<IActionResult> DossierDetails(int id)
         {
-            var dossier = await _context.Dossiers
+            var dossier = await _context.Folders
                 .Include(d => d.Patient)
                 .Include(d => d.Assessments)
                     .ThenInclude(a => a.Physio)
@@ -93,7 +93,7 @@ namespace KineStat.Controllers
 
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
-            if (!await PatientOwnershipHelper.IsDossierOwnedByPhysio(_context, physioId, id))
+            if (!await PatientOwnershipHelper.IsFolderOwnedByPhysio(_context, physioId, id))
             {
                 return RedirectToAction("AccessDenied", "Error");
             }

@@ -29,7 +29,7 @@ namespace KineStat.Controllers
         /// <returns>An asynchronous operation that returns an <see cref="IActionResult"/> representing the rendered 'Tests' view
         /// with patient and test data.</returns>
         [HttpGet]
-        [Route("Patient/{id}/Dossier/{folderId}/Tests/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/Tests/{assessmentId}")]
         public async Task<IActionResult> Tests(int id, int folderId, int assessmentId)
         {
             var patient = await _context.Patients

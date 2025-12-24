@@ -1,4 +1,4 @@
-﻿@model KineStat.Models.Dossier
+﻿@model KineStat.Models.Folder
 @{
     ViewData["Title"] = "Nouveau dossier";
 }
@@ -25,9 +25,9 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="PatientId" />
                         <div class="mb-4">
-                            <label asp-for="Titre" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Titre du dossier <span class="text-danger">*</span></label>
-                            <input asp-for="Titre" class="form-control form-control-lg" required/>
-                            <span asp-validation-for="Titre" class="text-danger small"></span>
+                            <label asp-for="Title" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Title du dossier <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control form-control-lg" required/>
+                            <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
                         <div class="mb-4">
                             <label asp-for="Notes" class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Notes</label>
@@ -52,7 +52,7 @@
     <script>
         // This script will make the submit button not available if the title textarea is empty, it will be available otherwise
         document.addEventListener('DOMContentLoaded', function() {
-            const titreInput = document.getElementById('Titre');
+            const titreInput = document.getElementById('Title');
             const submitBtn = document.getElementById('submitBtn');
 
             function updateButtonState() {

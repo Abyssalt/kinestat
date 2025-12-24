@@ -33,7 +33,7 @@ namespace KineStat.Controllers
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
                 .Include(a => a.Physio)
-                .Include(a => a.Dossier)
+                .Include(a => a.Folder)
                 .Include(a => a.Questions)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
@@ -86,7 +86,7 @@ namespace KineStat.Controllers
 
             ViewBag.TintivValues = tintivData;
             var firstAssessment = await _context.Assessments
-                .Where(a => a.DossierId == assessment.DossierId)
+                .Where(a => a.FolderId == assessment.FolderId)
                 .OrderBy(a => a.Date)
                 .Select(a => new { a.Id })
                 .FirstOrDefaultAsync();
@@ -109,7 +109,7 @@ namespace KineStat.Controllers
             var detectedPathologies = await GetOrCalculateDetectedPathologies(
                 patientId: assessment.PatientId,
                 assessmentId: assessment.Id,
-                folderId: assessment.DossierId);
+                folderId: assessment.FolderId);
 
 
             ViewBag.DetectedPathologies = detectedPathologies;
@@ -140,7 +140,7 @@ namespace KineStat.Controllers
             ViewBag.ClinicalAnswers = clinicalAnswers;
 
             var otherAssessments = await _context.Assessments
-                .Where(a => a.DossierId == assessment.DossierId
+                .Where(a => a.FolderId == assessment.FolderId
                             && a.Id != assessment.Id
                             && (firstAssessment == null || a.Id != firstAssessment.Id))
                 .OrderBy(a => a.Date)
@@ -196,7 +196,7 @@ namespace KineStat.Controllers
                 };
             }
 
-            ViewData["FolderId"] = assessment.DossierId;
+            ViewData["FolderId"] = assessment.FolderId;
             ViewData["AssessmentId"] = assessmentId;
             ViewBag.FirstName = patient.FirstName;
             ViewBag.LastName = patient.LastName;
@@ -248,7 +248,7 @@ namespace KineStat.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, folderId=assessment.DossierId ,assessmentId = socrate.AssessmentId });
+                return RedirectToAction("RedFlags", "RedFlags", new { id = socrate.PatientId, folderId=assessment.FolderId ,assessmentId = socrate.AssessmentId });
             }
             catch (Exception ex)
             {
@@ -261,11 +261,11 @@ namespace KineStat.Controllers
         /// Delete an assessment.
         /// </summary>
         /// <param name="id">The Id of the assessment.</param>
-        /// <param name="dossierId">The Id of the Folder.</param>
+        /// <param name="folderId">The Id of the Folder.</param>
         /// <returns>A redirection to the folder's details.</returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, int dossierId)
+        public async Task<IActionResult> DeleteConfirmed(int id, int folderId)
         {
             var assessment = await _context.Assessments.FindAsync(id);
 
@@ -297,7 +297,7 @@ namespace KineStat.Controllers
             }
 
             return RedirectToAction(
-                "DossierDetails", "Folder", new { id = dossierId }
+                "DossierDetails", "Folder", new { id = folderId }
             );
         }
 
@@ -305,13 +305,13 @@ namespace KineStat.Controllers
         /// Start a new assessment for a patient.
         /// </summary>
         /// <param name="PatientId">The Id of the patient.</param>
-        /// <param name="DossierId">The Id of the folder.</param>
+        /// <param name="FolderId">The Id of the folder.</param>
         /// <param name="PhysioId">The Id of the Physio.</param>
         /// <param name="MedicalContextId">The Id of the chosen medical context.</param>
         /// <returns>A redirection to the SOCRATE page.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StartAssessment(int PatientId, int DossierId, int PhysioId, int MedicalContextId)
+        public async Task<IActionResult> StartAssessment(int PatientId, int FolderId, int PhysioId, int MedicalContextId)
         {
             var patient = await _context.Patients.FindAsync(PatientId);
 
@@ -326,8 +326,8 @@ namespace KineStat.Controllers
             if (patient == null)
                 return NotFound("Patient introuvable");
 
-            var dossier = await _context.Dossiers.FindAsync(DossierId);
-            if (dossier == null)
+            var folder = await _context.Folders.FindAsync(FolderId);
+            if (folder == null)
                 return NotFound("Dossier introuvable");
 
             if (!await _context.MedicalContexts.AnyAsync(mc => mc.Id == MedicalContextId))
@@ -337,7 +337,7 @@ namespace KineStat.Controllers
             {
                 PatientId = PatientId,
                 PhysioId = PhysioId,
-                DossierId = DossierId,
+                FolderId = FolderId,
                 MedicalContextId = MedicalContextId,
                 Date = DateTime.Now
             };
@@ -396,44 +396,44 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Displays the assessment creation view for the specified dossier, pre-populated with patient and
+        /// Displays the assessment creation view for the specified folder, pre-populated with patient and
         /// physiotherapist information.
         /// </summary>
         /// <remarks>The returned view is initialized with the current date and default values. If the
-        /// dossier or its associated patient cannot be found, a NotFound result is returned. The list of available
+        /// folder or its associated patient cannot be found, a NotFound result is returned. The list of available
         /// medical contexts is provided to the view via <c>ViewBag.MedicalContexts</c>.</remarks>
-        /// <param name="dossierId">The unique identifier of the dossier for which the assessment is to be created. Must correspond to an
-        /// existing dossier.</param>
-        /// <returns>An <see cref="IActionResult"/> that renders the assessment creation view if the dossier and patient exist;
+        /// <param name="folderId">The unique identifier of the folder for which the assessment is to be created. Must correspond to an
+        /// existing folder.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the assessment creation view if the folder and patient exist;
         /// otherwise, a NotFound result indicating the missing resource.</returns>
-        [Route("Dossier/{dossierId}/CreateAssessment")]
-        public async Task<IActionResult> CreateAssessment(int dossierId)
+        [Route("Folder/{folderId}/CreateAssessment")]
+        public async Task<IActionResult> CreateAssessment(int folderId)
         {
-            var dossier = await _context.Dossiers
+            var folder = await _context.Folders
                 .Include(d => d.Patient)
                 .ThenInclude(p => p.Physio)
-                .FirstOrDefaultAsync(d => d.Id == dossierId);
+                .FirstOrDefaultAsync(d => d.Id == folderId);
 
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
 
-            if (!await PatientOwnershipHelper.IsDossierOwnedByPhysio(_context, physioId, dossierId))
+            if (!await PatientOwnershipHelper.IsFolderOwnedByPhysio(_context, physioId, folderId))
             {
                 return RedirectToAction("AccessDenied", "Error");
             }
 
-            if (dossier == null)
-                return NotFound("Dossier introuvable");
+            if (folder == null)
+                return NotFound("Folder introuvable");
 
-            if (dossier.Patient == null)
+            if (folder.Patient == null)
                 return NotFound("Patient introuvable");
 
             ViewBag.MedicalContexts = await _context.MedicalContexts.ToListAsync();
 
             return View(new Assessment
             {
-                DossierId = dossierId,
-                PatientId = dossier.Patient.Id,
-                PhysioId = dossier.Patient.PhysioId,
+                FolderId = folderId,
+                PatientId = folder.Patient.Id,
+                PhysioId = folder.Patient.PhysioId,
                 Date = DateTime.Today,
                 RedFlagsPercentage = 0,
                 Status = AssessmentStatus.EnCours
@@ -449,12 +449,12 @@ namespace KineStat.Controllers
         /// <returns>An <see cref="IActionResult"/> that renders the assessment's results view if found and associated with the patient;
         /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
         /// patient.</returns>
-        [Route("Patient/{id}/Dossier/{folderId}/Resultat/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/Resultat/{assessmentId}")]
         public async Task<IActionResult> Resultat(int id,int folderId, int assessmentId)
         {
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
-                .Include(a => a.Dossier)
+                .Include(a => a.Folder)
                 .FirstOrDefaultAsync(a => a.Id == assessmentId);
 
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
@@ -504,7 +504,7 @@ namespace KineStat.Controllers
             ViewBag.Tests = tests;
 
             var firstAssessment = await _context.Assessments
-                .Where(a => a.DossierId == assessment.DossierId)
+                .Where(a => a.FolderId == assessment.FolderId)
                 .OrderBy(a => a.Date)
                 .Select(a => new { a.Id })
                 .FirstOrDefaultAsync();
@@ -551,9 +551,9 @@ namespace KineStat.Controllers
         private async Task<List<DetectedPathologyDTO>> CalculateAndSaveDetectedPathologies(int patientId, int assessmentId, int folderId)
         {
             var assessment = await _context.Assessments
-                .Where(a => a.Id == assessmentId && a.DossierId == folderId)
+                .Where(a => a.Id == assessmentId && a.FolderId == folderId)
                 .Include(a => a.Patient)
-                .Include(a => a.Dossier)
+                .Include(a => a.Folder)
                 .FirstOrDefaultAsync();
             if (assessment == null) throw new Exception("Erreur bilan inexistant");
 
@@ -568,7 +568,7 @@ namespace KineStat.Controllers
 
             // Take PathologiesId in PatientAnswers
             var patientPathologyIds = await _context.PatientAnswers
-                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Assessment.DossierId == folderId)
+                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Assessment.FolderId == folderId)
                 .SelectMany(a => a.Question.QuestionPathologies.Select(qp => qp.PathologyId))
                 .Distinct()
                 .ToListAsync();
@@ -733,7 +733,7 @@ namespace KineStat.Controllers
             // Getting assessment with all its relations
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
-                .Include(a => a.Dossier)
+                .Include(a => a.Folder)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (assessment == null)
@@ -789,7 +789,7 @@ namespace KineStat.Controllers
             var detectedPathologies = await GetOrCalculateDetectedPathologies(
                 patientId: patient.Id,
                 assessmentId: id,
-                folderId: assessment.DossierId
+                folderId: assessment.FolderId
             );
 
             // Generate PDF

@@ -27,7 +27,7 @@ namespace KineStat.Controllers
         /// <param name="assessmentId">The unique identifier of the clinical assessment to display for the patient.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
         /// assessment.</returns>
-        [Route("Patient/{id}/Dossier/{folderId}/ExamenClinique/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/ExamenClinique/{assessmentId}")]
         public async Task<IActionResult> ExamenClinique(int id, int folderId, int assessmentId)
         {
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
@@ -294,7 +294,7 @@ namespace KineStat.Controllers
 
                     await _context.SaveChangesAsync();
                 
-            }
+                }
 
                 return Json(new
                 {

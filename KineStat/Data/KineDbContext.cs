@@ -26,7 +26,7 @@ namespace KineStat.Data
         public DbSet<PatientAnswerNumeric> PatientAnswerNumerics { get; set; }
         public DbSet<PriorContext> PriorContexts { get; set; }
         public DbSet<Socrate> Socrates { get; set; }
-        public DbSet<Dossier> Dossiers { get; set; }
+        public DbSet<Folder> Folders { get; set; }
         public DbSet<Administrator> Administrators { get; set; }
         public DbSet<PatientAnswerTests> PatientAnswerTests { get; set; }
         public DbSet<Doctor> Doctors { get; set; }

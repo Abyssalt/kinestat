@@ -9,7 +9,7 @@
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{Model.PatientId}/Anamnese'>Anamnèse</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Dossier/{Model.DossierId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Folder/{Model.FolderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item active'>Nouveau Bilan</li>";
 }
 
@@ -102,7 +102,7 @@
     @Html.AntiForgeryToken()
 
     <input type="hidden" name="PatientId" value="@Model.PatientId" />
-    <input type="hidden" name="DossierId" value="@Model.DossierId" />
+    <input type="hidden" name="FolderId" value="@Model.FolderId" />
     <input type="hidden" name="PhysioId" value="@Model.PhysioId" />
 
     <h6 class="fw-bold mb-3">

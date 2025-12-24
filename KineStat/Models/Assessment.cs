@@ -38,9 +38,9 @@ namespace KineStat.Models
         public virtual MedicalContext MedicalContext { get; set; }
 
         [Required]
-        public int DossierId { get; set; }
+        public int FolderId { get; set; }
 
-        public Dossier Dossier { get; set; }
+        public Folder Folder { get; set; }
 
         public AssessmentStatus Status { get; set; }
 
