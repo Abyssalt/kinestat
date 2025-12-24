@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KineStat.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,21 +70,6 @@ namespace KineStat.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MedicalRecords",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PatientId = table.Column<int>(type: "integer", nullable: false),
-                    IsArchived = table.Column<bool>(type: "boolean", nullable: false),
-                    ArchivedAt = table.Column<DateTime>(type: "date", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MedicalRecords", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Physios",
                 columns: table => new
                 {
@@ -100,20 +85,6 @@ namespace KineStat.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Physios", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RedflagThresholds",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ThresholdPercentage = table.Column<double>(type: "double precision", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RedflagThresholds", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -298,8 +269,7 @@ namespace KineStat.Migrations
                     PhysioId = table.Column<int>(type: "integer", nullable: false),
                     DossierId = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    RedFlagsPercentage = table.Column<double>(type: "double precision", nullable: true),
-                    MedicalRecordId = table.Column<int>(type: "integer", nullable: true)
+                    RedFlagsPercentage = table.Column<double>(type: "double precision", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -316,11 +286,6 @@ namespace KineStat.Migrations
                         principalTable: "MedicalContexts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Assessments_MedicalRecords_MedicalRecordId",
-                        column: x => x.MedicalRecordId,
-                        principalTable: "MedicalRecords",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Assessments_Patients_PatientId",
                         column: x => x.PatientId,
@@ -408,40 +373,6 @@ namespace KineStat.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Redflags",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    PatientId = table.Column<int>(type: "integer", nullable: false),
-                    Value = table.Column<double>(type: "double precision", nullable: false),
-                    AssessmentId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Redflags", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Redflags_Assessments_AssessmentId",
-                        column: x => x.AssessmentId,
-                        principalTable: "Assessments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Redflags_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Redflags_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Socrates",
                 columns: table => new
                 {
@@ -483,8 +414,7 @@ namespace KineStat.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Score = table.Column<int>(type: "integer", nullable: false),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionQCMId = table.Column<int>(type: "integer", nullable: true)
+                    QuestionId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -495,11 +425,43 @@ namespace KineStat.Migrations
                         principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PatientAnswers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PatientId = table.Column<int>(type: "integer", nullable: false),
+                    QuestionId = table.Column<int>(type: "integer", nullable: false),
+                    AssessmentId = table.Column<int>(type: "integer", nullable: false),
+                    Comment = table.Column<string>(type: "text", nullable: true),
+                    Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
+                    Value = table.Column<bool>(type: "boolean", nullable: true),
+                    PatientAnswerNumeric_Value = table.Column<double>(type: "double precision", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PatientAnswers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Answers_Questions_QuestionQCMId",
-                        column: x => x.QuestionQCMId,
+                        name: "FK_PatientAnswers_Assessments_AssessmentId",
+                        column: x => x.AssessmentId,
+                        principalTable: "Assessments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PatientAnswers_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PatientAnswers_Questions_QuestionId",
+                        column: x => x.QuestionId,
                         principalTable: "Questions",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -522,50 +484,6 @@ namespace KineStat.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_QuestionPathologies_Questions_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "Questions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PatientAnswers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PatientId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
-                    AssessmentId = table.Column<int>(type: "integer", nullable: false),
-                    Comment = table.Column<string>(type: "text", nullable: true),
-                    Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
-                    Value = table.Column<bool>(type: "boolean", nullable: true),
-                    PatientAnswerNumeric_Value = table.Column<double>(type: "double precision", nullable: true),
-                    AnswerId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PatientAnswers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PatientAnswers_Answers_AnswerId",
-                        column: x => x.AnswerId,
-                        principalTable: "Answers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PatientAnswers_Assessments_AssessmentId",
-                        column: x => x.AssessmentId,
-                        principalTable: "Assessments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PatientAnswers_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PatientAnswers_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
                         principalColumn: "Id",
@@ -621,11 +539,6 @@ namespace KineStat.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Answers_QuestionQCMId",
-                table: "Answers",
-                column: "QuestionQCMId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Assessments_DossierId",
                 table: "Assessments",
                 column: "DossierId");
@@ -634,11 +547,6 @@ namespace KineStat.Migrations
                 name: "IX_Assessments_MedicalContextId",
                 table: "Assessments",
                 column: "MedicalContextId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Assessments_MedicalRecordId",
-                table: "Assessments",
-                column: "MedicalRecordId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assessments_PatientId",
@@ -684,11 +592,6 @@ namespace KineStat.Migrations
                 name: "IX_Pathologies_ClusterId",
                 table: "Pathologies",
                 column: "ClusterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PatientAnswers_AnswerId",
-                table: "PatientAnswers",
-                column: "AnswerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PatientAnswers_AssessmentId",
@@ -782,21 +685,6 @@ namespace KineStat.Migrations
                 column: "ClusterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Redflags_AssessmentId",
-                table: "Redflags",
-                column: "AssessmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Redflags_CategoryId",
-                table: "Redflags",
-                column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Redflags_PatientId",
-                table: "Redflags",
-                column: "PatientId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Socrates_AssessmentId",
                 table: "Socrates",
                 column: "AssessmentId");
@@ -832,12 +720,6 @@ namespace KineStat.Migrations
                 name: "QuestionPathologies");
 
             migrationBuilder.DropTable(
-                name: "Redflags");
-
-            migrationBuilder.DropTable(
-                name: "RedflagThresholds");
-
-            migrationBuilder.DropTable(
                 name: "Socrates");
 
             migrationBuilder.DropTable(
@@ -860,9 +742,6 @@ namespace KineStat.Migrations
 
             migrationBuilder.DropTable(
                 name: "MedicalContexts");
-
-            migrationBuilder.DropTable(
-                name: "MedicalRecords");
 
             migrationBuilder.DropTable(
                 name: "Categories");

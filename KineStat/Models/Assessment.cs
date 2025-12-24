@@ -33,8 +33,6 @@ namespace KineStat.Models
 
         public virtual Physio Physio { get; set; }
 
-        public virtual ICollection<Redflag> RedFlagsDetected { get; set; } = new List<Redflag>();
-
         public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
 
         public virtual MedicalContext MedicalContext { get; set; }

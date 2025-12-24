@@ -34,7 +34,6 @@ namespace KineStat.Controllers
                 .Include(a => a.Patient)
                 .Include(a => a.Physio)
                 .Include(a => a.Dossier)
-                .Include(a => a.RedFlagsDetected)
                 .Include(a => a.Questions)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
