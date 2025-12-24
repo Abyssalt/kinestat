@@ -46,6 +46,13 @@ async function saveTestData(questionId) {
         });
 
         const result = await response.json();
+
+        if (result.success && result.clinicalCategories) {
+            if (window.ClinicalProfileStore) {
+                ClinicalProfileStore.set(result.clinicalCategories);
+                console.log('✓ Radar chart 9 mis à jour:', result.clinicalCategories);
+            }
+        }
     } catch (error) {
         console.error('✗ Erreur sauvegarde automatique:', error);
     }
