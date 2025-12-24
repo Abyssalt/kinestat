@@ -471,6 +471,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/patient.js"></script>
     <style>
         /* ========== TABLET ========== */
         @@media (min-width: 768px) and (max-width: 1199px) {
@@ -574,31 +575,11 @@
                     return value !== '';
 
                 case 'SocialSecNumber':
-                    if (!value) return false;
-                    const nissClean = value.replace(/[\s\.\-]/g, '');
-                    if (!/^\d{11}$/.test(nissClean)) return false;
-
-                    const year = parseInt(nissClean.substring(0, 2));
-                    const month = parseInt(nissClean.substring(2, 4));
-                    const day = parseInt(nissClean.substring(4, 6));
-                    const checkDigits = parseInt(nissClean.substring(9, 11));
-
-                    const validMonths = (month >= 1 && month <= 12) ||
-                        (month >= 21 && month <= 32) ||
-                        (month >= 41 && month <= 52) ||
-                        (month >= 61 && month <= 72);
-                    if (!validMonths) return false;
-                    if (day < 1 || day > 31) return false;
-
-                    let baseNumber = parseInt(nissClean.substring(0, 9));
-                    let calculatedCheck = 97 - (baseNumber % 97);
-
-                    if (calculatedCheck !== checkDigits) {
-                        baseNumber = parseInt('2' + nissClean.substring(0, 9));
-                        calculatedCheck = 97 - (baseNumber % 97);
-                    }
-
-                    return calculatedCheck === checkDigits;
+                if (!value) return false;
+                const countrySelect = document.getElementById('edit_Country');
+                const country = countrySelect ? countrySelect.value : '';
+                if (!country) return false;
+                return validateSocialSecurityNumber(value, country);
 
                 default:
                     return value.length > 0;
