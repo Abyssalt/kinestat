@@ -71,12 +71,10 @@
                         <div class="list-group list-group-flush">
                             @foreach (var assessment in Model.Assessments.OrderByDescending(a => a.Date))
                             {
-                                <div class="list-group-item border-2 rounded-1 mb-2 px-3 py-3">
-
-                                    <div class="d-flex justify-content-between align-items-center">
-
-                                        @if (assessment.Status == AssessmentStatus.EnCours)
-                                        {
+                                @if (assessment.Status == AssessmentStatus.EnCours)
+                                {
+                                    <div class="list-group-item border-2 rounded-1 mb-2 px-3 py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
                                             <div class="flex-grow-1">
                                                 <div>
                                                     <h6 class="mb-1 fw-semibold">
@@ -84,50 +82,40 @@
                                                     </h6>
                                                 </div>
                                             </div>
-                                        }
-                                        else
-                                        {
-                                            <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id"
-                                               class="text-decoration-none text-reset flex-grow-1">
-                                                <div>
-                                                    <h6 class="mb-1 fw-semibold">
-                                                        <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
-                                                    </h6>
-                                                </div>
-                                            </a>
-                                        }
-                                        <div class="d-flex align-items-center ms-3">
-
-                                            @if (assessment.Status == AssessmentStatus.EnCours)
-                                            {
+                                            <div class="d-flex align-items-center ms-3">
                                                 <a asp-controller="Assessments" asp-action="Socrate" asp-route-id="@Model.PatientId" asp-route-assessmentId="@assessment.Id"
                                                    class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 me-3 btn-tablet-lg">
                                                     <i class="bi bi-play-fill me-1"></i>Reprendre
                                                 </a>
-
                                                 <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 me-2 border border-success border-opacity-25">
                                                     En cours
                                                 </span>
-
                                                 <span class="text-muted opacity-25">
                                                     <i class="bi bi-chevron-right"></i>
                                                 </span>
-                                            }
-                                            else
-                                            {
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id"
+                                       class="list-group-item border-2 rounded-1 mb-2 px-3 py-3 text-decoration-none text-reset d-block">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">
+                                                    <i class="bi bi-calendar3 text-success me-2"></i>Bilan du @assessment.Date.ToString("dd/MM/yyyy")
+                                                </h6>
+                                            </div>
+                                            <div class="d-flex align-items-center ms-3">
                                                 <span class="badge bg-danger px-3 py-2 rounded-pill fw-semibold me-2">
                                                     Clôturé
                                                 </span>
-
-                                                <a asp-controller="Assessments" asp-action="AssessmentDetails" asp-route-id="@assessment.Id" class="text-secondary">
-                                                    <i class="bi bi-chevron-right"></i>
-                                                </a>
-                                            }
-
+                                                <i class="bi bi-chevron-right text-secondary"></i>
+                                            </div>
                                         </div>
-
-                                    </div>
-                                </div>
+                                    </a>
+                                }
                             }
                         </div>
                     }
@@ -137,3 +125,12 @@
     </div>
 
 </div>
+
+<style>
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.02);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
