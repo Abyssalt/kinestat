@@ -450,7 +450,7 @@ namespace KineStat.Controllers
         /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
         /// patient.</returns>
         [Route("Patient/{id}/Folder/{folderId}/Resultat/{assessmentId}")]
-        public async Task<IActionResult> Resultat(int id,int folderId, int assessmentId)
+        public async Task<IActionResult> Results(int id,int folderId, int assessmentId)
         {
             var assessment = await _context.Assessments
                 .Include(a => a.Patient)
