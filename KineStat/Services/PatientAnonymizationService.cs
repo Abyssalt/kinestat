@@ -98,9 +98,9 @@ namespace KineStat.Services
             patient.Address = "ADRESSE ANONYMISEE";
 
             patient.Profession = null;
-            patient.ActivitesPhysiques = null;
-            patient.AntecedentsMedicaux = "DONNEES ANONYMISEES";
-            patient.MedicationActuelle = null;
+            patient.PhysicalActivities = null;
+            patient.MedicalHistory = "DONNEES ANONYMISEES";
+            patient.ActualMedication = null;
 
             patient.Status = PatientStatus.Terminé;
             patient.IsAnonymized = true;

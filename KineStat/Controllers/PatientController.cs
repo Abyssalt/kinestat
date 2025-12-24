@@ -22,7 +22,7 @@ namespace KineStat.Controllers
         /// <summary>
         /// Handles the HTTP GET request to display the anamnesis view for a specified patient.
         /// </summary>
-        /// <remarks>The returned view includes the patient's dossier information and a list of
+        /// <remarks>The returned view includes the patient's folder information and a list of
         /// physiotherapists ordered by last name, available via <see cref="ViewBag.Physios"/>.</remarks>
         /// <param name="id">The unique identifier of the patient whose anamnesis information is to be displayed.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the anamnesis view for the patient if found; otherwise, a
@@ -38,7 +38,7 @@ namespace KineStat.Controllers
             }
 
             var patient = _context.Patients
-                .Include(p => p.Dossiers)
+                .Include(p => p.Folders)
                 .Include(p => p.Doctor)
                 .FirstOrDefault(p => p.Id == id);
 
@@ -229,9 +229,9 @@ namespace KineStat.Controllers
             }
 
             patient.Profession = Profession;
-            patient.ActivitesPhysiques = ActivitesPhysiques;
-            patient.AntecedentsMedicaux = AntecedentsMedicaux;
-            patient.MedicationActuelle = MedicationActuelle;
+            patient.PhysicalActivities = ActivitesPhysiques;
+            patient.MedicalHistory = AntecedentsMedicaux;
+            patient.ActualMedication = MedicationActuelle;
 
             await _context.SaveChangesAsync();
 

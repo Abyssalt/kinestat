@@ -1,19 +1,33 @@
 ﻿using KineStat.Models;
+using KineStat.Models.DTO;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+
+// Note : This is the base of the PDF Export, we can't do really better at the moment, so, the graphs and other diagrams have to be added to refactor this functionnality.
 
 namespace KineStat.Services
 {
     public class AssessmentCompletePdfService
     {
+        /// <summary>
+        /// Generate a complete PDF medical report for a patient assessment
+        /// </summary>
+        /// <param name="patient">The patient information</param>
+        /// <param name="socrate">The SOCRATE data</param>
+        /// <param name="assessment">The assessment data</param>
+        /// <param name="tests">The list of tests performed</param>
+        /// <param name="tintivValues">TINTIV Values</param>
+        /// <param name="clinicalValues">Clinical profile values</param>
+        /// <returns>An array containing the pdf document, with a size of 1 page</returns>
         public byte[] GenerateCompletePdf(
             Patient patient,
             Socrate? socrate,
             Assessment assessment,
             List<PatientAnswerTests> tests,
             List<double> tintivValues,
-            List<double> clinicalValues)
+            List<double> clinicalValues,
+            List<DetectedPathologyDTO> detectedPathologies)
         {
             // License stuff, do not modify
             QuestPDF.Settings.License = LicenseType.Community;
@@ -30,37 +44,40 @@ namespace KineStat.Services
                     // Header
                     page.Header()
                         .Background(Colors.Blue.Lighten3)
-                        .Padding(10)
-                        .Column(column =>
+                        .Padding(8)
+                        .Row(row =>
                         {
-                            column.Item().Text("Dossier Kinésithérapie")
-                                .FontSize(14)
+                            row.RelativeItem().Text("RAPPORT MÉDICAL - BILAN KINÉSITHÉRAPIE")
+                                .FontSize(12)
                                 .Bold()
                                 .FontColor(Colors.Blue.Darken2);
 
-                            column.Item().Text($"Patient : {patient.FirstName} {patient.LastName} - {assessment.Date:dd/MM/yyyy}")
-                                .FontSize(10)
+                            row.AutoItem().Text($"{patient.LastName} {patient.FirstName} | {assessment.Date:dd/MM/yyyy}")
+                                .FontSize(9)
                                 .FontColor(Colors.Grey.Darken2);
                         });
 
                     // Start of the content
                     page.Content()
-                        .PaddingVertical(10)
+                        .PaddingVertical(5)
                         .Column(column =>
                         {
-                            // Page 1
-                            AddAnamnesePage(column, patient);
-                            column.Item().PageBreak();
+                            column.Spacing(8);
 
-                            // Page 2
-                            if (socrate != null)
-                            {
-                                AddSocratePage(column, socrate);
-                                column.Item().PageBreak();
-                            }
+                            // Compact synthesis
+                            AddCompactSynthesis(column, patient, assessment);
 
-                            // Page 3
-                            AddResultsPage(column, tests, tintivValues, clinicalValues, assessment);
+                            // Red Flags
+                            AddRedFlagsSection(column, assessment);
+
+                            // TINTIV Data
+                            AddTintivData(column, tintivValues);
+
+                            // Clinical profile data
+                            AddClinicalData(column, clinicalValues);
+
+                            // Add suspected pathology
+                            AddPathologiesSection(column, detectedPathologies);
                         });
 
                     // Footer
@@ -79,254 +96,140 @@ namespace KineStat.Services
             return document.GeneratePdf();
         }
 
-        private void AddAnamnesePage(ColumnDescriptor column, Patient patient)
+        /// <summary>
+        /// Add the patient identification with administrative information for the doctor
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        /// <param name="patient">Patient information, including name, birth date, contact details and medical history</param>
+        /// <param name="assessment">The assessment with the evaluation date</param>
+        private void AddCompactSynthesis(ColumnDescriptor column, Patient patient, Assessment assessment)
         {
-            column.Item().Text("ANAMNÈSE")
-                .FontSize(16)
+            column.Item().Text("IDENTIFICATION DU PATIENT")
+                .FontSize(12)
                 .Bold()
                 .FontColor(Colors.Blue.Darken2);
 
-            column.Item().PaddingTop(10).LineHorizontal(2).LineColor(Colors.Blue.Lighten2);
-
-            column.Item().PaddingTop(15).Column(sectionColumn =>
+            column.Item().PaddingTop(5).Table(table =>
             {
-                sectionColumn.Item().Text("Informations administratives")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Blue.Darken1);
-
-                sectionColumn.Item().PaddingTop(10).Table(table =>
+                table.ColumnsDefinition(columns =>
                 {
-                    table.ColumnsDefinition(columns =>
-                    {
-                        columns.RelativeColumn(1);
-                        columns.RelativeColumn(2);
-                    });
-
-                    // Line 1
-                    AddTableRow(table, "Nom", patient.LastName);
-                    AddTableRow(table, "Prénom", patient.FirstName);
-
-                    // Line 2
-                    AddTableRow(table, "Genre", patient.Gender.ToString());
-                    AddTableRow(table, "Date de naissance", patient.BirthDate.ToString("dd/MM/yyyy"));
-
-                    // Line 3
-                    AddTableRow(table, "Adresse", patient.Address ?? "Non renseignée");
-                    AddTableRow(table, "Téléphone", patient.PhoneNumber ?? "Non renseigné");
-
-                    // Line 4
-                    AddTableRow(table, "Email", patient.Email ?? "Non renseigné");
-                    AddTableRow(table, "Statut", patient.Status.ToString());
-
-                    // Line 5
-                    AddTableRow(table, "Poids (kg)", patient.Weight?.ToString() ?? "Non renseigné");
-                    AddTableRow(table, "Taille (cm)", patient.Height?.ToString() ?? "Non renseignée");
-
-                    // Line 6
-                    AddTableRow(table, "N° Sécurité sociale", patient.SocialSecurityNumber ?? "Non renseigné");
+                    columns.RelativeColumn(1);
+                    columns.RelativeColumn(2);
+                    columns.RelativeColumn(1);
+                    columns.RelativeColumn(2);
                 });
 
-                // Medical information
-                sectionColumn.Item().PaddingTop(20).Text("Informations médicales")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Blue.Darken1);
+                // Line 1
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Nom").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.LastName).FontSize(9);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Prénom").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.FirstName).FontSize(9);
 
-                sectionColumn.Item().PaddingTop(10).Column(medColumn =>
-                {
-                    AddMedicalInfo(medColumn, "Profession", patient.Profession);
-                    AddMedicalInfo(medColumn, "Activités physiques", patient.ActivitesPhysiques);
-                    AddMedicalInfo(medColumn, "Antécédents médicaux", patient.AntecedentsMedicaux);
-                    AddMedicalInfo(medColumn, "Médication actuelle", patient.MedicationActuelle);
-                });
+                // Line 2
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Date de naissance").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.BirthDate.ToString("dd/MM/yyyy")).FontSize(9);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("N° Sécurité sociale").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.SocialSecurityNumber ?? "Non renseigné").FontSize(9);
+
+                // Line 3
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Téléphone").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.PhoneNumber ?? "Non renseigné").FontSize(9);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Email").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.Email ?? "Non renseigné").FontSize(9);
+
+                // Line 4
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Date du bilan").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(assessment.Date.ToString("dd/MM/yyyy")).FontSize(9);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text("Statut").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                    .Text(patient.Status.ToString()).FontSize(9);
             });
+
+            if (!string.IsNullOrWhiteSpace(patient.MedicalHistory))
+            {
+                column.Item().PaddingTop(5).Column(col =>
+                {
+                    col.Item().Text("Antécédents médicaux")
+                        .FontSize(10)
+                        .Bold()
+                        .FontColor(Colors.Blue.Darken1);
+                    col.Item().PaddingTop(2)
+                        .BorderLeft(2)
+                        .BorderColor(Colors.Blue.Lighten3)
+                        .PaddingLeft(8)
+                        .Text(patient.MedicalHistory)
+                        .FontSize(9);
+                });
+            }
         }
 
-        private void AddSocratePage(ColumnDescriptor column, Socrate socrate)
+        /// <summary>
+        /// Add the RedFlag section with a progress bar (like the gauge)
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        /// <param name="assessment">The assessment with the evaluation date</param>
+        private void AddRedFlagsSection(ColumnDescriptor column, Assessment assessment)
         {
-            column.Item().Text("QUESTIONNAIRE SOCRATE")
-                .FontSize(16)
+            column.Item().Text("ANALYSE DU RISQUE")
+                .FontSize(12)
                 .Bold()
-                .FontColor(Colors.Blue.Darken2);
+                .FontColor(Colors.Orange.Darken2);
 
-            column.Item().PaddingTop(5).Text("Évaluation de la douleur")
-                .FontSize(11)
+            var percentage = assessment.RedFlagsPercentage ?? 0;
+            var barColor = percentage < 30 ? Colors.Green.Medium :
+                          percentage < 60 ? Colors.Orange.Medium :
+                          Colors.Red.Medium;
+
+            column.Item().PaddingTop(5).Row(row =>
+            {
+                row.RelativeItem().Height(20).Background(Colors.Grey.Lighten2).Row(innerRow =>
+                {
+                    innerRow.ConstantItem((float)percentage * 4.5f).Background(barColor);
+                    innerRow.RelativeItem();
+                });
+
+                row.AutoItem().PaddingLeft(10).AlignMiddle()
+                    .Text($"{percentage:F1}%")
+                    .FontSize(11)
+                    .Bold()
+                    .FontColor(barColor);
+            });
+
+            column.Item().PaddingTop(3).Text("Niveau de vigilance recommandé")
+                .FontSize(9)
                 .Italic()
                 .FontColor(Colors.Grey.Darken1);
-
-            column.Item().PaddingTop(10).LineHorizontal(2).LineColor(Colors.Blue.Lighten2);
-
-            column.Item().PaddingTop(15).Column(sectionColumn =>
-            {
-                sectionColumn.Spacing(12);
-
-                AddSocrateSection(sectionColumn, "S", "Site",
-                    "Où se situe la douleur ?", socrate.Site);
-
-                AddSocrateSection(sectionColumn, "O", "Onset (Début)",
-                    "Quand et comment a débuté la douleur ?", socrate.Onset);
-
-                AddSocrateSection(sectionColumn, "C", "Character (Caractère)",
-                    "Comment décririez-vous la douleur ?", socrate.Character);
-
-                AddSocrateSection(sectionColumn, "R", "Radiation",
-                    "La douleur se propage-t-elle ailleurs ?", socrate.Radiation);
-
-                AddSocrateSection(sectionColumn, "A", "Association",
-                    "Autres symptômes associés ?", socrate.Association);
-
-                AddSocrateSection(sectionColumn, "T", "Timing (Temporalité)",
-                    "La douleur est-elle constante ou intermittente ?", socrate.Timing);
-
-                AddSocrateSection(sectionColumn, "E", "Exacerbating Factor",
-                    "Qu'est-ce qui aggrave la douleur ?", socrate.ExacerbatingFactor);
-
-                AddSocrateSection(sectionColumn, "R", "Relieving Factor",
-                    "Qu'est-ce qui soulage la douleur ?", socrate.RelievingFactor);
-            });
         }
 
-        private void AddResultsPage(ColumnDescriptor column, List<PatientAnswerTests> tests,
-            List<double> tintivValues, List<double> clinicalValues, Assessment assessment)
+        /// <summary>
+        /// Add the suspected pathologies section
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        private void AddPathologiesSection(ColumnDescriptor column, List<DetectedPathologyDTO> detectedPathologies)
         {
-            column.Item().Text("RÉSULTATS DU BILAN")
-                .FontSize(16)
+            column.Item().Text("PATHOLOGIES SUSPECTÉES")
+                .FontSize(12)
                 .Bold()
-                .FontColor(Colors.Blue.Darken2);
+                .FontColor(Colors.Blue.Darken1);
 
-            column.Item().PaddingTop(10).LineHorizontal(2).LineColor(Colors.Blue.Lighten2);
-
-            // Red Flags section
-            column.Item().PaddingTop(15).Column(rfColumn =>
+            if (detectedPathologies != null && detectedPathologies.Any())
             {
-                rfColumn.Item().Text("Analyse du risque (Red Flags)")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Orange.Darken2);
-
-                rfColumn.Item().PaddingTop(5)
-                    .Background(Colors.Orange.Lighten4)
-                    .Padding(10)
-                    .Text($"Pourcentage de risque : {assessment.RedFlagsPercentage:F2} %")
-                    .FontSize(14)
-                    .Bold();
-            });
-
-            // Test done section
-            column.Item().PaddingTop(15).Column(testsColumn =>
-            {
-                testsColumn.Item().Text("Tests effectués")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Blue.Darken1);
-
-                if (tests != null && tests.Any())
-                {
-                    var testsByCluster = tests.GroupBy(t =>
-                        t.IsCustomTest ? "Tests personnalisés" :
-                        t.Question?.Cluster?.Name ?? "Autres");
-
-                    foreach (var clusterGroup in testsByCluster)
-                    {
-                        testsColumn.Item().PaddingTop(10).Column(clusterCol =>
-                        {
-                            clusterCol.Item().Text($"▸ {clusterGroup.Key} ({clusterGroup.Count()})")
-                                .FontSize(12)
-                                .Bold()
-                                .FontColor(Colors.Blue.Darken2);
-
-                            foreach (var test in clusterGroup)
-                            {
-                                clusterCol.Item().PaddingLeft(15).PaddingTop(5).Column(testCol =>
-                                {
-                                    testCol.Item().Text(test.IsCustomTest ? test.CustomTestName : test.Question?.Title ?? "Test")
-                                        .FontSize(10)
-                                        .Bold();
-
-                                    var resultText = test.ResponseValue == "true" ? "✓ Positif" :
-                                                   test.ResponseValue == "false" ? "✗ Négatif" :
-                                                   test.ResponseValue;
-
-                                    testCol.Item().Text($"Résultat : {resultText}")
-                                        .FontSize(10)
-                                        .FontColor(Colors.Grey.Darken1);
-
-                                    if (!string.IsNullOrWhiteSpace(test.Observations))
-                                    {
-                                        testCol.Item().Text($"💬 {test.Observations}")
-                                            .FontSize(9)
-                                            .Italic()
-                                            .FontColor(Colors.Grey.Medium);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                }
-                else
-                {
-                    testsColumn.Item().PaddingTop(5).Text("Aucun test enregistré")
-                        .FontSize(10)
-                        .Italic()
-                        .FontColor(Colors.Grey.Medium);
-                }
-            });
-
-            // Clinical data section
-            column.Item().PaddingTop(15).Column(dataColumn =>
-            {
-                dataColumn.Item().Text("Données cliniques")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Blue.Darken1);
-
-                // Tintiv
-                if (tintivValues != null && tintivValues.Any())
-                {
-                    dataColumn.Item().PaddingTop(10).Column(tintivCol =>
-                    {
-                        tintivCol.Item().Text("TINTIV (6 catégories)")
-                            .FontSize(11)
-                            .Bold();
-
-                        var tintivCategories = new[] { "T", "I", "N", "T", "I", "V" };
-                        for (int i = 0; i < Math.Min(tintivValues.Count, 6); i++)
-                        {
-                            tintivCol.Item().Text($"{tintivCategories[i]} : {tintivValues[i]:F2}")
-                                .FontSize(10);
-                        }
-                    });
-                }
-
-                // Clinical profile (9 category)
-                if (clinicalValues != null && clinicalValues.Any())
-                {
-                    dataColumn.Item().PaddingTop(10).Column(clinicalCol =>
-                    {
-                        clinicalCol.Item().Text("Profil clinique (9 catégories)")
-                            .FontSize(11)
-                            .Bold();
-
-                        var clinicalCategories = new[] { "Cat 1", "Cat 2", "Cat 3", "Cat 4", "Cat 5", "Cat 6", "Cat 7", "Cat 8", "Cat 9" };
-                        for (int i = 0; i < Math.Min(clinicalValues.Count, 9); i++)
-                        {
-                            clinicalCol.Item().Text($"{clinicalCategories[i]} : {clinicalValues[i]:F2}")
-                                .FontSize(10);
-                        }
-                    });
-                }
-            });
-
-            // Suspected pathology (Hardcoded value for now)
-            column.Item().PaddingTop(15).Column(pathoColumn =>
-            {
-                pathoColumn.Item().Text("Pathologies suspectées")
-                    .FontSize(13)
-                    .Bold()
-                    .FontColor(Colors.Blue.Darken1);
-
-                pathoColumn.Item().PaddingTop(5).Table(table =>
+                column.Item().PaddingTop(5).Table(table =>
                 {
                     table.ColumnsDefinition(columns =>
                     {
@@ -334,16 +237,120 @@ namespace KineStat.Services
                         columns.RelativeColumn(1);
                     });
 
-                    AddPathologyRow(table, "Tumoral", "26%");
-                    AddPathologyRow(table, "Infectieux", "10%");
-                    AddPathologyRow(table, "Neurologique", "12%");
-                    AddPathologyRow(table, "Traumatique", "8%");
-                    AddPathologyRow(table, "Inflammatoire", "7%");
-                    AddPathologyRow(table, "Vasculaire", "32%");
+                    foreach (var pathology in detectedPathologies.OrderByDescending(p => p.PathologyProbability))
+                    {
+                        AddPathologyRow(table, pathology.PathologyName, $"{pathology.PathologyProbability * 100:F1}%");
+                    }
                 });
-            });
+            }
+            else
+            {
+                column.Item().PaddingTop(5).Text("Aucune pathologie détectée")
+                    .FontSize(9)
+                    .Italic()
+                    .FontColor(Colors.Grey.Medium);
+            }
         }
 
+        /// <summary>
+        /// Add the TINTIV data with values and progress bars for RedFlags categories
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        /// <param name="tintivValues">The list of TINTIV values</param>
+        private void AddTintivData(ColumnDescriptor column, List<double> tintivValues)
+        {
+            column.Item().Text("TINTIV - Données Red Flags")
+                .FontSize(12)
+                .Bold()
+                .FontColor(Colors.Red.Darken1);
+
+            if (tintivValues != null && tintivValues.Any())
+            {
+                column.Item().PaddingTop(5).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn();
+                        columns.RelativeColumn();
+                        columns.RelativeColumn();
+                    });
+
+                    var labels = new[] { "Tumeur", "Infection", "Neurologique", "Traumatisme", "Inflammatoire", "Vasculaire" };
+
+                    for (int i = 0; i < Math.Min(tintivValues.Count, 6); i++)
+                    {
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Text(labels[i]).FontSize(9).Bold();
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .AlignCenter().Text($"{tintivValues[i]:F1} / 5").FontSize(9);
+
+                        // Progress bar
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Height(15).Background(Colors.Grey.Lighten3).Row(barRow =>
+                            {
+                                barRow.ConstantItem((float)tintivValues[i] * 30f).Background(Colors.Red.Lighten2);
+                                barRow.RelativeItem();
+                            });
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Adds the clinical profile data with values and progress bars for the 9 given categories
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        /// <param name="clinicalValues">The list of clinical profile values, for maximum 9 given categories</param>
+        private void AddClinicalData(ColumnDescriptor column, List<double> clinicalValues)
+        {
+            column.Item().Text("PROFIL CLINIQUE - 9 Catégories")
+                .FontSize(12)
+                .Bold()
+                .FontColor(Colors.Blue.Darken1);
+
+            if (clinicalValues != null && clinicalValues.Any())
+            {
+                column.Item().PaddingTop(5).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(1);
+                        columns.RelativeColumn(2);
+                    });
+
+                    var labels = new[] {
+                        "Articulaire/structurel", "Myofascial", "Nociceptif",
+                        "Neuropathique", "Nociplastique", "Contrôle sensorimoteur",
+                        "Croyance & cognition", "Socio-environnemental", "Émotionnel/Affectif"
+                    };
+
+                    for (int i = 0; i < Math.Min(clinicalValues.Count, 9); i++)
+                    {
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Text(labels[i]).FontSize(9).Bold();
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .AlignCenter().Text($"{clinicalValues[i]:F1} / 5").FontSize(9);
+
+                        // Progress bar
+                        table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Height(15).Background(Colors.Grey.Lighten3).Row(barRow =>
+                            {
+                                barRow.ConstantItem((float)clinicalValues[i] * 30f).Background(Colors.Blue.Lighten2);
+                                barRow.RelativeItem();
+                            });
+                    }
+                });
+            }
+        }
+
+        /*  Commented because it could be useful in a next refactor
+        /// <summary>
+        /// Add a row to a table with a label and corresponding value
+        /// </summary>
+        /// <param name="table">The table descriptor</param>
+        /// <param name="label">The label text</param>
+        /// <param name="value">The value text</param>
         private void AddTableRow(TableDescriptor table, string label, string? value)
         {
             table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
@@ -352,7 +359,15 @@ namespace KineStat.Services
             table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
                 .Text(value ?? "Non renseigné").FontSize(10);
         }
+        */
 
+        /*  Commented because it could be useful in a next refactor
+        /// <summary>
+        /// Add medical information with a label
+        /// </summary>
+        /// <param name="column">Where content will be added</param>
+        /// <param name="label">The label text</param>
+        /// <param name="value">The medical information test</param>
         private void AddMedicalInfo(ColumnDescriptor column, string label, string? value)
         {
             column.Item().PaddingTop(8).Column(col =>
@@ -371,45 +386,14 @@ namespace KineStat.Services
                     .FontColor(string.IsNullOrWhiteSpace(value) ? Colors.Grey.Medium : Colors.Black);
             });
         }
+        */
 
-        private void AddSocrateSection(ColumnDescriptor column, string badge, string title, string description, string? content)
-        {
-            column.Item().Column(sectionColumn =>
-            {
-                sectionColumn.Item().Row(row =>
-                {
-                    row.AutoItem()
-                        .Background(Colors.Blue.Lighten3)
-                        .Padding(5)
-                        .Text(badge)
-                        .FontSize(10)
-                        .Bold()
-                        .FontColor(Colors.White);
-
-                    row.RelativeItem()
-                        .PaddingLeft(10)
-                        .Text(title)
-                        .FontSize(11)
-                        .Bold()
-                        .FontColor(Colors.Blue.Darken2);
-                });
-
-                sectionColumn.Item().PaddingTop(3)
-                    .Text(description)
-                    .FontSize(9)
-                    .Italic()
-                    .FontColor(Colors.Grey.Darken1);
-
-                sectionColumn.Item().PaddingTop(5)
-                    .BorderLeft(2)
-                    .BorderColor(Colors.Blue.Lighten3)
-                    .PaddingLeft(10)
-                    .Text(string.IsNullOrWhiteSpace(content) ? "Non renseigné" : content)
-                    .FontSize(10)
-                    .FontColor(string.IsNullOrWhiteSpace(content) ? Colors.Grey.Medium : Colors.Black);
-            });
-        }
-
+        /// <summary>
+        /// Add a pathology row with the name and the percentage to the table
+        /// </summary>
+        /// <param name="table">The table descriptor</param>
+        /// <param name="pathology"></param>
+        /// <param name="percentage"></param>
         private void AddPathologyRow(TableDescriptor table, string pathology, string percentage)
         {
             table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(8)

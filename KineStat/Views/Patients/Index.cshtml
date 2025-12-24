@@ -218,7 +218,7 @@
             <div class="modal-body">
                 <form id="addPatientForm" asp-controller="Patients" asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
-                    
+
                     <input type="hidden" id="newDoctorLastName_hidden" name="NewDoctorLastName" value="">
                     <input type="hidden" id="newDoctorFirstName_hidden" name="NewDoctorFirstName" value="">
                     <input type="hidden" id="newDoctorINAMI_hidden" name="NewDoctorINAMI" value="">
@@ -306,7 +306,7 @@
                             <label class="form-label small text-uppercase text-muted">Taille (cm)</label>
                             <input type="number" class="form-control cache-field" name="Height" data-field="Height" data-validation="decimal" min="0">
                         </div>
-                        
+
                         <div class="col-12 col-md-6">
                             <label class="form-label small text-uppercase text-muted">Médecin traitant</label>
                             <select class="form-select cache-field" name="DoctorId" id="doctorSelect" data-field="DoctorId">
@@ -321,12 +321,11 @@
                                     }
                                 }
                             </select>
-                            <div class="col-12" id="addDoctorBtnContainer">
+                            <div id="addDoctorBtnContainer" style="display: none;">
                                 <button type="button" class="btn btn-sm btn-outline-primary btn-tablet-lg" id="addDoctorBtn">
                                     <i class="bi bi-plus-circle me-1"></i>Ajouter un nouveau médecin
                                 </button>
                             </div>
-                            
                         </div>
 
                         <div class="col-12 collapse" id="addDoctorSection">
@@ -346,8 +345,8 @@
                                         </div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small">N° INAMI *</label>
-                                            <input type="text" class="form-control" id="newDoctorINAMI" 
-                                                   placeholder="11 chiffres sans tirets" 
+                                            <input type="text" class="form-control" id="newDoctorINAMI"
+                                                   placeholder="11 chiffres sans tirets"
                                                    maxlength="11"
                                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                         </div>
@@ -356,7 +355,7 @@
                             </div>
                         </div>
 
-                        
+
                     </div>
                 </form>
             </div>
@@ -372,6 +371,8 @@
 
 @section Scripts {
     <script src="~/js/patient.js"></script>
+    <script src="~/lib/animejs/anime.min.js"></script>
+
     <style>
         .letter-spacing-wide {
             letter-spacing: 0.1em;
@@ -385,24 +386,29 @@
         .clickable-row {
             cursor: pointer;
             transition: background-color 0.15s ease-in-out;
+            opacity: 0;
+            transform: translateX(-20px);
         }
 
             .clickable-row:hover {
-                background-color: var(--bs-gray-100) !important;
+                background-color: rgba(13, 110, 253, 0.05) !important;
+                transform: translateX(5px) !important;
             }
 
         .clickable-card {
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
         }
 
             .clickable-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15) !important;
             }
 
             .clickable-card:active {
-                transform: scale(0.98);
+                transform: translateY(-4px) scale(0.98);
             }
 
         .delete-form {
@@ -626,6 +632,7 @@
                     <td class="py-3 text-end actions-cell"><form action="/Patients/${p.id}/Delete" method="post" class="delete-form d-inline"><input type="hidden" name="__RequestVerificationToken" value="${token}"><button type="submit" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); return confirm('Supprimer ce patient ?');"><i class="bi bi-trash"></i></button></form></td>
                 </tr>`).join('');
             attachRowEvents();
+            animatePatients();
         }
 
         function updateCards(patients) {
@@ -642,6 +649,7 @@
                     </div>
                 </div>`).join('');
             attachCardEvents();
+            animatePatients();
         }
 
         function updatePagination(current, total) {
@@ -674,12 +682,40 @@
         function attachRowEvents() { document.querySelectorAll('.clickable-row').forEach(row => row.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = row.dataset.href; })); }
         function attachCardEvents() { document.querySelectorAll('.clickable-card').forEach(card => card.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = card.dataset.href; })); }
 
+        function animatePatients() {
+            const cards = document.querySelectorAll('.patient-card');
+            if (cards.length > 0) {
+                anime({
+                    targets: cards,
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    scale: [0.95, 1],
+                    delay: anime.stagger(80, { start: 100 }),
+                    duration: 600,
+                    easing: 'easeOutExpo'
+                });
+            }
+
+            const rows = document.querySelectorAll('.clickable-row');
+            if (rows.length > 0) {
+                anime({
+                    targets: rows,
+                    opacity: [0, 1],
+                    translateX: [-20, 0],
+                    delay: anime.stagger(50, { start: 100 }),
+                    duration: 500,
+                    easing: 'easeOutQuad'
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             updatePhonePrefix();
             setUpSocialSecurityByCountry();
             autoFillBirthDate();
             attachRowEvents();
             attachCardEvents();
+            animatePatients();
             document.querySelectorAll('.cache-field').forEach(input => ['input', 'blur', 'change'].forEach(evt => input.addEventListener(evt, () => saveField(input))));
             document.getElementById('createPatientBtn').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -696,7 +732,7 @@
 
                     if (!dLastName || !dFirstName || !dInami) {
                         alert("Veuillez remplir tous les champs pour le nouveau médecin (Nom, Prénom et INAMI).");
-                        return; 
+                        return;
                     }
 
                     if (!/^\d{11}$/.test(dInami)) {
@@ -706,7 +742,7 @@
                         inamiInput.classList.add('is-invalid-custom');
                         inamiInput.focus();
 
-                        return; 
+                        return;
                     }
                 }
 
@@ -723,55 +759,55 @@
             localStorage.removeItem(ADD_STORAGE_KEY);
             document.getElementById('addPatientForm').submit();
         });
-            
+
             document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(performSearch, 300); });
             document.getElementById('statusFilter').addEventListener('change', performSearch);
-            
+
             const doctorSelect = document.getElementById('doctorSelect');
             const addDoctorBtnContainer = document.getElementById('addDoctorBtnContainer');
             const addDoctorBtn = document.getElementById('addDoctorBtn');
             const addDoctorSection = document.getElementById('addDoctorSection');
-            
+
             function updateAddDoctorButtonVisibility() {
                 const selectedValue = doctorSelect.value;
-                
+
                 if (selectedValue === '') {
                     addDoctorBtnContainer.style.display = 'block';
                 } else {
                     addDoctorBtnContainer.style.display = 'none';
-                    
+
                     const bsCollapse = bootstrap.Collapse.getInstance(addDoctorSection);
                     if (bsCollapse) {
                         bsCollapse.hide();
                     }
-                    
+
                     document.getElementById('newDoctorLastName').value = '';
                     document.getElementById('newDoctorFirstName').value = '';
                     document.getElementById('newDoctorINAMI').value = '';
                 }
             }
-            
+
             doctorSelect.addEventListener('change', updateAddDoctorButtonVisibility);
-            
+
             updateAddDoctorButtonVisibility();
-            
+
             addDoctorBtn.addEventListener('click', function() {
                 const bsCollapse = new bootstrap.Collapse(addDoctorSection, { toggle: true });
             });
-            
+
             performSearch();
         });
 
         document.getElementById('newDoctorINAMI').addEventListener('input', function(e) {
             const val = e.target.value;
             e.target.classList.remove('is-valid-custom', 'is-invalid-custom');
-    
-            if (val.length === 0) return; 
+
+            if (val.length === 0) return;
 
             if (/^\d{11}$/.test(val)) {
-                e.target.classList.add('is-valid-custom'); 
+                e.target.classList.add('is-valid-custom');
             } else {
-                e.target.classList.add('is-invalid-custom'); 
+                e.target.classList.add('is-invalid-custom');
             }
                 });
 

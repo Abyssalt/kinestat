@@ -29,7 +29,7 @@ namespace KineStat.Controllers
         /// <returns>An asynchronous operation that returns an <see cref="IActionResult"/> representing the rendered 'Tests' view
         /// with patient and test data.</returns>
         [HttpGet]
-        [Route("Patient/{id}/Dossier/{folderId}/Tests/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/Tests/{assessmentId}")]
         public async Task<IActionResult> Tests(int id, int folderId, int assessmentId)
         {
             var patient = await _context.Patients
@@ -101,7 +101,9 @@ namespace KineStat.Controllers
                     return BadRequest(new { success = false, message = "Patient invalide" });
                 }
 
-                var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+                var userIdString = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+                var physioId = int.Parse(userIdString);
 
                 if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, dto.PatientId))
                 {
@@ -115,7 +117,6 @@ namespace KineStat.Controllers
                 }
 
                 var dateResponse = DateTime.UtcNow;
-                var today = dateResponse.Date;
 
                 var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId);
@@ -127,140 +128,78 @@ namespace KineStat.Controllers
 
                 var existingResponses = await query.ToListAsync();
 
-
                 int savedCount = 0;
                 int updatedCount = 0;
 
                 foreach (var test in dto.Tests)
                 {
-
                     if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
                     {
                         continue;
                     }
 
-                    PatientAnswerTests response;
+                    PatientAnswerTests response = null;
 
                     if (test.Custom)
                     {
                         response = existingResponses.FirstOrDefault(r =>
                             r.IsCustomTest &&
                             r.CustomTestName == test.Name);
-
-                        if (response != null)
-                        {
-                            response.ResponseValue = test.Value;
-                            response.Observations = test.Observations;
-                            response.DateResponse = dateResponse;
-                            _context.PatientAnswerTests.Update(response);
-                            updatedCount++;
-                        }
-                        else
-                        {
-                            response = new PatientAnswerTests
-                            {
-                                PatientId = dto.PatientId,
-                                AssessmentId = dto.AssessmentId,
-                                DateResponse = dateResponse,
-                                ResponseValue = test.Value,
-                                Observations = test.Observations,
-                                IsCustomTest = true,
-                                CustomTestName = test.Name,
-                                CustomTestType = test.Type,
-                                QuestionId = null,
-                                AnswerId = null
-                            };
-                            _context.PatientAnswerTests.Add(response);
-                            savedCount++;
-                        }
                     }
                     else
                     {
+
                         response = existingResponses.FirstOrDefault(r =>
                             !r.IsCustomTest &&
                             r.QuestionId == test.Id);
+                    }
 
-                        if (response != null)
+                    if (response != null)
+                    {
+                        response.ResponseValue = test.Value;
+                        response.Observations = test.Observations;
+                        response.DateResponse = dateResponse; 
+
+                        _context.PatientAnswerTests.Update(response);
+                        updatedCount++;
+                    }
+                    else
+                    {
+                        response = new PatientAnswerTests
                         {
-                            if (!string.IsNullOrWhiteSpace(test.Value))
-                            {
-                                response.ResponseValue = test.Value;
-                            }
-                            response.Observations = test.Observations;
-                            response.DateResponse = dateResponse;
+                            PatientId = dto.PatientId,
+                            AssessmentId = dto.AssessmentId,
+                            DateResponse = dateResponse,
+                            ResponseValue = test.Value,
+                            Observations = test.Observations,
+                            IsCustomTest = test.Custom,
+                            CustomTestName = test.Custom ? test.Name : null,
+                            CustomTestType = test.Custom ? test.Type : null,
+                            QuestionId = test.Custom ? null : test.Id,
+                            AnswerId = null
+                        };
 
-                            var qcm = await _context.QuestionQCMs
-                                .Include(q => q.Answers)
-                                .FirstOrDefaultAsync(q => q.Id == test.Id);
-
-                            if (qcm != null)
-                            {
-                                var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
-                                response.AnswerId = answer?.Id;
-                            }
-                            else
-                            {
-                                response.AnswerId = null;
-                            }
-
-                            _context.PatientAnswerTests.Update(response);
-                            updatedCount++;
-                        }
-                        else
-                        {
-                            if (string.IsNullOrWhiteSpace(test.Value) && string.IsNullOrWhiteSpace(test.Observations))
-                            {
-                                continue;
-                            }
-
-                            response = new PatientAnswerTests
-                            {
-                                PatientId = dto.PatientId,
-                                AssessmentId = dto.AssessmentId,
-                                DateResponse = dateResponse,
-                                QuestionId = test.Id,
-                                ResponseValue = test.Value,
-                                Observations = test.Observations,
-                                IsCustomTest = false,
-                            };
-
-                            var qcm = await _context.QuestionQCMs
-                                .Include(q => q.Answers)
-                                .FirstOrDefaultAsync(q => q.Id == test.Id);
-
-                            if (qcm != null)
-                            {
-                                var answer = qcm.Answers?.FirstOrDefault(a => a.Title == test.Value);
-                                response.AnswerId = answer?.Id;
-                            }
-
-                            _context.PatientAnswerTests.Add(response);
-                            savedCount++;
-                        }
+                        _context.PatientAnswerTests.Add(response);
+                        savedCount++;
                     }
                 }
 
-                await _context.SaveChangesAsync();
+                if (savedCount > 0 || updatedCount > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Évaluation enregistrée avec succès",
-                    testCount = savedCount + updatedCount,
-                    newCount = savedCount,
-                    updatedCount = updatedCount,
-                    dateEvaluation = dateResponse.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    message = "Résultats sauvegardés avec succès",
+                    saved = savedCount,
+                    updated = updatedCount
                 });
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Erreur lors de l'enregistrement",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { success = false, message = "Une erreur est survenue lors de la sauvegarde." });
             }
         }
     }

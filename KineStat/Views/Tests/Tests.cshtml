@@ -14,10 +14,10 @@
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Folder/{folderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Folder/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Folder/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
         $"<li class='breadcrumb-item active'>Tests</li>";
 
     int totalQuestions = clusters.Sum(c => c.Questions.Count);
@@ -37,7 +37,7 @@
                     <h1 class="h2 fw-bold text-primary mb-2">
                         <i class="bi bi-clipboard2-pulse me-2"></i>Évaluation complète
                     </h1></div>
-                <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
+                <a asp-controller="Assessments" asp-action="Results" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium">
                     <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
                 </a>
             </div>
@@ -265,7 +265,7 @@
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-center">
 
                     <div class="d-flex gap-2 w-100 w-sm-auto">
-                        <a asp-controller="Assessments" asp-action="Resultat" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
+                        <a asp-controller="Assessments" asp-action="Results" asp-route-id="@patientId" asp-route-folderId="@folderId" asp-route-assessmentId="@assessmentId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                             <i class="bi bi-arrow-right me-2"></i>Passer aux résultats
                         </a>
                     </div>
