@@ -177,6 +177,78 @@ namespace KineStat.Services
         }
 
 
-   
+        /// <summary>
+        /// Calculates the posterior probability for a clinical category (7-15) by retrieving patient answers
+        /// from both PatientAnswers (ExamenClinique) and PatientAnswerTests (Tests) tables,
+        /// and applying Bayes' theorem sequentially on all responses.
+        /// </summary>
+        /// <param name="patientId">ID of the patient.</param>
+        /// <param name="assessmentId">ID of the assessment.</param>
+        /// <param name="categoryId">ID of the clinical category (7-15).</param>
+        /// <param name="categoryPrior">The initial prior probability of the category (must be between 0 and 1).</param>
+        /// <returns>The final posterior probability for the clinical category.</returns>
+        public async Task<double> CalculateClinicalCategoryProbability(int patientId, int assessmentId, int categoryId, double categoryPrior)
+        {
+            var boolAnswers = await _context.PatientAnswers
+                .OfType<PatientAnswerBool>()
+                .Where(a => a.PatientId == patientId
+                            && a.AssessmentId == assessmentId
+                            && a.Question.CategoryId == categoryId)
+                .Include(a => a.Question)
+                .ToListAsync();
+
+            var testAnswers = await _context.PatientAnswerTests
+                .Where(a => a.PatientId == patientId
+                            && a.AssessmentId == assessmentId
+                            && a.Question.CategoryId == categoryId
+                            && !a.IsCustomTest)
+                .Include(a => a.Question)
+                .ToListAsync();
+
+            double posterior = categoryPrior;
+
+            foreach (var answer in boolAnswers)
+            {
+                posterior = _calculator.CalculatePosterior(
+                    posterior,
+                    answer.Question.RVPositive,
+                    answer.Question.RVNegative,
+                    answer.Value
+                );
+            }
+            foreach (var testAnswer in testAnswers)
+            {
+                var question = testAnswer.Question;
+
+                bool isPositive = false;
+
+                if (question is QuestionBool)
+                {
+                    isPositive = testAnswer.ResponseValue?.ToLower() == "oui"
+                                 || testAnswer.ResponseValue?.ToLower() == "true";
+                }
+                else if (question is QuestionLadder qLadder)
+                {
+                    if (double.TryParse(testAnswer.ResponseValue, out double value))
+                    {
+                        double midPoint = (qLadder.Max - qLadder.Min) / 2.0 + qLadder.Min;
+                        isPositive = value > midPoint;
+                    }
+                }
+                else
+                {
+                    isPositive = !string.IsNullOrWhiteSpace(testAnswer.ResponseValue);
+                }
+                posterior = _calculator.CalculatePosterior(
+                    posterior,
+                    question.RVPositive,
+                    question.RVNegative,
+                    isPositive
+                );
+            }
+
+            return posterior;
+        }
+
     }
 }
