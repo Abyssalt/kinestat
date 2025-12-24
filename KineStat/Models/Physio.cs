@@ -2,6 +2,11 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a physiotherapist (kinesiotherapist) in the KineStat system.
+    /// Stores the physiotherapist's identification, contact information, authentication credentials,
+    /// and maintains relationships with their patients.
+    /// </summary>
     public class Physio
     {
         [Key]
