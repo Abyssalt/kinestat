@@ -14,10 +14,10 @@
     ViewData["Breadcrumbs"] =
         $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Anamnese'>Anamnèse</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Dossier/{folderId}/Details'>Dossier</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Folder/{folderId}/Details'>Dossier</a></li>" +
         $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Socrate/{assessmentId}'>SOCRATE</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
-        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Dossier/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Folder/{folderId}/RedFlags/{assessmentId}'>Red Flags</a></li>" +
+        $"<li class='breadcrumb-item'><a href='/Patient/{patientId}/Folder/{folderId}/ExamenClinique/{assessmentId}'>Examen Clinique</a></li>" +
         $"<li class='breadcrumb-item active'>Tests</li>";
 
     int totalQuestions = clusters.Sum(c => c.Questions.Count);

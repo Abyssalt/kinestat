@@ -32,7 +32,7 @@ namespace KineStat.Controllers
         /// <param name="id">The unique identifier of the patient whose Red Flags are to be displayed.</param>
         /// <param name="assessmentId">The unique identifier of the assessment associated with the Red Flags.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the Red Flags view for the specified patient and assessment.</returns>
-        [Route("Patient/{id}/Dossier/{folderId}/RedFlags/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/RedFlags/{assessmentId}")]
         public IActionResult RedFlags(int id, int folderId, int assessmentId)
         {
             ViewData["PatientId"] = id.ToString();
@@ -139,7 +139,7 @@ namespace KineStat.Controllers
         /// percentage for the assessment.
         /// </summary>
         /// <remarks>Returns a 404 response if the patient does not exist, or a 400 response if the
-        /// patient has no dossier or assessment. Returns a 500 response for unexpected errors or database update
+        /// patient has no folder or assessment. Returns a 500 response for unexpected errors or database update
         /// failures. The method is intended to be called via HTTP POST with a valid answer DTO in the request
         /// body.</remarks>
         /// <param name="answerDto">An object containing the patient's ID, question ID, answer value, and optional comment. The patient and
@@ -167,9 +167,9 @@ namespace KineStat.Controllers
                     return NotFound(new { success = false, message = "Le patient n'existe pas" });
                 }
 
-                var dossier = _context.Dossiers
+                var dossier = _context.Folders
                     .Where(d => d.PatientId == answerDto.PatientId)
-                    .OrderByDescending(d => d.DateOuverture)
+                    .OrderByDescending(d => d.OpeningDate)
                     .ThenByDescending(d => d.Id)
                     .FirstOrDefault();
                 if (dossier == null)
@@ -177,7 +177,7 @@ namespace KineStat.Controllers
                     return StatusCode(400, new
                     {
                         success = false,
-                        message = "Ce patient ne possède aucun dossier."
+                        message = "Ce patient ne possède aucun folder."
                     });
                 }
 

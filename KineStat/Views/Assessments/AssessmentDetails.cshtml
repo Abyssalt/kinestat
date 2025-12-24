@@ -5,7 +5,7 @@
     ViewData["Title"] = "Détails du bilan";
     ViewData["Breadcrumbs"] = $"<li class='breadcrumb-item'><a href='/Patients'>Patients</a></li>" +
                               $"<li class='breadcrumb-item'><a href='/Patient/{Model.Patient.Id}/Anamnese'>Anamnèse</a></li>" +
-                              $"<li class='breadcrumb-item'><a href='/Dossier/{Model.DossierId}/details'>Dossier</a></li>" +
+                              $"<li class='breadcrumb-item'><a href='/Folder/{Model.FolderId}/details'>Dossier</a></li>" +
                               $"<li class='breadcrumb-item active'>Bilan du {Model.Date:dd/MM/yyyy}</li>";
     var tintivJson = System.Text.Json.JsonSerializer.Serialize(
         ViewBag.TintivValues ?? new List<double> { 0, 0, 0, 0, 0, 0 }
@@ -22,7 +22,7 @@
         <div class="col-12">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <a asp-controller="Folder" asp-action="DossierDetails"
-                   asp-route-id="@Model.DossierId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
+                   asp-route-id="@Model.FolderId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
                 <div>
@@ -76,7 +76,7 @@
                         <div class="col-12 mb-3 mb-md-0">
                             <label class="form-label fw-medium text-secondary small">Dossier</label>
                             <p class="form-control-plaintext mb-0">
-                                <i class="bi bi-folder text-info me-2"></i>@Model.Dossier.Titre
+                                <i class="bi bi-folder text-info me-2"></i>@Model.Folder.Title
                             </p>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
                                 var firstAssessmentLocal = await Context.RequestServices
                                 .GetService<KineStat.Data.KineDbContext>()
                                 .Assessments
-                                .Where(a => a.DossierId == Model.DossierId)
+                                .Where(a => a.FolderId == Model.FolderId)
                                 .OrderBy(a => a.Date)
                                 .FirstOrDefaultAsync();
 
@@ -557,7 +557,7 @@
                 <form asp-controller="Assessments"
                       asp-action="Delete"
                       asp-route-id="@Model.Id"
-                      asp-route-dossierId="@Model.DossierId"
+                      asp-route-folderId="@Model.FolderId"
                       method="post">
                     @Html.AntiForgeryToken()
                     <button type="submit"

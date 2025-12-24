@@ -53,7 +53,7 @@ namespace KineStat.Services
         /// </summary>
         /// <param name="patientId">ID of the patient.</param>
         /// <param name="assessmentId">ID of the assessment.</param>
-        /// <param name="dossierId">ID of the dossier.</param>
+        /// <param name="folderId">ID of the folder.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>A list of patient boolean answers for the specified pathology and no cluster.</returns>
         private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int pathologyId, int folderId)
@@ -63,7 +63,7 @@ namespace KineStat.Services
                .FirstOrDefault();
             if (patient == null) return null;
             var assessment = _context.Assessments
-                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.DossierId == folderId)
+                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.FolderId == folderId)
                     .FirstOrDefault();
             if (assessment == null)
             {
@@ -95,7 +95,7 @@ namespace KineStat.Services
               .FirstOrDefaultAsync();
             if (patient == null) return null;
             var assessment = await _context.Assessments
-                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.DossierId == folderId)
+                    .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.FolderId == folderId)
                     .FirstOrDefaultAsync();
             if (assessment == null)
             {
@@ -148,7 +148,7 @@ namespace KineStat.Services
         /// <param name="prior">The initial prior probability of the pathology.</param>
         /// <param name="patientId">ID of the patient.</param>
         /// <param name="assessmentId">ID of the assessment.</param>
-        /// <param name="dossierId">ID of the dossier.</param>
+        /// <param name="folderId">ID of the folder.</param>
         /// <param name="pathologyId">ID of the pathology.</param>
         /// <returns>The final posterior probability for the pathology after evaluating all answers and clusters.</returns>
         public async Task<double> CalculateProbabilityByPathology(double prior, int patientId, int assessmentId,int pathologyId, int folderId)

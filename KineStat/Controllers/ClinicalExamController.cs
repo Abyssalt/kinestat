@@ -27,7 +27,7 @@ namespace KineStat.Controllers
         /// <param name="assessmentId">The unique identifier of the clinical assessment to display for the patient.</param>
         /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
         /// assessment.</returns>
-        [Route("Patient/{id}/Dossier/{folderId}/ExamenClinique/{assessmentId}")]
+        [Route("Patient/{id}/Folder/{folderId}/ExamenClinique/{assessmentId}")]
         public async Task<IActionResult> ExamenClinique(int id, int folderId, int assessmentId)
         {
             var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
@@ -58,14 +58,16 @@ namespace KineStat.Controllers
         [HttpGet]
         public async Task<IActionResult> GetQuestionsClinique(int id)
         {
-            var physioId = int.Parse(HttpContext.Session.GetString("UserId"));
+            var userIdString = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
+            var physioId = int.Parse(userIdString);
 
             if (!await PatientOwnershipHelper.IsPatientOwnedByPhysio(_context, physioId, id))
             {
                 return Unauthorized();
             }
 
-            var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
+            var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
             var allQuestions = await _context.Questions
                 .Include(q => q.Category)
@@ -97,20 +99,6 @@ namespace KineStat.Controllers
                         options = new[] { "Oui", "Non" }
                     };
                 }
-                else if (question is QuestionQCM qQcm)
-                {
-                    var qcmWithAnswers = await _context.QuestionQCMs
-                        .Include(q => q.Answers)
-                        .FirstOrDefaultAsync(q => q.Id == question.Id);
-
-                    questionData = new
-                    {
-                        id = question.Id,
-                        question = question.Title,
-                        type = "qcm",
-                        options = qcmWithAnswers?.Answers?.Select(a => a.Title).ToArray() ?? Array.Empty<string>()
-                    };
-                }
                 else if (question is QuestionLadder qLadder)
                 {
                     questionData = new
@@ -118,7 +106,9 @@ namespace KineStat.Controllers
                         id = question.Id,
                         question = question.Title,
                         type = "ladder",
-                        options = Enumerable.Range(qLadder.Min, qLadder.Max - qLadder.Min + 1).Select(i => i.ToString()).ToArray()
+                        options = Enumerable.Range(qLadder.Min, qLadder.Max - qLadder.Min + 1)
+                                            .Select(i => i.ToString())
+                                            .ToArray()
                     };
                 }
                 else
@@ -304,7 +294,7 @@ namespace KineStat.Controllers
 
                     await _context.SaveChangesAsync();
                 
-            }
+                }
 
                 return Json(new
                 {

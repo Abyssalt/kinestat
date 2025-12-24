@@ -3,16 +3,16 @@
 namespace KineStat.Models
 {
 
-    public class Dossier
+    public class Folder
     {
         [Key]
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Le titre est obligatoire")]
-        public string Titre { get; set; }
+        public string Title { get; set; }
 
         [Required]
-        public DateTime DateOuverture { get; set; }
+        public DateTime OpeningDate { get; set; }
 
         public string? Notes { get; set; }
 

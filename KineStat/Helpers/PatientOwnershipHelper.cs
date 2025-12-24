@@ -38,18 +38,18 @@ namespace KineStat.Helpers
         }
 
         /// <summary>
-        /// Checks if a "dossier patient" belongs to a specific physiotherapist.
+        /// Checks if a "folder patient" belongs to a specific physiotherapist.
         /// </summary>
-        public static async Task<bool> IsDossierOwnedByPhysio(KineDbContext context, int physioId, int dossierId)
+        public static async Task<bool> IsFolderOwnedByPhysio(KineDbContext context, int physioId, int folderId)
         {
-            var dossier = await context.Dossiers
+            var folder = await context.Folders
                 .Include(d => d.Patient)
-                .FirstOrDefaultAsync(d => d.Id == dossierId);
+                .FirstOrDefaultAsync(d => d.Id == folderId);
 
-            if (dossier == null || dossier.Patient == null)
+            if (folder == null || folder.Patient == null)
                 return false;
 
-            return dossier.Patient.PhysioId == physioId;
+            return folder.Patient.PhysioId == physioId;
         }
     }
 }
