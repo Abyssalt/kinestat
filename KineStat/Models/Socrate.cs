@@ -2,6 +2,11 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a SOCRATES pain assessment in the KineStat system.
+    /// SOCRATES is a mnemonic used in medical practice to systematically evaluate and document pain characteristics.
+    /// Each property corresponds to one aspect of the pain assessment framework.
+    /// </summary>
     public class Socrate
     {
         [Key] 

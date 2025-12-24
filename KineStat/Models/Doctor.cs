@@ -2,6 +2,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a treating physician in the KineStat system.
+    /// Stores the doctor's identification information, including their INAMI number (National Institute for Health and Disability Insurance),
+    /// and maintains relationships with patients for whom they are the treating physician.
+    /// </summary>
     public class Doctor
     {
         [Key]
