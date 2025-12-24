@@ -16,10 +16,37 @@
     );
 }
 
+<script src="~/lib/animejs/anime.min.js"></script>
+
+<style>
+    .assessment-header, .info-card, .stats-card, .chart-card,
+    .accordion-item, .delete-btn {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
+        }
+
+    .accordion-button {
+        transition: all 0.3s ease;
+    }
+
+        .accordion-button:not(.collapsed) {
+            transform: translateX(5px);
+        }
+</style>
+
 <div class="container-fluid px-3 px-md-4 py-4">
 
     <div class="row mb-4">
-        <div class="col-12">
+        <div class="col-12 assessment-header">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <a asp-controller="Folder" asp-action="DossierDetails"
                    asp-route-id="@Model.FolderId" class="btn btn-outline-secondary fw-medium btn-tablet-lg">
@@ -45,7 +72,7 @@
 
     <div class="row">
         <div class="col-12 col-lg-12 col-xl-12 mb-4">
-            <div class="card border-0 shadow">
+            <div class="card border-0 shadow info-card">
                 <div class="card-header bg-primary text-white py-3">
                     <h5 class="mb-0 fw-bold">
                         <i class="bi bi-info-circle me-2"></i>Informations générales
@@ -88,7 +115,7 @@
 
 <div class="row">
     <div class="col-12 col-lg-4 mb-4">
-        <div class="card border-0 shadow h-100">
+        <div class="card border-0 shadow h-100 stats-card">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0 fw-bold">
                     <i class="bi bi-list-check me-2"></i>Tests effectués
@@ -125,17 +152,17 @@
                                     {
                                         <li class="list-group-item">
                                             <strong>
-                                                @(test.IsCustomTest ? test.CustomTestName : test.Question?.Title)
-                                </strong>
+                                                @(test.IsCustomTest? test.CustomTestName: test.Question?.Title)
+                                            </strong>
 
-                                <div class="text-muted small">
-                                    Résultat :
-                                    @(
-                                    test.ResponseValue == "true" ? "Positif" :
-                                    test.ResponseValue == "false" ? "Negatif" :
-                                    test.ResponseValue
-                                    )
-                                </div>
+                                            <div class="text-muted small">
+                                                Résultat :
+                                                @(
+                                                                                    test.ResponseValue == "true" ? "Positif" :
+                                                                                    test.ResponseValue == "false" ? "Negatif" :
+                                                                                    test.ResponseValue
+                                                                                    )
+                                        </div>
 
                                 @if (!string.IsNullOrWhiteSpace(test.Observations))
                                             {
@@ -162,7 +189,7 @@
         </div>
     </div>
     <div class="col-12 col-lg-4 mb-4">
-        <div class="card border-0 shadow h-100">
+        <div class="card border-0 shadow h-100 stats-card">
             <div class="card-header bg-warning text-center">
                 <h5 class="mb-0 fw-bold">
                     <i class="bi bi-activity text-danger me-2"></i>Analyse du risque
@@ -180,13 +207,13 @@
                 </span>
 
                 <small class="text-muted mt-2">
-                    Probabilité 
+                    Probabilité
                 </small>
             </div>
         </div>
     </div>
     <div class="col-12 col-lg-4 mb-4">
-        <div class="card border-0 shadow h-100">
+        <div class="card border-0 shadow h-100 stats-card">
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0 fw-bold">
                     <i class="bi bi-clipboard2-pulse me-2"></i>Pathologies suspectées
@@ -226,7 +253,7 @@
 </div>
 <div class="row">
     <div class="col-12">
-        <div class="card border-0 shadow">
+        <div class="card border-0 shadow chart-card">
 
             <div class="card-header bg-secondary text-white">
                 <h5 class="mb-0 fw-bold">
@@ -470,8 +497,8 @@
                         @if (ViewBag.ClinicalAnswers != null && ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers).Any())
                         {
                             var groupedClinical = ((List<PatientAnswerTests>)ViewBag.ClinicalAnswers)
-                                .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
-                                .ToList();
+                            .GroupBy(a => a.Question?.Category?.Name ?? "Autres")
+                            .ToList();
 
                             int clinIndex = 0;
 
@@ -521,7 +548,7 @@
             </div>
         </div>
     </div>
-    <button class="btn btn-outline-danger fw-medium btn-tablet-lg mt-3"
+    <button class="btn btn-outline-danger fw-medium btn-tablet-lg mt-3 delete-btn"
             data-bs-toggle="modal"
             data-bs-target="#deleteAssessmentModal">
         <i class="bi bi-trash me-2"></i>Supprimer
@@ -572,10 +599,55 @@
     </div>
 
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        anime.timeline({
+            easing: 'easeOutExpo'
+        })
+        .add({
+            targets: '.assessment-header',
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 800
+        })
+        .add({
+            targets: '.info-card',
+            opacity: [0, 1],
+            translateY: [30, 0],
+            scale: [0.95, 1],
+            duration: 800
+        }, '-=400')
+        .add({
+            targets: '.stats-card',
+            opacity: [0, 1],
+            translateY: [40, 0],
+            scale: [0.9, 1],
+            delay: anime.stagger(150),
+            duration: 800
+        }, '-=400')
+        .add({
+            targets: '.chart-card',
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 800
+        }, '-=400')
+        .add({
+            targets: '.accordion-item',
+            opacity: [0, 1],
+            translateY: [20, 0],
+            delay: anime.stagger(100),
+            duration: 600
+        }, '-=400')
+        .add({
+            targets: '.delete-btn',
+            opacity: [0, 1],
+            scale: [0.8, 1],
+            duration: 600
+        }, '-=200');
+
         const redFlagsPercentage = @((Model.RedFlagsPercentage ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        
+
         GaugeManager.createGauge("redFlagsGaugeDetails", "redFlagsGaugeDetailsValue");
         GaugeManager.updateGauge("redFlagsGaugeDetails", redFlagsPercentage);
     });
