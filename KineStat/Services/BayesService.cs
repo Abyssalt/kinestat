@@ -2,6 +2,7 @@
 using KineStat.Models;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace KineStat.Services
 {
@@ -58,18 +59,18 @@ namespace KineStat.Services
         /// <returns>A list of patient boolean answers for the specified pathology and no cluster.</returns>
         private async Task<List<PatientAnswerBool>> GetPatientAnswersByPathology(int patientId, int assessmentId, int pathologyId, int folderId)
         {
-            var patient = _context.Patients
+            var patient = await _context.Patients
                .Where(p => p.Id == patientId)
-               .FirstOrDefault();
+               .FirstOrDefaultAsync();
             if (patient == null) return null;
-            var assessment = _context.Assessments
+            var assessment = await _context.Assessments
                     .Where(a => a.PatientId == patientId && a.Id == assessmentId && a.FolderId == folderId)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
             if (assessment == null)
             {
                 return null;
             }
-            var answerByPathology = await _context.PatientAnswers
+            var answersBoolByPathology = await _context.PatientAnswers
                 .OfType<PatientAnswerBool>()
                 .Where(a => a.PatientId == patientId
                 && a.AssessmentId == assessmentId
@@ -77,7 +78,22 @@ namespace KineStat.Services
                 && a.Question.ClusterId == null)
                 .Include(a => a.Question)
                 .ToListAsync();
-            return answerByPathology;
+
+            var answerTests = await _context.PatientAnswerTests
+                .Where(a => a.PatientId == patientId
+                && a.AssessmentId == assessmentId
+                && a.Question.QuestionPathologies.Any(p => p.PathologyId == pathologyId)
+                && a.Question.ClusterId == null)
+                .Include(a => a.Question)
+                .ToListAsync();
+            
+            if (answerTests != null && answerTests.Any())
+            {
+                var answerTestConvertedToBool = ConvertPatientAnswerTestToPatientAnswerBool(answerTests);
+                answersBoolByPathology.AddRange(answerTestConvertedToBool);
+
+            }
+            return answersBoolByPathology;
         }
 
         /// <summary>
@@ -155,6 +171,8 @@ namespace KineStat.Services
         {
             double posterior = prior;
             var boolAnswers = await GetPatientAnswersByPathology(patientId, assessmentId, pathologyId, folderId);
+
+
             if (boolAnswers != null && boolAnswers.Any())
             {
                 foreach( var a in boolAnswers)
@@ -176,6 +194,44 @@ namespace KineStat.Services
 
         }
 
+        private List<PatientAnswerBool> ConvertPatientAnswerTestToPatientAnswerBool (List<PatientAnswerTests> patientAnswerTests)
+        {
+            var patientAnswerBools = new List<PatientAnswerBool>();
+            var positiveResponses = new [] { "true", "oui", "yes", "vrai" };
+            var negativeResponses = new[] { "false", "non", "faux", "no" };
+
+            foreach (var answer in patientAnswerTests)
+            {
+                if (answer != null && answer.ResponseValue != null && answer.QuestionId != null && answer.AssessmentId != null)
+                {
+                    if (positiveResponses.Contains(answer.ResponseValue.Trim().ToLower())) {
+                        var answerBool = new PatientAnswerBool
+                        {
+                            PatientId = answer.PatientId,
+                            AssessmentId = answer.AssessmentId.Value,
+                            QuestionId = answer.QuestionId.Value,
+                            Question = answer.Question,
+                            Value = true
+                        };
+                        patientAnswerBools.Add(answerBool);
+                    }else if (negativeResponses.Contains(answer.ResponseValue.Trim().ToLower()))
+                    {
+                        
+                        var answerBool = new PatientAnswerBool
+                        {
+                            PatientId = answer.PatientId,
+                            AssessmentId = answer.AssessmentId.Value,
+                            QuestionId = answer.QuestionId.Value,
+                            Question = answer.Question,
+                            Value = false
+                        };
+                        patientAnswerBools.Add(answerBool);
+
+                    }
+                } 
+            }
+            return patientAnswerBools;
+        }
 
         /// <summary>
         /// Calculates the posterior probability for a clinical category (7-15) by retrieving patient answers

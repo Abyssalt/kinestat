@@ -29,7 +29,7 @@
                             <input type="text"
                                    class="form-control form-control-lg"
                                    id="searchInput"
-                                   placeholder="Title de la question..."
+                                   placeholder="Titre de la question..."
                                    autocomplete="off">
                         </div>
                         <div class="col-12 col-md-4">
@@ -58,7 +58,7 @@
                             <table class="table table-hover align-middle mb-0" id="questionsTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th scope="col" class="fw-semibold" style="width: 40%">Title</th>
+                                        <th scope="col" class="fw-semibold" style="width: 40%">Titre</th>
                                         <th scope="col" class="fw-semibold" style="width: 15%">Catégorie</th>
                                         <th scope="col" class="fw-semibold text-center" style="width: 12%">RV+</th>
                                         <th scope="col" class="fw-semibold text-center" style="width: 12%">RV-</th>
@@ -253,155 +253,9 @@
 </div>
 
 @section Scripts {
+    @Html.AntiForgeryToken()
+    <script src="~/js/admin.js"></script>
     <script>
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            const alertId = 'alert-' + Date.now();
-
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show border-0" role="alert" id="${alertId}">
-                    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-2"></i>
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-                </div>
-            `;
-
-            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
-
-            setTimeout(() => {
-                const alert = document.getElementById(alertId);
-                if (alert) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }
-            }, 5000);
-        }
-
-        document.getElementById('editQuestionModal').addEventListener('show.bs.modal', function(event) {
-            document.getElementById('editRVPositive').classList.remove('is-invalid');
-            document.getElementById('editRVNegative').classList.remove('is-invalid');
-
-            const button = event.relatedTarget;
-
-            const questionId = button.getAttribute('data-question-id');
-            const questionTitle = button.getAttribute('data-question-title');
-            const rvPositive = button.getAttribute('data-question-rv-positive');
-            const rvNegative = button.getAttribute('data-question-rv-negative');
-            const sourceRv = button.getAttribute('data-question-source');
-
-            document.getElementById('editQuestionId').value = questionId;
-            document.getElementById('editQuestionTitle').textContent = questionTitle;
-            document.getElementById('editRVPositive').value = rvPositive;
-            document.getElementById('editRVNegative').value = rvNegative;
-            document.getElementById('editSourceRv').value = sourceRv || '';
-        });
-
-        document.getElementById('editQuestionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const id = document.getElementById('editQuestionId').value;
-            const rvPositive = document.getElementById('editRVPositive').value.replace(',', '.');
-            const rvNegative = document.getElementById('editRVNegative').value.replace(',', '.');
-            const sourceRv = document.getElementById('editSourceRv').value;
-
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-            try {
-                const response = await fetch('@Url.Action("UpdateQuestionRV", "Admin")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        '__RequestVerificationToken': token,
-                        'id': id,
-                        'rvPositive': rvPositive,
-                        'rvNegative': rvNegative,
-                        'sourceRv': sourceRv
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    const row = document.querySelector(`#questionsTable tr[data-question-id="${id}"]`);
-                    if (row) {
-                        row.querySelector('.rv-positive').textContent = parseFloat(rvPositive).toFixed(2);
-                        row.querySelector('.rv-negative').textContent = parseFloat(rvNegative).toFixed(2);
-                        row.querySelector('.source-text').innerHTML = `<small class="text-secondary">${sourceRv || 'Non spécifié'}</small>`;
-                    }
-
-                    const card = document.querySelector(`#questionsList .question-card[data-question-id="${id}"]`);
-                    if (card) {
-                        card.querySelector('.rv-positive').textContent = parseFloat(rvPositive).toFixed(2);
-                        card.querySelector('.rv-negative').textContent = parseFloat(rvNegative).toFixed(2);
-
-                        const sourceElement = card.querySelector('.source-text');
-                        if (sourceRv) {
-                            if (sourceElement) {
-                                sourceElement.innerHTML = `<small class="text-secondary"><i class="bi bi-book me-1"></i>${sourceRv}</small>`;
-                            } else {
-                                const sourceHtml = `<div class="source-text"><small class="text-secondary"><i class="bi bi-book me-1"></i>${sourceRv}</small></div>`;
-                                card.insertAdjacentHTML('beforeend', sourceHtml);
-                            }
-                        } else if (sourceElement) {
-                            sourceElement.remove();
-                        }
-                    }
-
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editQuestionModal'));
-                    modal.hide();
-
-                    showAlert(result.message, 'success');
-                } else {
-                    showAlert(result.message, 'danger');
-                }
-            } catch (error) {
-                showAlert('Erreur de connexion au serveur : ' + error.message, 'danger');
-            }
-        });
-
-        const searchInput = document.getElementById('searchInput');
-        const tableBody = document.getElementById('questionsTableBody');
-        const questionsList = document.getElementById('questionsList');
-        const resultCount = document.getElementById('resultCount');
-
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            let visibleCount = 0;
-
-            if (tableBody) {
-                const rows = tableBody.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const title = row.getAttribute('data-question-title');
-                    const category = row.getAttribute('data-category').toLowerCase();
-
-                    if (searchTerm === '' || title.includes(searchTerm) || category.includes(searchTerm)) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-
-            if (questionsList) {
-                const cards = questionsList.querySelectorAll('.question-card');
-                visibleCount = 0;
-                cards.forEach(card => {
-                    const title = card.getAttribute('data-question-title');
-                    const category = card.getAttribute('data-category').toLowerCase();
-
-                    if (searchTerm === '' || title.includes(searchTerm) || category.includes(searchTerm)) {
-                        card.style.display = '';
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            }
-
-            resultCount.textContent = `${visibleCount} question(s)`;
-        });
+        initializeQuestionsManagement('@Url.Action("UpdateQuestionRV", "Admin")');
     </script>
 }
