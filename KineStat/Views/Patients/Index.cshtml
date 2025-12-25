@@ -524,7 +524,9 @@
             '3': '+41' 
         };
 
- 
+       /**
+         * Validates an input field based on its data-validation attribute.
+        * */
         function validateField(input) {
             const type = input.dataset.validation, value = input.value.trim();
             if (!type) return true;
@@ -544,13 +546,18 @@
                 default: return value.length > 0;
             }
         }
-
+        /**
+          * Updates the visual state of a field based on its validity.
+         */
         function updateFieldState(input) {
             const value = input.value.trim();
             input.classList.remove('is-valid-custom', 'is-invalid-custom');
             if (value) input.classList.add(validateField(input) ? 'is-valid-custom' : 'is-invalid-custom');
         }
 
+        /**
+          * Enables or disables the create button based on form validity.
+         */
         function updateCreateButton() {
             const required = ['LastName', 'FirstName', 'Email', 'PhoneNumber', 'Genre', 'BirthDate', 'Country', 'SocialSecurityNumber'];
             const valid = required.every(f => { const input = document.querySelector(`.cache-field[data-field="${f}"]`); return input && input.value.trim() && validateField(input); });
@@ -560,6 +567,9 @@
             btn.classList.toggle('btn-secondary', !valid);
         }
 
+        /**
+          * Saves the current value of a field to localStorage.
+         */
         function saveField(input) {
             updateFieldState(input);
             addFormData[input.dataset.field] = input.value;
@@ -567,6 +577,9 @@
             updateCreateButton();
         }
 
+        /**
+          * Restores the form data from localStorage.
+         */
         function restoreForm() {
             try {
                 addFormData = JSON.parse(localStorage.getItem(ADD_STORAGE_KEY)) || {};
@@ -575,6 +588,9 @@
             } catch (e) {}
         }
 
+        /**
+          * Performs the search with current parameters.
+         */
         function performSearch() {
             currentSearch = document.getElementById('searchInput').value;
             currentStatus = document.getElementById('statusFilter').value;
@@ -589,6 +605,9 @@
             loadPatients();
         }
 
+        /**
+          * loads patients from the server.
+         */
         function loadPatients() {
             document.getElementById('loadingIndicator').style.display = 'block';
             fetch(`/Patients/SearchPatients?search=${currentSearch}&status=${currentStatus}&page=${currentPage}&pageSize=${pageSize}`)
@@ -610,16 +629,25 @@
                 });
         }
 
+        /**
+           * Returns the HTML for a gender
+         */
         function getGenderBadge(g, large) {
             const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-primary', 'H'], 1: ['bg-danger', 'F'], 2: ['bg-secondary', 'A'] };
             return `<span class="badge ${labels[g][0]} rounded-pill ${cls}">${labels[g][1]}</span>`;
         }
 
+        /**
+           * Returns the HTML for a status badge
+          */
         function getStatusBadge(s, large) {
             const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-secondary', 'Terminé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Abandonné'] };
             return `<span class="badge ${labels[s][0]} rounded-pill ${cls}">${labels[s][1]}</span>`;
         }
 
+        /**
+         * Formats a date as DD/MM/YYYY
+         */
         function formatDate(d) { const dt = new Date(d); return `${dt.getDate().toString().padStart(2,'0')}/${(dt.getMonth()+1).toString().padStart(2,'0')}/${dt.getFullYear()}`; }
 
         function updateTable(patients) {
@@ -635,6 +663,9 @@
             animatePatients();
         }
 
+        /**
+          * Updates the cards view with new patients.
+         */
         function updateCards(patients) {
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             document.getElementById('patientsCardsView').innerHTML = patients.map(p => `
@@ -652,6 +683,9 @@
             animatePatients();
         }
 
+        /**
+          * Updates the pagination controls.
+         */
         function updatePagination(current, total) {
             const ul = document.getElementById('paginationControls');
             let html = '';
@@ -679,9 +713,19 @@
             }));
         }
 
+        /**
+          * Attaches click events to table rows and cards.
+         */
         function attachRowEvents() { document.querySelectorAll('.clickable-row').forEach(row => row.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = row.dataset.href; })); }
+
+        /**
+          * Attaches click events to cards.
+         */
         function attachCardEvents() { document.querySelectorAll('.clickable-card').forEach(card => card.addEventListener('click', e => { if (!e.target.closest('.delete-form')) window.location.href = card.dataset.href; })); }
 
+        /**
+         * Animates the appearance of patient rows and cards.
+         */
         function animatePatients() {
             const cards = document.querySelectorAll('.patient-card');
             if (cards.length > 0) {
@@ -708,7 +752,7 @@
                 });
             }
         }
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             updatePhonePrefix();
             setUpSocialSecurityByCountry();
@@ -768,6 +812,9 @@
             const addDoctorBtn = document.getElementById('addDoctorBtn');
             const addDoctorSection = document.getElementById('addDoctorSection');
 
+            /**
+              * Updates the visibility of the "Add Doctor" button and section based on the selected doctor.
+             */
             function updateAddDoctorButtonVisibility() {
                 const selectedValue = doctorSelect.value;
 
