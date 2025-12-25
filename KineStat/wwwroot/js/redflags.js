@@ -4,6 +4,10 @@ let globalPatientId = null;
 let globalAssessmentId = null;
 let globalFolderId = null;
 
+/**
+ * Loads questions for a specific category and updates the UI.
+ * @param {any} categoryId
+ */
 async function loadQuestionsByCategory(categoryId) {
     const response = await fetch(`/RedFlags/${globalPatientId}/Assessment/${globalAssessmentId}/Questions/${categoryId}`);
     const html = await response.text();
@@ -14,6 +18,9 @@ async function loadQuestionsByCategory(categoryId) {
     initializeTooltips();
 }
 
+/**
+ * Transforms question cards into a compact format.
+ */
 function transformQuestionsToCompactFormat() {
     const container = document.getElementById("questionnaireContainer");
     const cards = container.querySelectorAll('.card');
@@ -117,6 +124,9 @@ function transformQuestionsToCompactFormat() {
     });
 }
 
+/**
+ * Initializes the gauge component.
+ */
 function initializeTooltips() {
     const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipElements.forEach(el => {
@@ -124,6 +134,11 @@ function initializeTooltips() {
     });
 }
 
+/**
+ * Shows the critical red flag modal if not already displayed.
+ * @param {any} patientId
+ * @returns
+ */
 function showCriticalRedFlagModal(patientId) {
     if (hasDisplayedCriticalModal) return;
     hasDisplayedCriticalModal = true;
@@ -135,6 +150,9 @@ function showCriticalRedFlagModal(patientId) {
     modal.show();
 }
 
+/**
+ * Fetches the initial state of red flags and updates the store.
+ */
 function fetchInitialState() {
     fetch(`/Patient/${globalPatientId}/Assessment/${globalAssessmentId}/CategoryPercentages`)
         .then(response => response.json())
@@ -153,6 +171,9 @@ function fetchInitialState() {
         });
 }
 
+/**
+ * Attaches event listeners to answer inputs.
+ */
 function attachAnswerListeners() {
     const radios = document.querySelectorAll('input[name^="q_"]');
     radios.forEach(radio => {
@@ -165,6 +186,10 @@ function attachAnswerListeners() {
     });
 }
 
+/**
+ * Handles radio button change events.
+ * @param {any} event
+ */
 function handleRadioChange(event) {
     const radio = event.target;
     const questionId = radio.dataset.questionId;
@@ -173,6 +198,10 @@ function handleRadioChange(event) {
     saveAnswer(globalPatientId, questionId, value, comment);
 }
 
+/**
+ * Handles textarea input change events.
+ * @param {any} event
+ */
 function handleTextareaInput(event) {
     const textarea = event.target;
     const questionId = textarea.dataset.questionId;
@@ -181,16 +210,33 @@ function handleTextareaInput(event) {
     saveAnswer(globalPatientId, questionId, value, comment);
 }
 
+/**
+ * Gets the comment for a specific question.
+ * @param {any} questionId
+ * @returns
+ */
 function getCommentForQuestion(questionId) {
     const textarea = document.querySelector(`textarea[name="note_${questionId}"]`);
     return textarea ? textarea.value : "";
 }
 
+/**
+ * Gets the selected radio value for a specific question.
+ * @param {any} questionId
+ * @returns
+ */
 function getRadioValueForQuestion(questionId) {
     const radio = document.querySelector(`input[name="q_${questionId}"]:checked`);
     return radio ? (radio.value === "true") : null;
 }
 
+/**
+ * Saves or updates an answer via API call.
+ * @param {any} patientId
+ * @param {any} questionId
+ * @param {any} boolValue
+ * @param {any} comment
+ */
 function saveAnswer(patientId, questionId, boolValue, comment) {
     const dto = {
         PatientId: patientId,
@@ -222,6 +268,10 @@ function saveAnswer(patientId, questionId, boolValue, comment) {
         });
 }
 
+/**
+ * Updates the gauge display.
+ * @param {any} newValue
+ */
 function updateGauge(newValue) {
     if (typeof moveNeedle === 'function') {
         moveNeedle(newValue);
@@ -239,6 +289,9 @@ function updateGauge(newValue) {
     }
 }
 
+/**
+ * Initializes tab event listeners.
+ */
 function initializeTabs() {
     document.querySelectorAll('#redflagsTabs button[data-category]').forEach(btn => {
         btn.addEventListener('click', function (e) {
@@ -258,6 +311,10 @@ function initializeTabs() {
     });
 }
 
+/**
+ * Initializes the "Back to Top" button functionality.
+ * @returns
+ */
 function initBackToTop() {
     const backToTopBtn = document.getElementById('backToTop');
 
