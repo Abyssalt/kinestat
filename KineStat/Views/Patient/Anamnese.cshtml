@@ -521,7 +521,10 @@
     </style>
 
     <script>
-        // ========== VALIDATION ==========
+
+        /**
+        * Check if every field given in the inputs are valid
+        */
         function validateField(input) {
             const validationType = input.dataset.validation;
             const value = input.value.trim();
@@ -586,6 +589,9 @@
             }
         }
 
+       /**
+        * Update the visual state of a field based on its validity
+        */
         function updateFieldVisualState(input) {
             const value = input.value.trim();
             const isRequired = input.hasAttribute('required');
@@ -611,7 +617,9 @@
             }
         }
 
-        // ========== EDIT FORM ==========
+       /**
+         * Check if all required fields in the edit form are filled and valid
+         */
         function areEditRequiredFieldsFilled() {
             const requiredInputs = document.querySelectorAll('.edit-field[required]');
 
@@ -630,6 +638,9 @@
             return true;
         }
 
+       /**
+          * Update the state of the save button based on form validity
+         */
         function updateEditButton() {
             const btn = document.getElementById('saveEditBtn');
             const allValid = areEditRequiredFieldsFilled();
@@ -755,6 +766,9 @@
             const editAddDoctorBtn = document.getElementById('edit_addDoctorBtn');
             const editAddDoctorSection = document.getElementById('editAddDoctorSection');
             
+           /**
+            * Update the visibility of the "Add Doctor" button and section based on the selected value
+            */
             function updateEditAddDoctorButtonVisibility() {
                 const selectedValue = editDoctorSelect.value;
                 
