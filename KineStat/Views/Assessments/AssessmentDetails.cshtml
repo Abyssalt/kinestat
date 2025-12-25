@@ -744,6 +744,9 @@
             });
         }
 
+        /**
+         * Initialize the radar charts
+         */
         function initCharts() {
 
             if (radarChart9) radarChart9.destroy();
@@ -789,6 +792,9 @@
             });
         }
 
+        /**
+         * Load the first assessment data into the charts.
+         */
         function loadFirstAssessment() {
             if (!firstTintivValues) return;
 
@@ -819,6 +825,9 @@
             radarChart6.update();
         }
 
+        /**
+         * Load comparison data for a given assessment ID.
+         */
         async function loadComparisonData(assessmentId) {
             try {
                 const response = await fetch(`/Assessment/${assessmentId}/ComparisonData`);
