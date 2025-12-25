@@ -1,10 +1,12 @@
 ﻿using KineStat.Data;
-using KineStat.Models;
-using KineStat.Models.DTO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using KineStat.Filters;
 using KineStat.Helpers;
+using KineStat.Models;
+using KineStat.Models.DTO;
+using KineStat.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace KineStat.Controllers
 {
@@ -187,14 +189,91 @@ namespace KineStat.Controllers
                 if (savedCount > 0 || updatedCount > 0)
                 {
                     await _context.SaveChangesAsync();
-                }
 
+                }
+                var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                var categoryScores = new List<double>();
+
+                if (dto.AssessmentId.HasValue)
+                {
+                    
+                    
+
+                    var assessment = await _context.Assessments.FindAsync(dto.AssessmentId.Value);
+                    if (assessment != null)
+                    {
+                        var bayesService = new BayesService(_context, new BayesCalculator());
+
+                        foreach (var categoryId in examCliniqueCategories)
+                        {
+                            var priorContext = await _context.PriorContexts
+                                .FirstOrDefaultAsync(p => p.MedicalContextId == assessment.MedicalContextId
+                                                          && p.CategoryId == categoryId);
+
+                            if (priorContext == null || priorContext.Value <= 0 || priorContext.Value >= 1)
+                            {
+                                categoryScores.Add(0);
+                                continue;
+                            }
+
+                            try
+                            {
+                                double posterior = await bayesService.CalculateClinicalCategoryProbability(
+                                    dto.PatientId,
+                                    dto.AssessmentId.Value,
+                                    categoryId,
+                                    priorContext.Value
+                                );
+
+                                double radarValue = (posterior * 100) / 10 / 2;
+                                categoryScores.Add(Math.Round(radarValue, 2));
+                            }
+                            catch
+                            {
+                                categoryScores.Add(0);
+                            }
+                        }
+
+                        for (int i = 0; i < examCliniqueCategories.Length; i++)
+                        {
+                            int categoryId = examCliniqueCategories[i];
+                            double categoryValue = categoryScores[i];
+
+                            var existingData = await _context.ClinicalDatas
+                                .FirstOrDefaultAsync(cd =>
+                                    cd.PatientId == dto.PatientId &&
+                                    cd.AssessmentId == dto.AssessmentId.Value &&
+                                    cd.CategoryId == categoryId);
+
+                            if (existingData != null)
+                            {
+                                existingData.Value = categoryValue;
+                                _context.ClinicalDatas.Update(existingData);
+                            }
+                            else
+                            {
+                                var newData = new ClinicalData
+                                {
+                                    PatientId = dto.PatientId,
+                                    AssessmentId = dto.AssessmentId.Value,
+                                    CategoryId = categoryId,
+                                    Value = categoryValue
+                                };
+                                _context.ClinicalDatas.Add(newData);
+                            }
+                        }
+
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                await _context.SaveChangesAsync();
                 return Ok(new
                 {
                     success = true,
                     message = "Résultats sauvegardés avec succès",
                     saved = savedCount,
-                    updated = updatedCount
+                    updated = updatedCount,
+                    clinicalCategories = categoryScores
                 });
             }
             catch (Exception ex)

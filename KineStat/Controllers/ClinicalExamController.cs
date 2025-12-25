@@ -1,12 +1,13 @@
 ﻿using KineStat.Data;
-using KineStat.Models;
-using KineStat.Models.DTO;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Globalization;
 using KineStat.Filters;
 using KineStat.Helpers;
+using KineStat.Models;
+using KineStat.Models.DTO;
+using KineStat.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Linq;
 
 namespace KineStat.Controllers
 {
@@ -14,10 +15,12 @@ namespace KineStat.Controllers
     public class ClinicalExamController : Controller
     {
         private readonly KineDbContext _context;
+        private readonly BayesService _bayesService;
 
         public ClinicalExamController(KineDbContext context)
         {
             _context = context;
+            _bayesService = new BayesService(_context, new BayesCalculator());
         }
 
         /// <summary>
@@ -107,8 +110,8 @@ namespace KineStat.Controllers
                         question = question.Title,
                         type = "ladder",
                         options = Enumerable.Range(qLadder.Min, qLadder.Max - qLadder.Min + 1)
-                                            .Select(i => i.ToString())
-                                            .ToArray()
+                            .Select(i => i.ToString())
+                            .ToArray()
                     };
                 }
                 else
@@ -159,7 +162,7 @@ namespace KineStat.Controllers
 
                 var query = _context.PatientAnswerTests
                     .Where(pr => pr.PatientId == dto.PatientId
-                              && !pr.IsCustomTest);
+                                 && !pr.IsCustomTest);
 
                 if (dto.AssessmentId.HasValue)
                 {
@@ -198,7 +201,7 @@ namespace KineStat.Controllers
                         var newResponse = new PatientAnswerTests()
                         {
                             PatientId = dto.PatientId,
-                            AssessmentId = dto.AssessmentId, 
+                            AssessmentId = dto.AssessmentId,
                             QuestionId = responseDto.QuestionId,
                             ResponseValue = responseDto.Response,
                             Observations = responseDto.Notes,
@@ -217,48 +220,43 @@ namespace KineStat.Controllers
                 var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
                 var categoryScores = new List<double>();
 
+                var assessment = await _context.Assessments.FindAsync(dto.AssessmentId);
+                if (assessment == null)
+                {
+                    return Json(new { success = false, message = "Assessment introuvable" });
+                }
+
                 foreach (var categoryId in examCliniqueCategories)
                 {
-                    var responses = await _context.PatientAnswerTests
-                        .Include(pat => pat.Question)
-                        .Where(pat =>
-                            pat.PatientId == dto.PatientId &&
-                            pat.AssessmentId == dto.AssessmentId &&
-                            pat.Question.CategoryId == categoryId &&
-                            pat.Question.ClusterId == null &&
-                            !pat.IsCustomTest)
-                        .ToListAsync();
+                    var priorContext = await _context.PriorContexts
+                        .FirstOrDefaultAsync(p => p.MedicalContextId == assessment.MedicalContextId
+                                                  && p.CategoryId == categoryId);
 
-                    if (!responses.Any())
+                    if (priorContext == null || priorContext.Value <= 0 || priorContext.Value >= 1)
                     {
                         categoryScores.Add(0);
                         continue;
                     }
 
+                    double categoryPrior = priorContext.Value;
 
-                    double totalScore = 0;
-                    int validResponseCount = 0;
-
-                    foreach (var response in responses)
+                    try
                     {
-                        var question = await _context.Questions.FindAsync(response.QuestionId);
+                        double posterior = await _bayesService.CalculateClinicalCategoryProbability(
+                            dto.PatientId,
+                            dto.AssessmentId.Value,
+                            categoryId,
+                            categoryPrior
+                        );
 
-                        if (question is QuestionBool)
-                        {
-                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
-                            {
-                                totalScore += 2;
-                            }
-                            validResponseCount++;
-                        } else
-                        {
-                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
-                            {
-                                totalScore += 2;
-                            }
-                        }
+                        double radarValue = (posterior * 100) / 10 / 2;
+                        categoryScores.Add(Math.Round(radarValue, 2));
                     }
-                    categoryScores.Add(Math.Round(totalScore/2, 2));
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erreur calcul catégorie {categoryId}: {ex.Message}");
+                        categoryScores.Add(0);
+                    }
                 }
 
                 if (dto.AssessmentId.HasValue)
@@ -293,7 +291,7 @@ namespace KineStat.Controllers
                     }
 
                     await _context.SaveChangesAsync();
-                
+
                 }
 
                 return Json(new
@@ -371,6 +369,7 @@ namespace KineStat.Controllers
         /// <summary>
         /// Retrieves the calculated percentages for the 9 clinical categories for a specific assessment.
         /// </summary>
+
         [HttpGet]
         [Route("Patient/{patientId}/Assessment/{assessmentId}/ClinicalCategoryPercentages")]
         public async Task<IActionResult> GetClinicalCategoryPercentages(int patientId, int assessmentId)
@@ -387,47 +386,43 @@ namespace KineStat.Controllers
                 var examCliniqueCategories = new[] { 7, 8, 9, 10, 11, 12, 13, 14, 15 };
                 var categoryScores = new List<double>();
 
+                var assessment = await _context.Assessments.FindAsync(assessmentId);
+                if (assessment == null)
+                {
+                    return Json(new { success = false, message = "Assessment introuvable" });
+                }
+
                 foreach (var categoryId in examCliniqueCategories)
                 {
-                    var responses = await _context.PatientAnswerTests
-                        .Include(pat => pat.Question)
-                        .Where(pat =>
-                            pat.PatientId == patientId &&
-                            pat.AssessmentId == assessmentId &&
-                            pat.Question.CategoryId == categoryId &&
-                            pat.Question.ClusterId == null &&
-                            !pat.IsCustomTest)
-                        .ToListAsync();
+                    var priorContext = await _context.PriorContexts
+                        .FirstOrDefaultAsync(p => p.MedicalContextId == assessment.MedicalContextId
+                                                  && p.CategoryId == categoryId);
 
-                    if (!responses.Any())
+                    if (priorContext == null || priorContext.Value <= 0 || priorContext.Value >= 1)
                     {
                         categoryScores.Add(0);
                         continue;
                     }
 
-                    double totalScore = 0;
-                    int validResponseCount = 0;
+                    double categoryPrior = priorContext.Value;
 
-                    foreach (var response in responses)
+                    try
                     {
-                        var question = await _context.Questions.FindAsync(response.QuestionId);
+                        double posterior = await _bayesService.CalculateClinicalCategoryProbability(
+                            patientId,
+                            assessmentId,
+                            categoryId,
+                            categoryPrior
+                        );
 
-                        if (question is QuestionBool)
-                        {
-                            if (response.ResponseValue.ToLower() == "oui" || response.ResponseValue.ToLower() == "true")
-                            {
-                                totalScore += 2;
-                            }
-
-                        } else
-                        {
-                            if (!string.IsNullOrWhiteSpace(response.ResponseValue))
-                            {
-                                totalScore += 2;
-                            }
-                        }
+                        double radarValue = (posterior * 100) / 10 / 2;
+                        categoryScores.Add(Math.Round(radarValue, 2));
                     }
-                    categoryScores.Add(Math.Round(totalScore/2, 2));
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erreur calcul catégorie {categoryId}: {ex.Message}");
+                        categoryScores.Add(0);
+                    }
                 }
 
                 return Json(new { success = true, clinicalCategories = categoryScores });
