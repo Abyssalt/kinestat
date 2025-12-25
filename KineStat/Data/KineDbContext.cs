@@ -32,5 +32,6 @@ namespace KineStat.Data
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<PatientPathologiesDetected> PatientPathologiesDetecteds { get; set; }
         public DbSet<QuestionPathology> QuestionPathologies { get; set; }
+        public DbSet<PriorContextPathology> PriorContextPathologies { get; set; }
     }
 }
