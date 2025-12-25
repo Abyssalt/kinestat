@@ -3,7 +3,7 @@ let globalPatientId = null;
 let globalAssessmentId = null;
 
 /**
- * Triggers an automatic save after a 500ms delay when user interacts with a test question.
+ * Triggers an automatic save after a 300ms delay when user interacts with a test question.
  * Debounces rapid changes to avoid excessive API calls.
  * @param {number} questionId - The ID of the question being answered
  */
@@ -14,7 +14,7 @@ function autoSaveTest(questionId) {
 
     saveTimeout = setTimeout(() => {
         saveTestData(questionId);
-    }, 500);
+    }, 300);
 }
 
 /**
