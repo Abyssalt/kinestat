@@ -441,14 +441,12 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Returns a view displaying the assessment results for the specified patient and assessment identifiers.
+        /// Displays the results of a specific assessment for a patient.
         /// </summary>
-        /// <param name="id">The unique identifier of the patient whose assessment is to be retrieved. Must match the patient associated
-        /// with the assessment.</param>
-        /// <param name="assessmentId">The unique identifier of the assessment to retrieve for the specified patient.</param>
-        /// <returns>An <see cref="IActionResult"/> that renders the assessment's results view if found and associated with the patient;
-        /// otherwise, a NotFound or BadRequest result if the assessment does not exist or does not belong to the
-        /// patient.</returns>
+        /// <param name="id">The Id of the patient.</param>
+        /// <param name="folderId">The Id of the folder.</param>
+        /// <param name="assessmentId">The Id of the assessment.</param>
+        /// <returns></returns>
         [Route("Patient/{id}/Folder/{folderId}/Resultat/{assessmentId}")]
         public async Task<IActionResult> Results(int id,int folderId, int assessmentId)
         {
@@ -545,9 +543,13 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Calculates and saves the detected pathologies for a patient assessment,
-        /// considering only the pathologies actually present in the patient's answers.
+        /// Calculates and saves detected pathologies for a patient in a specific assessment and folder.
         /// </summary>
+        /// <param name="patientId">The Id of the patient.</param>
+        /// <param name="assessmentId">The Id of the assessment.</param>
+        /// <param name="folderId">The Id of the folder.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private async Task<List<DetectedPathologyDTO>> CalculateAndSaveDetectedPathologies(int patientId, int assessmentId, int folderId)
         {
             var assessment = await _context.Assessments
@@ -668,8 +670,13 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Retrieves saved pathology probabilities from database.
+        /// Retrieves the list of detected pathologies that have been saved for a specific patient and assessment.
         /// </summary>
+        /// <param name="patientId">The unique identifier of the patient whose detected pathologies are to be retrieved.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment associated with the detected pathologies.</param>
+        /// <returns>A list of DetectedPathologyDTO objects representing the detected pathologies for the specified patient and
+        /// assessment. The list is ordered by pathology probability in descending order. Returns an empty list if no
+        /// detected pathologies are found.</returns>
         private async Task<List<DetectedPathologyDTO>> GetSavedDetectedPathologies(int patientId, int assessmentId)
         {
             var detectedPathologies = await _context.PatientPathologiesDetecteds
@@ -691,10 +698,11 @@ namespace KineStat.Controllers
 
 
 
-        /// Get comparison data for a specific assessment (TINTIV and Clinical values).
+        /// <summary>
+        /// Gets comparison data for a specific assessment.
         /// </summary>
-        /// <param name="id">The Id of the assessment to compare.</param>
-        /// <returns>JSON data with assessment date and values.</returns>
+        /// <param name="id">The Id of the assessment.</param>
+        /// <returns></returns>
         [Route("Assessment/{id}/ComparisonData")]
         public async Task<IActionResult> GetComparisonData(int id)
         {

@@ -24,12 +24,15 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Displays the clinical assessment view for the specified patient and assessment.
+        /// Displays the clinical assessment view for a specified patient, folder, and assessment.
         /// </summary>
+        /// <remarks>The user must have ownership of the specified patient to access this view. If the
+        /// user does not have the required permissions, the method redirects to an access denied page.</remarks>
         /// <param name="id">The unique identifier of the patient whose clinical assessment is to be displayed.</param>
-        /// <param name="assessmentId">The unique identifier of the clinical assessment to display for the patient.</param>
-        /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view for the specified patient and
-        /// assessment.</returns>
+        /// <param name="folderId">The unique identifier of the folder containing the assessment.</param>
+        /// <param name="assessmentId">The unique identifier of the clinical assessment to display.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the clinical assessment view if the current user has access;
+        /// otherwise, redirects to an access denied page.</returns>
         [Route("Patient/{id}/Folder/{folderId}/ExamenClinique/{assessmentId}")]
         public async Task<IActionResult> ExamenClinique(int id, int folderId, int assessmentId)
         {
@@ -315,13 +318,16 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Retrieves the list of responses submitted by the specified patient for standard tests on the current day.
+        /// Retrieves the existing responses for a specified patient, optionally filtered by assessment.
         /// </summary>
-        /// <remarks>Only responses for standard tests (non-custom) and questions not associated with a
-        /// cluster are included. The returned objects contain question identifiers, response values, observations, and
-        /// category names.</remarks>
+        /// <remarks>The caller must be authorized to access the specified patient's data. Only responses
+        /// to non-custom tests and questions not associated with a cluster are included.</remarks>
         /// <param name="id">The unique identifier of the patient whose responses are to be retrieved.</param>
-        /// <returns>A JSON result containing a list of response objects for the patient. If no responses are found or an error
+        /// <param name="assessmentId">The optional identifier of the assessment to filter the responses. If null, responses from all assessments
+        /// are included.</param>
+        /// <returns>A JSON result containing a list of the patient's existing responses. Each response includes the question ID,
+        /// response value, observations, and category name. Returns an empty list if no responses are found or if an
+        /// error occurs.</returns>
         [HttpGet]
         public async Task<IActionResult> GetExistingResponses(int id, int? assessmentId)
         {
@@ -367,8 +373,16 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Retrieves the calculated percentages for the 9 clinical categories for a specific assessment.
+        /// Retrieves the calculated percentage scores for each clinical category associated with a specific assessment
+        /// for a given patient.
         /// </summary>
+        /// <remarks>Access is restricted to physiotherapists who own the specified patient. The returned
+        /// percentages represent normalized scores for predefined clinical categories within the assessment. If the
+        /// assessment is not found or the user does not have access, an error message is returned.</remarks>
+        /// <param name="patientId">The unique identifier of the patient whose clinical category percentages are to be retrieved.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment for which clinical category percentages are calculated.</param>
+        /// <returns>A JSON result containing a success flag and an array of percentage scores for each clinical category if the
+        /// operation succeeds; otherwise, a JSON result with an error message.</returns>
 
         [HttpGet]
         [Route("Patient/{patientId}/Assessment/{assessmentId}/ClinicalCategoryPercentages")]
