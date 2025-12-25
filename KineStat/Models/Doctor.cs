@@ -25,10 +25,8 @@ namespace KineStat.Models
         [RegularExpression(@"^\d{11}$|^\d-\d{5}-\d{2}-\d{3}$", ErrorMessage = "Le numéro INAMI doit être au format valide (11 chiffres ou X-XXXXX-XX-XXX)")]
         public string NumeroINAMI { get; set; }
 
-        // Navigation property - Liste des patients associés à ce médecin
         public ICollection<Patient>? Patients { get; set; } = new List<Patient>();
 
-        // Propriété calculée pour affichage
         public string FullName => $"{FirstName} {LastName}";
     }
 }

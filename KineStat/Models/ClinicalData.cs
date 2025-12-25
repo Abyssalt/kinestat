@@ -2,7 +2,10 @@
 
 namespace KineStat.Models
 {
-    public class ClinicalData //This class is used to store values of each axe of the patient's clinical profile
+    /// <summary>
+    /// Represents the clinical exam's data associated with a patient.
+    /// </summary>
+    public class ClinicalData
     {
         [Key]
         public int Id { get; set; }

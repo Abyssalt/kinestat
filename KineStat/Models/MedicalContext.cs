@@ -2,6 +2,9 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a medical context, including its identifier, name, and associated prior contexts.
+    /// </summary>
     public class MedicalContext
     {
         [Key] 

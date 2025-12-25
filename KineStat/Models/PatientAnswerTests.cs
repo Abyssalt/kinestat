@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a patient's response to a specific assessment question, including selected answer, custom test
+    /// details, and related metadata.
+    /// </summary>
     public class PatientAnswerTests
     {
-
-
         [Key]
         public int Id { get; set; }
 

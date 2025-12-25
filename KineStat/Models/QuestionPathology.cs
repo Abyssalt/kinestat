@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents an association between a question and a pathology, indicating that the specified question is related
+    /// to the specified pathology.
     [Index(nameof(QuestionId), nameof(PathologyId), IsUnique = true)]
     public class QuestionPathology
     {

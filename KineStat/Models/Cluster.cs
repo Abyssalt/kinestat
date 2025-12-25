@@ -2,6 +2,10 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a cluster grouping related questions and pathologies, along with associated test result thresholds
+    /// and metadata.
+    /// </summary>
     public class Cluster
     {
         [Key] 
