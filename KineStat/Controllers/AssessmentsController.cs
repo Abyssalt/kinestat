@@ -556,22 +556,31 @@ namespace KineStat.Controllers
                 .Include(a => a.Folder)
                 .FirstOrDefaultAsync();
             if (assessment == null) throw new Exception("Erreur bilan inexistant");
-
-            var priorContext = await _context.PriorContexts
-                .Where(m => m.MedicalContextId == assessment.MedicalContextId)
-                .FirstOrDefaultAsync();
-            if (priorContext == null) throw new Exception("Erreur prior inexistant pour ce contexte");
-
-            var priorProbability = priorContext.Value;
-
+            
             var detectedPathologies = new List<DetectedPathologyDTO>();
 
-            // Take PathologiesId in PatientAnswers
-            var patientPathologyIds = await _context.PatientAnswers
-                .Where(a => a.PatientId == patientId && a.AssessmentId == assessmentId && a.Assessment.FolderId == folderId)
+            // Pathologies from PatientAnswers
+            var patientAnswersPathologyIds = await _context.PatientAnswers
+                .Where(a => a.PatientId == patientId
+                            && a.AssessmentId == assessmentId
+                            && a.Assessment.FolderId == folderId)
                 .SelectMany(a => a.Question.QuestionPathologies.Select(qp => qp.PathologyId))
                 .Distinct()
                 .ToListAsync();
+
+            // Pathologies from  PatientAnswerTests with positives responses
+            var patientAnswerTestsPathologyIds = await _context.PatientAnswerTests
+                .Where(a => a.PatientId == patientId
+                            && a.AssessmentId == assessmentId
+                            && a.Assessment.FolderId == folderId
+                            && a.ResponseValue != null)
+                .SelectMany(a => a.Question.QuestionPathologies.Select(qp => qp.PathologyId))
+                .Distinct()
+                .ToListAsync();
+
+            var patientPathologyIds = patientAnswersPathologyIds
+                .Union(patientAnswerTestsPathologyIds)
+                .ToList();
 
             // Take all pathologies linked to Patient's pathologies
             var relevantPathologies = await _context.Pathologies
@@ -582,7 +591,12 @@ namespace KineStat.Controllers
             //For every patient detected pathologie calculate pathology probability
             foreach (var pathology in relevantPathologies)
             {
-              
+                var priorContext = await _context.PriorContextPathologies
+                    .Where(p => p.MedicalContextId == assessment.MedicalContextId && p.PathologyId == pathology.Id)
+                    .FirstOrDefaultAsync();
+                if (priorContext == null) throw new Exception("Erreur prior inexistant pour ce contexte");
+                var priorProbability = priorContext.Value;
+
                 double probability = await _bayesService.CalculateProbabilityByPathology(
                     prior: priorProbability,
                     patientId: patientId,
