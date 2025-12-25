@@ -2,6 +2,9 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a category that groups clusters and pathologies within the domain model.
+    /// </summary>
     public class Category
     {
         [Key]

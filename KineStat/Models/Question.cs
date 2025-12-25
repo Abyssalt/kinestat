@@ -5,6 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents an abstract question entity, including metadata, categorization, and related response information.
+    /// </summary>
     public abstract class Question
     {
         public int Id { get; set; }

@@ -1,6 +1,8 @@
 ﻿namespace KineStat.Models
 {
-    //This class is used as a ViewModel to share information between the controller and View
+    /// <summary>
+    /// Represents a view model that associates a patient with a specific question and their corresponding answer.
+    /// </summary>
     public class QuestionPatientAnswerVM 
     {
         public int PatientId { get; set; }

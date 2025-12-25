@@ -6,12 +6,21 @@ namespace KineStat.Models
 
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// Specifies the status of an assessment process.
+    /// </summary>
+    /// <remarks>Use this enumeration to indicate whether an assessment is currently in progress or has been
+    /// closed. The values correspond to distinct stages in the assessment lifecycle.</remarks>
     public enum AssessmentStatus
     {
         EnCours,
         Cloture
     }
 
+    /// <summary>
+    /// Represents a clinical assessment performed for a patient, including associated context, practitioner, and
+    /// related questions.
+    /// </summary>
     public class Assessment
     {
         [Key]

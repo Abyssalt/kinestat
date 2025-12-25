@@ -2,7 +2,10 @@
 
 namespace KineStat.Models
 {
-    public class PriorContext // This class represents the prior of each category according to the current medical context
+    /// <summary>
+    /// Represents a prior context entity that associates a value with a specific medical context and category.
+    /// </summary>
+    public class PriorContext 
     {
         [Key]
         public int Id { get; set; }

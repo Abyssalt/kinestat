@@ -3,6 +3,10 @@
 namespace KineStat.Models
 {
 
+    /// <summary>
+    /// Represents a folder containing patient information, assessments, and related metadata within the medical records
+    /// system.
+    /// </summary>
     public class Folder
     {
         [Key]

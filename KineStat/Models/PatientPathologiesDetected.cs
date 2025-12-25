@@ -2,6 +2,10 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents a record of a pathology detected for a specific patient during an assessment, including the
+    /// probability of detection and related entities.
+    /// </summary>
     public class PatientPathologiesDetected
     {
         [Key]

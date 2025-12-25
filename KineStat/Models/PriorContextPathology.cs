@@ -2,6 +2,10 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Represents the association between a pathology and a medical context, including a value indicating the relevance
+    /// or weight of the pathology within that context.
+    /// </summary>
     public class PriorContextPathology {
         
         [Key]

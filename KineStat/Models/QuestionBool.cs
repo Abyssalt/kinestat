@@ -1,7 +1,7 @@
 ﻿namespace KineStat.Models
 {
     /// <summary>
-    /// Question de type Booléen (Oui/Non)
+    /// Represents a question whose answer is a Boolean value.
     /// </summary>
     public class QuestionBool : Question
     {
