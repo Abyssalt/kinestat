@@ -7,14 +7,20 @@ let globalAssessmentId = null;
  * Debounces rapid changes to avoid excessive API calls.
  * @param {number} questionId - The ID of the question being answered
  */
-function autoSaveTest(questionId) {
-    if (saveTimeout) {
-        clearTimeout(saveTimeout);
-    }
-
-    saveTimeout = setTimeout(() => {
+function autoSaveTest(questionId, immediate = false) {
+    if (immediate) {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
         saveTestData(questionId);
-    }, 300);
+    } else {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+        saveTimeout = setTimeout(() => {
+            saveTestData(questionId);
+        }, 300);
+    }
 }
 
 /**

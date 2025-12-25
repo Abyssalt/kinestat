@@ -149,7 +149,7 @@
                                                                name="test-@question.Id-value"
                                                                id="oui-@question.Id"
                                                                value="true"
-                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id, true)" />
                                                         <label class="btn btn-outline-success fw-medium" for="oui-@question.Id">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Positif
                                                         </label>
@@ -159,7 +159,7 @@
                                                                name="test-@question.Id-value"
                                                                id="non-@question.Id"
                                                                value="false"
-                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id, true)" />
                                                         <label class="btn btn-outline-secondary fw-medium" for="non-@question.Id">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Négatif
                                                         </label>
