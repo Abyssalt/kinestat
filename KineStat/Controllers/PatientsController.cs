@@ -183,17 +183,23 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Handles HTTP POST requests to create a new patient. Validates the input and ensures that the
-        /// patient's social security number and phone number are unique before saving.
+        /// Handles the creation of a new patient and optionally a new doctor, associating the patient with the current
+        /// physiotherapist.
         /// </summary>
-        /// <remarks>If the provided patient data is invalid or duplicates an existing patient's social
-        /// security number or phone number, the method does not create a new record and displays an appropriate error
-        /// message. The method uses anti-forgery validation to protect against cross-site request forgery (CSRF)
-        /// attacks.</remarks>
-        /// <param name="patient">The patient entity containing the details to be created. Must have a unique social security number and phone
-        /// number. Cannot be null.</param>
-        /// <returns>An IActionResult that redirects to the patient list view. If creation succeeds, a success message is
-        /// displayed; otherwise, an error message is shown.</returns>
+        /// <remarks>The user must be authenticated as a physiotherapist to create a patient. If all new
+        /// doctor fields are provided, a new doctor is created and linked to the patient; all fields must be filled to
+        /// add a new doctor. The method validates that the patient's social security number and phone number are
+        /// unique. Error messages are provided via TempData for invalid input or duplicate entries.</remarks>
+        /// <param name="patient">The patient entity to create. Must contain valid patient information. The patient's social security number
+        /// and phone number must be unique.</param>
+        /// <param name="NewDoctorLastName">The last name of the new doctor to associate with the patient. Required if adding a new doctor; otherwise,
+        /// can be null or empty.</param>
+        /// <param name="NewDoctorFirstName">The first name of the new doctor to associate with the patient. Required if adding a new doctor; otherwise,
+        /// can be null or empty.</param>
+        /// <param name="NewDoctorINAMI">The INAMI number of the new doctor to associate with the patient. Must be 11 digits or in the format
+        /// 'X-XXXXX-XX-XXX' if adding a new doctor; otherwise, can be null or empty.</param>
+        /// <returns>A redirect to the next step in the patient creation process if successful; otherwise, a redirect to the
+        /// index or login page with an error message.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Patient patient, string? NewDoctorLastName, string? NewDoctorFirstName, string? NewDoctorINAMI)

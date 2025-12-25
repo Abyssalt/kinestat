@@ -21,15 +21,18 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Handles HTTP GET requests to display the test clusters and latest test responses for a specified patient.
+        /// Handles HTTP GET requests to display the list of test clusters and associated questions for a specific
+        /// assessment within a patient's folder.
         /// </summary>
-        /// <remarks>The returned view includes the patient's details, available test clusters with
-        /// questions, and the most recent test responses. If no responses exist for the patient, the view will display
-        /// only the available clusters. This action is intended for use within an ASP.NET MVC application and requires
-        /// a valid patient identifier.</remarks>
-        /// <param name="id">The unique identifier of the patient whose test information is to be retrieved.</param>
-        /// <returns>An asynchronous operation that returns an <see cref="IActionResult"/> representing the rendered 'Tests' view
-        /// with patient and test data.</returns>
+        /// <remarks>Access to this action is restricted to physiotherapists who own the specified
+        /// patient. If the current user does not have ownership, the method redirects to an access denied
+        /// page.</remarks>
+        /// <param name="id">The unique identifier of the patient whose assessment tests are to be displayed.</param>
+        /// <param name="folderId">The unique identifier of the folder containing the assessment.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment for which tests are being retrieved.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains an IActionResult that renders
+        /// the 'Tests' view with the relevant clusters and questions, or redirects to an error page if access is
+        /// denied.</returns>
         [HttpGet]
         [Route("Patient/{id}/Folder/{folderId}/Tests/{assessmentId}")]
         public async Task<IActionResult> Tests(int id, int folderId, int assessmentId)
