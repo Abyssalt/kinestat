@@ -153,7 +153,7 @@ function getSocialSecurityPlaceholder(country) {
         case '0':
             return 'AA.MM.JJ-XXX.XX';
         case '1':
-            return 'S MM AA JJ XXX XXX XX';
+            return 'S AA MM JJ XXX XXX XX';
         case '2':
             return 'AAAA MM JJ XXX';
         case '3':
