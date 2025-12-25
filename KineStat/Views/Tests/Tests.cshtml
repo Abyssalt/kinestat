@@ -199,8 +199,8 @@
                                                                        min="@ladder.Min"
                                                                        max="@ladder.Max"
                                                                        placeholder="@ladder.Min"
-                                                                       onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
-                                                                       oninput="autoSaveTest(@question.Id)"
+                                                                       onchange="updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
+                                                                       oninput="markAsAnswered(@question.Id); autoSaveTest(@question.Id)"
                                                                        id="input-@question.Id">
 
                                                                 <input type="range"
@@ -210,7 +210,7 @@
                                                                        max="@ladder.Max"
                                                                        value="@ladder.Min"
                                                                        step="1"
-                                                                       oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
+                                                                       oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
 
                                                                 <span class="badge bg-primary" id="display-@question.Id">@ladder.Min</span>
                                                             </div>
