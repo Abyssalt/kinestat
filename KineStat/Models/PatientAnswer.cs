@@ -2,6 +2,9 @@
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Abstract base class representing a patient's answer to a specific question within an assessment.
+    /// </summary>
     public abstract class PatientAnswer
     {
         [Key]

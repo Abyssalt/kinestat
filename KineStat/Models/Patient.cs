@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KineStat.Models
 {
+    /// <summary>
+    /// Specifies the gender options available for classification.
+    /// </summary>
     public enum Gender
     {
         Homme,
@@ -10,6 +13,9 @@ namespace KineStat.Models
         Autre
     }
 
+    /// <summary>
+    /// Specifies the status of a patient within the system.
+    /// </summary>
     public enum PatientStatus
     {
         Actif,
@@ -18,6 +24,9 @@ namespace KineStat.Models
         Abandonné,
     }
 
+    /// <summary>
+    /// Specifies supported countries for regional operations.
+    /// </summary>
     public enum Country
     {
         Belgique,
@@ -25,6 +34,11 @@ namespace KineStat.Models
         Luxembourg,
         Suisse
     }
+
+    /// <summary>
+    /// Represents a patient and their associated personal, medical, and administrative information within the
+    /// healthcare system.
+    /// </summary>
     public class Patient
     {
         [Key]

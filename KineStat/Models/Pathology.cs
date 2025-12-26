@@ -1,7 +1,10 @@
 ﻿using KineStat.Models;
 
 namespace KineStat.Models {
-
+    
+    /// <summary>
+    /// Represents a medical pathology, including its identifier, name, and associated questions.
+    /// </summary>
     public class Pathology
     {
         public int Id { get; set; }

@@ -25,13 +25,12 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Displays the Red Flags view for a specified patient and assessment.
+        /// Displays the Red Flags view for a specific assessment within a patient's folder.
         /// </summary>
-        /// <remarks>The patient and assessment identifiers are made available to the view through the
-        /// <see cref="ViewData"/> dictionary for use in rendering or further processing.</remarks>
-        /// <param name="id">The unique identifier of the patient whose Red Flags are to be displayed.</param>
-        /// <param name="assessmentId">The unique identifier of the assessment associated with the Red Flags.</param>
-        /// <returns>An <see cref="IActionResult"/> that renders the Red Flags view for the specified patient and assessment.</returns>
+        /// <param name="id">The unique identifier of the patient whose assessment is being viewed.</param>
+        /// <param name="folderId">The unique identifier of the folder containing the assessment.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment for which red flags are displayed.</param>
+        /// <returns>An <see cref="IActionResult"/> that renders the Red Flags view for the specified assessment.</returns>
         [Route("Patient/{id}/Folder/{folderId}/RedFlags/{assessmentId}")]
         public IActionResult RedFlags(int id, int folderId, int assessmentId)
         {
@@ -88,16 +87,18 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Retrieves the list of boolean red flag questions and the patient's most recent answers for a specified
-        /// category.
+        /// Retrieves the list of red flag questions and corresponding patient answers for a specified patient,
+        /// assessment, and question category.
         /// </summary>
-        /// <remarks>This method returns only boolean-type questions and their corresponding answers from
-        /// the patient's latest assessment in the specified category. If no assessment exists for the patient, or if
-        /// the patient is not found, the method returns a NotFound result.</remarks>
-        /// <param name="patientId">The unique identifier of the patient whose red flag questions and answers are to be retrieved.</param>
-        /// <param name="categoryId">The unique identifier of the question category for which red flag questions and answers are requested.</param>
-        /// <returns>A partial view containing a collection of question and answer view models for the specified patient and
-        /// category. Returns a 404 Not Found response if the patient or their latest assessment does not exist.</returns>
+        /// <remarks>This endpoint is accessible only to physiotherapists who own the specified patient.
+        /// The returned partial view is intended for use in dynamic page updates, such as AJAX requests.</remarks>
+        /// <param name="patientId">The unique identifier of the patient whose red flag questions are to be retrieved. Must correspond to a
+        /// patient owned by the current physiotherapist.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment for which answers are being retrieved.</param>
+        /// <param name="categoryId">The unique identifier of the question category to filter the red flag questions.</param>
+        /// <returns>A partial view containing a list of question and answer view models for the specified patient, assessment,
+        /// and category. Returns an Unauthorized result if the patient is not owned by the current physiotherapist, or
+        /// NotFound if the patient does not exist.</returns>
         [HttpGet]
         [Route("RedFlags/{patientId}/Assessment/{assessmentId}/Questions/{categoryId}")]
         public async Task<IActionResult> GetRedFlagsQuestions(int patientId, int assessmentId, int categoryId)
@@ -350,9 +351,17 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Retrieves the red flags percentages for all TINTIV categories (categories 1-6)
-        /// Returns values scaled for radar chart (0-10 scale)
+        /// Retrieves the percentage scores for each assessment category for a specified patient and assessment.
         /// </summary>
+        /// <remarks>The response includes a 'success' flag, a 'categories' array with six percentage
+        /// values, and a 'totalPercentage' value. If the patient has no answers for the specified assessment, all
+        /// category percentages and the total percentage will be zero. Access is restricted to physiotherapists who own
+        /// the patient.</remarks>
+        /// <param name="patientId">The unique identifier of the patient whose assessment category percentages are to be retrieved.</param>
+        /// <param name="assessmentId">The unique identifier of the assessment for which category percentages are calculated.</param>
+        /// <returns>An <see cref="IActionResult"/> containing a JSON object with the percentage scores for each category and the
+        /// total percentage. Returns HTTP 403 if the patient is not owned by the current physiotherapist, or HTTP 500
+        /// if an error occurs.</returns>
         [HttpGet]
         [Route("Patient/{patientId}/Assessment/{assessmentId}/CategoryPercentages")]
         public async Task<IActionResult> GetCategoryPercentages(int patientId, int assessmentId)

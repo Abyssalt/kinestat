@@ -58,17 +58,23 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Processes a POST request to update an existing patient's information. Redirects to the patient's anamnesis
-        /// view upon completion.
+        /// Handles the submission of patient edits, including updating patient details and optionally adding a new
+        /// doctor if provided.
         /// </summary>
-        /// <remarks>This action requires a valid anti-forgery token and is accessible via the
-        /// 'Patient/Edit' route. If the patient does not exist or validation fails, the user is redirected with an
-        /// appropriate error message. Concurrency and other exceptions are handled and reported through
-        /// TempData. This method also manages the InactiveSinceDate field for GDPR compliance.</remarks>
-        /// <param name="patient">The patient entity containing updated information. The patient's Id must correspond to an existing record.
-        /// All required fields must be valid; otherwise, the update will not be performed.</param>
-        /// <returns>An <see cref="IActionResult"/> that redirects to the anamnesis view for the patient. If the update is
-        /// successful, a success message is provided; otherwise, an error message is displayed.</returns>
+        /// <remarks>All doctor fields must be provided to add a new doctor; partial input will result in
+        /// a validation error. Only the physiotherapist who owns the patient can edit their details. If the patient's
+        /// status is set to inactive, the inactivity date is updated accordingly. Concurrency and validation errors are
+        /// handled and reported to the user.</remarks>
+        /// <param name="patient">The patient entity containing the updated information. Must have a valid identifier and pass model
+        /// validation.</param>
+        /// <param name="NewDoctorLastName">The last name of the new doctor to associate with the patient. Required if adding a new doctor; otherwise,
+        /// can be null or empty.</param>
+        /// <param name="NewDoctorFirstName">The first name of the new doctor to associate with the patient. Required if adding a new doctor; otherwise,
+        /// can be null or empty.</param>
+        /// <param name="NewDoctorINAMI">The INAMI number of the new doctor to associate with the patient. Must be exactly 11 digits if provided.
+        /// Required if adding a new doctor; otherwise, can be null or empty.</param>
+        /// <returns>A redirect to the patient's details page if the update is successful, or to the appropriate page with an
+        /// error message if validation fails or an error occurs.</returns>
         [HttpPost]
         [Route("Patient/Edit")]
         [ValidateAntiForgeryToken]
@@ -197,18 +203,18 @@ namespace KineStat.Controllers
         }
 
         /// <summary>
-        /// Updates the medical information for the specified patient and redirects to the patient's anamnesis view.
+        /// Updates the medical information for a specified patient and saves the changes to the database.
         /// </summary>
-        /// <remarks>This action sets a success or error message in <see cref="TempData"/> depending on
-        /// whether the update was successful. The method requires a valid patient identifier; if the patient does not
-        /// exist, no changes are made.</remarks>
+        /// <remarks>The caller must have ownership of the patient to update their medical information. If
+        /// the patient does not exist or the user does not have access, the method redirects with an error
+        /// message.</remarks>
         /// <param name="PatientId">The unique identifier of the patient whose medical information is to be updated.</param>
-        /// <param name="Profession">The patient's current profession. Can be null to leave unchanged.</param>
-        /// <param name="ActivitesPhysiques">A description of the patient's physical activities. Can be null to leave unchanged.</param>
-        /// <param name="AntecedentsMedicaux">A summary of the patient's medical history or antecedents. Can be null to leave unchanged.</param>
-        /// <param name="MedicationActuelle">Details of the patient's current medication. Can be null to leave unchanged.</param>
-        /// <returns>An <see cref="IActionResult"/> that redirects to the patient's anamnesis view. If the patient is not found,
-        /// redirects with an error message.</returns>
+        /// <param name="Profession">The patient's current profession. Can be null to clear the existing value.</param>
+        /// <param name="ActivitesPhysiques">A description of the patient's physical activities. Can be null to clear the existing value.</param>
+        /// <param name="AntecedentsMedicaux">The patient's medical history or antecedents. Can be null to clear the existing value.</param>
+        /// <param name="MedicationActuelle">The patient's current medication. Can be null to clear the existing value.</param>
+        /// <returns>A redirect to the patient's medical history page if the update is successful; otherwise, a redirect to an
+        /// appropriate page with an error message.</returns>
         [HttpPost]
         public async Task<IActionResult> UpdateMedicalInfo(int PatientId, string? Profession, string? ActivitesPhysiques, string? AntecedentsMedicaux, string? MedicationActuelle)
         {
