@@ -644,7 +644,7 @@
            * Returns the HTML for a status badge
           */
         function getStatusBadge(s, large) {
-            const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-secondary', 'Anonymisé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Redirigé'] };
+             const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-dark text-white', 'Anonymisé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Redirigé'] };
             return `<span class="badge ${labels[s][0]} rounded-pill ${cls}">${labels[s][1]}</span>`;
         }
 
