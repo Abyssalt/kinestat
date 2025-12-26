@@ -3,23 +3,31 @@ let globalPatientId = null;
 let globalAssessmentId = null;
 
 /**
- * Save automatically the test data after a delay
- * @param {any} questionId
+ * Triggers an automatic save after a 300ms delay when user interacts with a test question.
+ * Debounces rapid changes to avoid excessive API calls.
+ * @param {number} questionId - The ID of the question being answered
  */
-function autoSaveTest(questionId) {
-    if (saveTimeout) {
-        clearTimeout(saveTimeout);
-    }
-
-    saveTimeout = setTimeout(() => {
+function autoSaveTest(questionId, immediate = false) {
+    if (immediate) {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
         saveTestData(questionId);
-    }, 500);
+    } else {
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+        saveTimeout = setTimeout(() => {
+            saveTestData(questionId);
+        }, 300);
+    }
 }
 
 /**
- * Save the test data to the server
- * @param {any} questionId
- * @returns
+ * Saves a single test response to the server via POST request.
+ * Validates input exists before sending. Updates clinical profile chart on success.
+ * @param {number} questionId - The ID of the question to save
+ * @returns {Promise<void>}
  */
 async function saveTestData(questionId) {
     const card = document.getElementById('test-' + questionId);
@@ -69,8 +77,9 @@ async function saveTestData(questionId) {
 
 
 /**
- *  Mark the question as answered
- * @param {any} questionId
+ * Marks a test question as answered by showing success badge and green border.
+ * Also triggers global progress bar update.
+ * @param {number} questionId - The ID of the question to mark as answered
  */
 function markAsAnswered(questionId) {
     const badge = document.getElementById('badge-' + questionId);
@@ -83,9 +92,9 @@ function markAsAnswered(questionId) {
 }
 
 /**
- * 
- * Toggle the observations zone visibility
- * @param {any} questionId
+ * Toggles the visibility of the observations textarea for a specific question.
+ * Uses Bootstrap's 'show' class for collapse animation.
+ * @param {number} questionId - The ID of the question whose observations to toggle
  */
 function toggleObservations(questionId) {
     const observationsZone = document.getElementById('observations-' + questionId);
@@ -93,10 +102,11 @@ function toggleObservations(questionId) {
 }
 
 /**
- * Synchronize range input with number input and display
- * @param {any} range
- * @param {any} inputId
- * @param {any} displayId
+ * Synchronizes a range slider with its corresponding number input and display badge.
+ * Ensures all three elements show the same value when slider is moved.
+ * @param {HTMLInputElement} range - The range input element being moved
+ * @param {string} inputId - DOM ID of the number input to sync
+ * @param {string} displayId - DOM ID of the display badge to sync
  */
 function syncInputs(range, inputId, displayId) {
     const input = document.getElementById(inputId);
@@ -108,10 +118,11 @@ function syncInputs(range, inputId, displayId) {
 }
 
 /**
- * Update range input from number input
- * @param {any} input
- * @param {any} rangeId
- * @param {any} displayId
+ * Synchronizes a range slider from a number input value change.
+ * Reverse operation of syncInputs - updates slider when number is typed.
+ * @param {HTMLInputElement} input - The number input element being changed
+ * @param {string} rangeId - ID of the range slider to sync
+ * @param {string} displayId -  ID of the display badge to sync
  */
 function updateRangeFromInput(input, rangeId, displayId) {
     const range = document.getElementById(rangeId);
@@ -123,7 +134,8 @@ function updateRangeFromInput(input, rangeId, displayId) {
 }
 
 /**
- * Update the overall progress bar and badge
+ * Updates the global progress bar showing overall test completion percentage.
+ * Counts answered tests vs total tests and updates UI elements accordingly.
  */
 function updateProgress() {
     const total = document.querySelectorAll('.test-card').length;
@@ -140,9 +152,10 @@ function updateProgress() {
 }
 
 /**
- * Calculate the progress for a specific cluster
- * @param {any} clusterId
- * @returns
+ * Calculates completion statistics for a specific test cluster.
+ * Returns object with completed count, total count, and percentage.
+ * @param {number} clusterId - The ID of the cluster to calculate progress for
+ * @returns {{completed: number, total: number, percentage: number}} Progress statistics
  */
 function calculateClusterProgress(clusterId) {
     const container = document.getElementById('testsContainer-' + clusterId);
@@ -157,9 +170,9 @@ function calculateClusterProgress(clusterId) {
 }
 
 /**
- * Update the cluster card UI based on progress
- * @param {any} clusterId
- * @returns
+ * Updates a cluster card's visual state based on completion progress.
+ * Changes badges, progress bar, button text/color according to 0%, 1-99%, or 100% completion.
+ * @param {number} clusterId - The ID of the cluster card to update
  */
 function updateClusterCard(clusterId) {
     const progress = calculateClusterProgress(clusterId);
@@ -207,9 +220,9 @@ function updateClusterCard(clusterId) {
 }
 
 /**
- * Tooggle the visibility of tests in a cluster
- * @param {any} clusterId
- * @returns
+ * Toggles the collapse/expand state of tests within a cluster using Bootstrap Collapse.
+ * Opens or closes the list of tests for a given cluster card.
+ * @param {number} clusterId - The ID of the cluster to toggle
  */
 function toggleClusterTests(clusterId) {
     const collapseId = 'collapse-cluster-' + clusterId;
@@ -223,8 +236,9 @@ function toggleClusterTests(clusterId) {
 }
 
 /**
- * Scroll to the top of the cluster card
- * @param {any} clusterId
+ * Smoothly scrolls the page to bring a cluster card to the top of viewport.
+ * Used by "back to top" buttons within expanded clusters.
+ * @param {number} clusterId - The ID of the cluster card to scroll to
  */
 function scrollToClusterTop(clusterId) {
     const card = document.querySelector(`[data-cluster-id="${clusterId}"]`);
@@ -237,8 +251,10 @@ function scrollToClusterTop(clusterId) {
 }
 
 /**
- * Load existing responses into the test form
- * @param {any} responses
+ * Populates the test form with previously saved responses from the database.
+ * Handles different input types (radio, number, select, textarea) and marks them as answered.
+ * Also loads saved observations if present.
+ * @param {Array<Object>} responses - Array of response objects containing questionId, value, and observations
  */
 function loadExistingResponses(responses) {
 
@@ -314,10 +330,12 @@ function loadExistingResponses(responses) {
 }
 
 /**
- * Initialize the Tests module
- * @param {any} patientId
- * @param {any} assessmentId
- * @param {any} existingResponses
+ * Initializes the Tests module by setting global IDs and attaching event listeners.
+ * Loads existing responses, sets up progress update hooks, and initializes cluster cards.
+ * Should be called once on page load.
+ * @param {number} patientId - The ID of the current patient
+ * @param {number} assessmentId - The ID of the current assessment
+ * @param {Array<Object>} existingResponses - Array of previously saved test responses
  */
 function initTests(patientId, assessmentId, existingResponses) {
     globalPatientId = patientId;

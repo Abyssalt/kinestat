@@ -6,6 +6,10 @@ let globalAssessmentId = null;
 let saveTimeout = null;
 
 
+/**
+ * Initializes category tab buttons with click handlers.
+ * Switches active tab styling and displays corresponding questions when clicked.
+ */
 function initializeTabs() {
     document.querySelectorAll('button[data-category]').forEach(btn => {
         btn.addEventListener('click', async function (e) {
@@ -26,6 +30,12 @@ function initializeTabs() {
     });
 }
 
+/**
+ * Fetches clinical exam questions from the server and initializes the questionnaire.
+ * Loads existing responses, hides empty categories, and displays the first category.
+ * Shows error message if fetch fails.
+ * @returns {Promise<void>}
+ */
 async function loadQuestionnaire() {
     try {
         const response = await fetch(`/ClinicalExam/GetQuestionsClinique/${globalPatientId}`);
@@ -60,6 +70,12 @@ async function loadQuestionnaire() {
     }
 }
 
+/**
+ * Loads previously saved responses from the server for the current assessment.
+ * Populates userResponses object with values and notes by category and question ID.
+ * Silently fails if no responses exist or fetch fails.
+ * @returns {Promise<void>}
+ */
 async function loadExistingResponses() {
     try {
         const url = `/ClinicalExam/GetExistingResponses/${globalPatientId}?assessmentId=${globalAssessmentId}`;
@@ -84,6 +100,10 @@ async function loadExistingResponses() {
     }
 }
 
+/**
+ * Hides category buttons that have no questions loaded from the server.
+ * Compares loaded categories against all category buttons and hides empty ones.
+ */
 function hideEmptyCategories() {
     const loadedCategories = Object.keys(allQuestionsData);
 
@@ -104,6 +124,13 @@ function hideEmptyCategories() {
     });
 }
 
+
+/**
+ * Saves all answered questions to the server via POST request.
+ * Collects all responses and notes from the DOM, sends them in batch.
+ * Updates clinical profile chart if server returns updated categories.
+ * @returns {Promise<void>}
+ */
 async function autoSaveResponses() {
     const responses = [];
 
@@ -147,12 +174,10 @@ async function autoSaveResponses() {
 
         const data = await response.json();
 
-        if (data.success) {
-            console.log('Sauvegarde réussie');
+        if (data.success) {         
 
             if (data.clinicalCategories && window.ClinicalProfileStore) {
-                window.ClinicalProfileStore.set(data.clinicalCategories);
-                console.log('Catégories cliniques mises à jour:', data.clinicalCategories);
+                window.ClinicalProfileStore.set(data.clinicalCategories);               
             }
         }
     } catch (error) {
@@ -160,10 +185,22 @@ async function autoSaveResponses() {
     }
 }
 
+/**
+ * Redirects user to the physical tests page for the current patient and assessment.
+ * Called when user clicks "Next" or "Save and Continue" button.
+ * @returns {Promise<void>}
+ */
 async function saveResponses() {
     window.location.href = `/Patients/Tests/${globalPatientId}?assessmentId=${globalAssessmentId}`;
 }
 
+
+/**
+ * Renders all questions for a given category into the question container.
+ * Clears existing content and creates question cards dynamically.
+ * Shows info message if no questions exist for the category.
+ * @param {string} category - The name of the category to display
+ */
 function displayQuestions(category) {
 
     const container = document.getElementById('questionnaireContainer');
@@ -194,6 +231,17 @@ function displayQuestions(category) {
     });
 }
 
+
+/**
+ * Creates a single question card DOM element with horizontal layout.
+ * Generates different input types based on question type (ladder/radio).
+ * Includes question text on left, response controls in middle, and notes on right.
+ * Loads saved responses if they exist.
+ * @param {Object} question - Question object containing id, question text, type, and options
+ * @param {string} uniqueId - Unique identifier for DOM elements (sanitized category + index)
+ * @param {string} category - Category name for saving responses
+ * @returns {HTMLElement} Complete question card element ready to append to DOM
+ */
 function createQuestionCard(question, uniqueId, category) {
     uniqueId = uniqueId.replace(/[&\/]/g, '');
     const card = document.createElement('div');
@@ -212,6 +260,27 @@ function createQuestionCard(question, uniqueId, category) {
     questionText.className = 'fw-medium flex-grow-1';
     questionText.textContent = question.question;
     mainContainer.appendChild(questionText);
+
+    if (question.sourceRv && question.sourceRv.trim() !== '') {
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-info-circle ms-2 text-primary';
+        icon.style.cursor = 'pointer';
+        icon.setAttribute('data-bs-toggle', 'tooltip');
+        icon.setAttribute('data-bs-placement', 'top');
+
+        let tooltipContent = `${question.sourceRv}<br>`;
+        if (question.rvPositive || question.rvNegative) {
+            tooltipContent += `<small>RV+ : ${question.rvPositive || 'N/A'}<br>`;
+            tooltipContent += `RV- : ${question.rvNegative || 'N/A'}</small>`;
+        }
+
+        questionText.appendChild(icon);
+
+        new bootstrap.Tooltip(icon, {
+            html: true,
+            title: tooltipContent 
+        });
+    }
 
     const responseContainer = document.createElement('div');
     responseContainer.className = 'flex-shrink-0';
@@ -378,6 +447,14 @@ function createQuestionCard(question, uniqueId, category) {
     return card;
 }
 
+
+/**
+ * Stores a question response locally and triggers auto-save after 500ms delay.
+ * Debounces rapid changes to avoid excessive server calls.
+ * @param {number} questionId - The ID of the question being answered
+ * @param {string} response - The answer value (yes/no/number)
+ * @param {string} category - The category name for organizing responses
+ */
 function saveResponseLocally(questionId, response, category) {
     if (!userResponses[category]) {
         userResponses[category] = {};
@@ -397,7 +474,11 @@ function saveResponseLocally(questionId, response, category) {
 
 
 
-
+/**
+ * Initializes the Clinical Exam module by setting global IDs and loading the questionnaire.
+ * Sets up event listeners and exposes save functions to window object.
+ * Should be called once on page load.
+ */
 window.ExamenClinique = {
     init: function (patientId, assessmentId) {
         globalPatientId = patientId;

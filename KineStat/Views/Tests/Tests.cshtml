@@ -149,7 +149,7 @@
                                                                name="test-@question.Id-value"
                                                                id="oui-@question.Id"
                                                                value="true"
-                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id, true)" />
                                                         <label class="btn btn-outline-success fw-medium" for="oui-@question.Id">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Positif
                                                         </label>
@@ -159,7 +159,7 @@
                                                                name="test-@question.Id-value"
                                                                id="non-@question.Id"
                                                                value="false"
-                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
+                                                               onchange="markAsAnswered(@question.Id); autoSaveTest(@question.Id, true)" />
                                                         <label class="btn btn-outline-secondary fw-medium" for="non-@question.Id">
                                                             <i class="bi bi-x-circle-fill me-1"></i>Négatif
                                                         </label>
@@ -180,8 +180,7 @@
                                                                   name="test-@question.Id-observations"
                                                                   rows="3"
                                                                   placeholder="Notez ici vos observations..."
-                                                                  oninput="autoSaveTest(@question.Id)">
-                                                            </textarea>
+                                                                  oninput="autoSaveTest(@question.Id)"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -199,8 +198,8 @@
                                                                        min="@ladder.Min"
                                                                        max="@ladder.Max"
                                                                        placeholder="@ladder.Min"
-                                                                       onchange="markAsAnswered(@question.Id); updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
-                                                                       oninput="autoSaveTest(@question.Id)"
+                                                                       onchange="updateRangeFromInput(this, 'range-@question.Id', 'display-@question.Id')"
+                                                                       oninput="markAsAnswered(@question.Id); autoSaveTest(@question.Id)"
                                                                        id="input-@question.Id">
 
                                                                 <input type="range"
@@ -210,7 +209,7 @@
                                                                        max="@ladder.Max"
                                                                        value="@ladder.Min"
                                                                        step="1"
-                                                                       oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); autoSaveTest(@question.Id)" />
+                                                                       oninput="syncInputs(this, 'input-@question.Id', 'display-@question.Id'); markAsAnswered(@question.Id); autoSaveTest(@question.Id)" />
 
                                                                 <span class="badge bg-primary" id="display-@question.Id">@ladder.Min</span>
                                                             </div>

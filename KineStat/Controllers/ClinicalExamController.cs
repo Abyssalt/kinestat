@@ -102,7 +102,11 @@ namespace KineStat.Controllers
                         id = question.Id,
                         question = question.Title,
                         type = "bool",
-                        options = new[] { "Oui", "Non" }
+                        options = new[] { "Oui", "Non" },
+                        sourceRv = question.SourceRv,           
+                        rvPositive = question.RVPositive,       
+                        rvNegative = question.RVNegative
+
                     };
                 }
                 else if (question is QuestionLadder qLadder)
@@ -114,7 +118,10 @@ namespace KineStat.Controllers
                         type = "ladder",
                         options = Enumerable.Range(qLadder.Min, qLadder.Max - qLadder.Min + 1)
                             .Select(i => i.ToString())
-                            .ToArray()
+                            .ToArray(),
+                        sourceRv = question.SourceRv,           
+                        rvPositive = question.RVPositive,      
+                        rvNegative = question.RVNegative
                     };
                 }
                 else
@@ -124,7 +131,10 @@ namespace KineStat.Controllers
                         id = question.Id,
                         question = question.Title,
                         type = "text",
-                        options = Array.Empty<string>()
+                        options = Array.Empty<string>(),
+                        sourceRv = question.SourceRv,           
+                        rvPositive = question.RVPositive,      
+                        rvNegative = question.RVNegative
                     };
                 }
 
