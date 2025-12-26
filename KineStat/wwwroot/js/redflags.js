@@ -21,6 +21,10 @@ async function loadQuestionsByCategory(categoryId) {
 /**
  * Transforms question cards into a compact format.
  */
+/**
+ * Transforms question cards into a compact horizontal format matching the Clinical Exam style.
+ * Question text on left, response buttons in middle, notes toggle on right.
+ */
 function transformQuestionsToCompactFormat() {
     const container = document.getElementById("questionnaireContainer");
     const cards = container.querySelectorAll('.card');
@@ -39,41 +43,31 @@ function transformQuestionsToCompactFormat() {
         if (!questionText || !btnGroup) return;
 
         const mainContainer = document.createElement('div');
-        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3 w-100';
+        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3';
 
         const questionContainer = document.createElement('div');
         questionContainer.className = 'fw-medium flex-grow-1';
         questionContainer.innerHTML = questionText.innerHTML;
 
 
-        const tooltip = questionText.querySelector('[data-bs-toggle="tooltip"]');
-        if (tooltip) {
-            const icon = document.createElement('i');
-            icon.className = 'bi bi-info-circle ms-2 text-primary';
-            icon.setAttribute('data-bs-toggle', 'tooltip');
-            icon.setAttribute('title', tooltip.getAttribute('title'));
-            questionContainer.appendChild(icon);
-        }
-
-
         const responseContainer = document.createElement('div');
         responseContainer.className = 'flex-shrink-0';
+        responseContainer.style.minWidth = '300px';
 
-
-        btnGroup.classList.remove('w-100', 'd-grid');
+        btnGroup.classList.remove('w-100', 'd-grid', 'gap-2'); 
         btnGroup.classList.add('btn-group');
 
-        responseContainer.appendChild(btnGroup);
+        btnGroup.style.gap = '0';
 
+        responseContainer.appendChild(btnGroup);
 
         const notesSection = document.createElement('div');
         notesSection.className = 'flex-shrink-0 d-flex align-items-center gap-2';
         notesSection.style.minWidth = '200px';
 
-
         const toggleBtn = document.createElement('button');
         toggleBtn.type = 'button';
-        toggleBtn.className = 'btn btn-sm btn-outline-secondary';
+        toggleBtn.className = 'btn btn-sm btn-outline-secondary'; 
         toggleBtn.innerHTML = '<i class="bi bi-pencil"></i>';
         toggleBtn.title = 'Ajouter/Modifier une note';
 
@@ -105,18 +99,15 @@ function transformQuestionsToCompactFormat() {
                 }
             });
 
- 
             newTextarea.addEventListener('change', handleTextareaInput);
 
             notesSection.appendChild(toggleBtn);
             notesSection.appendChild(newTextarea);
         }
 
-
         mainContainer.appendChild(questionContainer);
         mainContainer.appendChild(responseContainer);
         mainContainer.appendChild(notesSection);
-
 
         cardBody.innerHTML = '';
         cardBody.className = 'card-body p-3 p-md-4';
