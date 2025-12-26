@@ -63,16 +63,6 @@ namespace KineStat.Controllers
                 .Where(pr => pr.PatientId == id && pr.AssessmentId == assessmentId)
                 .ToListAsync();
 
-
-            //var latestSessionDate = latestResponses.FirstOrDefault()?.DateResponse.Date;
-            //if (latestSessionDate.HasValue)
-            //{
-            //  latestResponses = latestResponses
-            //    .Where(pr => pr.DateResponse.Date == latestSessionDate.Value)
-            //  .ToList();
-
-            //}
-
             ViewData["Patient"] = patient;
             ViewData["PatientId"] = id;
             ViewData["AssessmentId"] = assessmentId;

@@ -44,9 +44,9 @@
                     <select id="statusFilter" class="form-select bg-light border-0">
                         <option value="Tous">Tous les statuts</option>
                         <option value="Actif">Actif</option>
-                        <option value="Terminé">Terminé</option>
                         <option value="Inactif">Inactif</option>
-                        <option value="Abandonné">Abandonné</option>
+                       <option value="Redirigé">Redirigé</option>
+                        <option value="Anonymisé">Anonymisé</option>
                     </select>
                 </div>
             </div>
@@ -92,14 +92,17 @@
                                         case PatientStatus.Actif:
                                             <span class="badge bg-success rounded-pill">Actif</span>
                                             break;
-                                        case PatientStatus.Terminé:
-                                            <span class="badge bg-secondary rounded-pill">Terminé</span>
+
+                                        case PatientStatus.Anonymisé:
+                                            <span class="badge bg-secondary rounded-pill">Anonymisé</span>
                                             break;
+
                                         case PatientStatus.Inactif:
-                                            <span class="badge bg-dark rounded-pill">Suspendu</span>
+                                            <span class="badge bg-muted text-dark rounded-pill">Inactif</span>
                                             break;
-                                        case PatientStatus.Abandonné:
-                                            <span class="badge bg-danger rounded-pill">Abandonné</span>
+
+                                        case PatientStatus.Redirigé:
+                                            <span class="badge bg-danger rounded-pill">Redirigé</span>
                                             break;
                                     }
                                 </div>
@@ -173,14 +176,14 @@
                                         case PatientStatus.Actif:
                                             <span class="badge bg-success rounded-pill px-3 py-2">Actif</span>
                                             break;
-                                        case PatientStatus.Terminé:
-                                            <span class="badge bg-secondary rounded-pill px-3 py-2">Terminé</span>
+                                        case PatientStatus.Anonymisé:
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">Anonymisé</span>
                                             break;
                                         case PatientStatus.Inactif:
-                                            <span class="badge bg-muted text-dark rounded-pill px-3 py-2">Suspendu</span>
+                                            <span class="badge bg-muted text-dark rounded-pill px-3 py-2">Inactif</span>
                                             break;
-                                        case PatientStatus.Abandonné:
-                                            <span class="badge bg-danger rounded-pill px-3 py-2">Abandonné</span>
+                                        case PatientStatus.Redirigé:
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">Redirigé</span>
                                             break;
                                     }
                                 </td>
@@ -641,7 +644,7 @@
            * Returns the HTML for a status badge
           */
         function getStatusBadge(s, large) {
-            const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-secondary', 'Terminé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Abandonné'] };
+             const cls = large ? 'px-3 py-2' : '', labels = { 0: ['bg-success', 'Actif'], 1: ['bg-dark text-white', 'Anonymisé'], 2: ['bg-warning text-dark', 'Inactif'], 3: ['bg-danger', 'Redirigé'] };
             return `<span class="badge ${labels[s][0]} rounded-pill ${cls}">${labels[s][1]}</span>`;
         }
 

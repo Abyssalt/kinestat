@@ -19,9 +19,9 @@ namespace KineStat.Models
     public enum PatientStatus
     {
         Actif,
-        Terminé,
+        Anonymisé,
         Inactif,
-        Abandonné,
+        Redirigé,
     }
 
     /// <summary>
