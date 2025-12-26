@@ -34,8 +34,6 @@ MonAppWeb/
 * **Documentation** : XML comments
 * **Base de données** : `camelCase`
 * **Style CSS** : [Bootswatch](https://https://bootswatch.com//) : Thème : Lux
-* **JavaScript** : [AlpineJS](https://alpinejs.dev/)
-
 ---
 
 ## 🔀 Workflow Git
@@ -91,7 +89,7 @@ Avant de commencer, assurez-vous d’avoir installé :
   * `Microsoft.EntityFrameworkCore.Tools`
 * **PostgreSQL 18** (serveur de base de données)
 * **pgAdmin** (outil graphique de gestion PostgreSQL)
-* **Visual Studio** 
+* **Visual Studio 22/26** 
 * **OpenSSL** (nécessaire pour la configuration SSL PostgreSQL)
 
 ---
@@ -110,17 +108,7 @@ cd KineStat
 ### 3️⃣ Configuration de la base de données
 
 La gestion de la base de données est réalisée avec **Entity Framework Core**.
-
-1. Ouvrir **pgAdmin** et se connecter au serveur PostgreSQL
-2. Créer une base de données (exemple : `kinestatDb`)
-3. Vérifier les identifiants (utilisateur, mot de passe, port)
-4. Renseigner la chaîne de connexion dans `appsettings.json` :
-
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Host=localhost;Port=5432;Database=kinestatDb;Username=postgres;Password=yourPassword"
-}
-```
+Si vous ne disposez pas de PostGreSQL, vous devez l'installer. Lors de l'installation, il faut choisir comme mot de passe **root**
 
 ---
 
@@ -137,20 +125,6 @@ Cette commande installe toutes les dépendances nécessaires, y compris **Entity
 ---
 
 ### 5️⃣ Configuration SSL
-
-#### SSL pour ASP.NET Core (HTTPS)
-
-L’application nécessite un certificat HTTPS avant le premier lancement.
-
-**Via Visual Studio** :
-
-1. Ouvrir le projet dans **Visual Studio**
-2. Au premier lancement, accepter l’installation du **certificat SSL de développement**
-3. Vérifier que le profil de lancement utilise **HTTPS**
-
-> ⚠️ Sans cette étape, l’application peut refuser de démarrer ou afficher des erreurs de sécurité.
-
----
 
 #### SSL pour PostgreSQL
 
@@ -214,18 +188,19 @@ Le projet utilise **Entity Framework Core avec migrations**.
 **Via Visual Studio (Gestionnaire NuGet)** :
 
 1. Ouvrir **Outils → Gestionnaire de package NuGet → Console du gestionnaire de package**
-2. Vérifier le projet par défaut
-3. Exécuter :
+2. Exécuter :
 
 ```powershell
 Update-Database
 ```
-
 Cette commande :
 
 * applique les migrations
 * crée automatiquement les tables
 * met à jour la table `__EFMigrationsHistory`
+
+3. Pour remplir la BD, vous pouvez copier le script SQL founi dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter.
+Ce script contient 4 patients qui seront automatiquement anonymisés par le service d'anonymisation au premier lancement de l'app. 
 
 ---
 
@@ -242,12 +217,6 @@ Application accessible à l’adresse :
 ```
 https://localhost:5001
 ```
-
----
-
-## 📚 Documentation
-
-Voir le dossier `Doc` du projet.
 
 ---
 
