@@ -102,7 +102,7 @@ namespace KineStat.Services
             patient.MedicalHistory = "DONNEES ANONYMISEES";
             patient.ActualMedication = null;
 
-            patient.Status = PatientStatus.Terminé;
+            patient.Status = PatientStatus.Anonymisé;
             patient.IsAnonymized = true;
             patient.AnonymizedDate = anonymizationDate;
 

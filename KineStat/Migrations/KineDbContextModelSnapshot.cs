@@ -48,7 +48,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Administrators");
+                    b.ToTable("Administrators", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Answer", b =>
@@ -73,7 +73,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.ToTable("Answers", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Assessment", b =>
@@ -115,7 +115,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PhysioId");
 
-                    b.ToTable("Assessments");
+                    b.ToTable("Assessments", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Category", b =>
@@ -132,7 +132,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.ClinicalData", b =>
@@ -163,7 +163,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("ClinicalDatas");
+                    b.ToTable("ClinicalDatas", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Cluster", b =>
@@ -198,7 +198,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Cluster");
+                    b.ToTable("Cluster", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Doctor", b =>
@@ -226,7 +226,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Folder", b =>
@@ -254,7 +254,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Folders");
+                    b.ToTable("Folders", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.MedicalContext", b =>
@@ -271,7 +271,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MedicalContexts");
+                    b.ToTable("MedicalContexts", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Pathology", b =>
@@ -298,7 +298,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("ClusterId");
 
-                    b.ToTable("Pathologies");
+                    b.ToTable("Pathologies", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Patient", b =>
@@ -386,7 +386,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PhysioId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.PatientAnswer", b =>
@@ -422,7 +422,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("PatientAnswers");
+                    b.ToTable("PatientAnswers", (string)null);
 
                     b.HasDiscriminator().HasValue("PatientAnswer");
 
@@ -481,7 +481,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("PatientAnswerTests");
+                    b.ToTable("PatientAnswerTests", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.PatientPathologiesDetected", b =>
@@ -510,7 +510,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("PatientPathologiesDetecteds");
+                    b.ToTable("PatientPathologiesDetecteds", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Physio", b =>
@@ -546,7 +546,7 @@ namespace KineStat.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Physios");
+                    b.ToTable("Physios", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.PriorContext", b =>
@@ -572,7 +572,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("MedicalContextId");
 
-                    b.ToTable("PriorContexts");
+                    b.ToTable("PriorContexts", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.PriorContextPathology", b =>
@@ -598,7 +598,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PathologyId");
 
-                    b.ToTable("PriorContextPathologies");
+                    b.ToTable("PriorContextPathologies", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Question", b =>
@@ -648,7 +648,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("ClusterId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Questions", (string)null);
 
                     b.HasDiscriminator().HasValue("Question");
 
@@ -676,7 +676,7 @@ namespace KineStat.Migrations
                     b.HasIndex("QuestionId", "PathologyId")
                         .IsUnique();
 
-                    b.ToTable("QuestionPathologies");
+                    b.ToTable("QuestionPathologies", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.Socrate", b =>
@@ -723,7 +723,7 @@ namespace KineStat.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Socrates");
+                    b.ToTable("Socrates", (string)null);
                 });
 
             modelBuilder.Entity("KineStat.Models.PatientAnswerBool", b =>
@@ -743,7 +743,7 @@ namespace KineStat.Migrations
                     b.Property<double>("Value")
                         .HasColumnType("double precision");
 
-                    b.ToTable("PatientAnswers", t =>
+                    b.ToTable("PatientAnswers", null, t =>
                         {
                             t.Property("Value")
                                 .HasColumnName("PatientAnswerNumeric_Value");

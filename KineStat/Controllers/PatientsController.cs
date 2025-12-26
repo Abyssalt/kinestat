@@ -52,11 +52,6 @@ namespace KineStat.Controllers
 
             bool hasFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
 
-            if (!hasFilter || (hasFilter && status != "Terminé"))
-            {
-                query = query.Where(p => p.Status != PatientStatus.Terminé);
-            }
-
             List<Patient> patients = new List<Patient>();
 
             bool hasSearch = !string.IsNullOrWhiteSpace(search);
@@ -135,11 +130,6 @@ namespace KineStat.Controllers
 
             bool hasStatusFilter = !string.IsNullOrWhiteSpace(status) && status != "Tous";
 
-            if (!hasStatusFilter || (hasStatusFilter && status != "Terminé"))
-            {
-                query = query.Where(p => p.Status != PatientStatus.Terminé);
-            }
-
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchLower = search.ToLower();
@@ -149,10 +139,23 @@ namespace KineStat.Controllers
                 );
             }
 
-            if (hasStatusFilter && Enum.TryParse<PatientStatus>(status, out var patientStatus))
+            if (hasStatusFilter)
             {
-                query = query.Where(p => p.Status == patientStatus);
+                PatientStatus? patientStatus = status switch
+                {
+                    "Actif" => PatientStatus.Actif,
+                    "Anonymisé" => PatientStatus.Anonymisé,
+                    "Inactif" => PatientStatus.Inactif,
+                    "Redirigé" => PatientStatus.Redirigé,
+                    _ => null
+                };
+
+                if (patientStatus.HasValue)
+                {
+                    query = query.Where(p => p.Status == patientStatus.Value);
+                }
             }
+
 
             var totalCount = await query.CountAsync();
 
