@@ -86,12 +86,19 @@
                     <div class="col-12 col-md-4 mb-3">
                         <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Statut</label>
                         <p class="form-control-plaintext mb-0">
-                            <span class="badge fs-6 px-3 py-2
-                            @(Model.Status == PatientStatus.Actif || Model.Status == PatientStatus.Terminé ? "bg-success" :
-                                                                  Model.Status == PatientStatus.Inactif ? "bg-dark" :
-                            Model.Status == PatientStatus.Abandonné ? "bg-danger" : "bg-secondary")">
-                                @Model.Status
-                            </span>
+                                <span class="badge fs-6 rounded-pill px-3 py-2
+                                             @(Model.Status == PatientStatus.Actif ? "bg-success" :
+                                            Model.Status == PatientStatus.Anonymisé ? "bg-secondary" :
+                                            Model.Status == PatientStatus.Inactif ? "bg-muted text-dark" :
+                                            Model.Status == PatientStatus.Redirigé ? "bg-danger" :
+                                            "bg-secondary")">
+
+                                    @(Model.Status == PatientStatus.Actif ? "Actif" :
+                                      Model.Status == PatientStatus.Anonymisé ? "Anonymisé" :
+                                      Model.Status == PatientStatus.Inactif ? "Inactif" :
+                                      Model.Status == PatientStatus.Redirigé ? "Redirigé" :
+                                      Model.Status.ToString())
+                                </span>
                         </p>
                     </div>
                 </div>
@@ -338,9 +345,9 @@
                             <label class="form-label fw-bold text-dark px-2 py-1 rounded d-inline-block">Statut</label>
                             <select class="form-select edit-field" id="edit_Status" name="Status" data-validation="select">
                                 <option value="0">Actif</option>
-                                <option value="1">Terminé</option>
-                                <option value="2">Inactif</option>
-                                <option value="3">Abandonné</option>
+                                <option value="1">Inactif</option>
+                                <option value="2">Redirigé</option>
+                                <option value="3">Anonymisé</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-4">
