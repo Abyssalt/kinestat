@@ -33,7 +33,7 @@ MonAppWeb/
 * **Nommage** : `camelCase`
 * **Documentation** : XML comments
 * **Base de données** : `camelCase`
-* **Style CSS** : [Bootswatch](https://https://bootswatch.com//) : Thème : Lux
+* **Style CSS** : [Bootswatch](https://bootswatch.com/) : Thème : Lux
 ---
 
 ## 🔀 Workflow Git
