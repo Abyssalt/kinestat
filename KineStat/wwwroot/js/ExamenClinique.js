@@ -261,6 +261,26 @@ function createQuestionCard(question, uniqueId, category) {
     questionText.textContent = question.question;
     mainContainer.appendChild(questionText);
 
+    if (question.sourceRv && question.sourceRv.trim() !== '') {
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-info-circle ms-2 text-primary';
+        icon.style.cursor = 'pointer';
+        icon.setAttribute('data-bs-toggle', 'tooltip');
+        icon.setAttribute('data-bs-placement', 'top');
+
+        let tooltipContent = `${question.sourceRv}\n`;
+        if (question.rvPositive || question.rvNegative) {
+            tooltipContent += `\nRV+ : ${question.rvPositive || 'N/A'}  \nRV- : ${question.rvNegative || 'N/A'}`;
+        }
+
+        icon.setAttribute('title', tooltipContent);
+        questionText.appendChild(icon);
+
+        new bootstrap.Tooltip(icon, {
+            html: false 
+        });
+    }
+
     const responseContainer = document.createElement('div');
     responseContainer.className = 'flex-shrink-0';
     responseContainer.style.minWidth = '300px';
