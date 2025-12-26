@@ -199,8 +199,8 @@ Cette commande :
 * crée automatiquement les tables
 * met à jour la table `__EFMigrationsHistory`
 
-3. Pour remplir la BD, nous mettons à disposition 2 scripts SQL. Un des 2 contient uniquement un admin, et l'autre contient une fausse population.
-vous pouvez copier un des scripts SQL fournis dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter (Clic droit sur KineStatDB -> QueryT ool).
+3. Pour remplir la BD, nous mettons à disposition 2 scripts SQL (populate et admin_only). Un des 2 contient uniquement un admin, et l'autre contient une fausse population.
+Vous pouvez copier un des scripts SQL fournis dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter (Clic droit sur KineStatDB -> QueryT ool).
 Le script avec la population contient 4 patients qui seront automatiquement anonymisés par le service d'anonymisation au premier lancement de l'app :
 
 - Alexandre LEROY (05-11-2000) - Inactif depuis 21 ans
