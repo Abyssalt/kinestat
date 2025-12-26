@@ -199,8 +199,14 @@ Cette commande :
 * crée automatiquement les tables
 * met à jour la table `__EFMigrationsHistory`
 
-3. Pour remplir la BD, vous pouvez copier le script SQL founi dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter.
-Ce script contient 4 patients qui seront automatiquement anonymisés par le service d'anonymisation au premier lancement de l'app. 
+3. Pour remplir la BD, nous mettons à disposition 2 scripts SQL. Un des 2 contient uniquement un admin, et l'autre contient une fausse population.
+vous pouvez copier un des scripts SQL fournis dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter (Clic droit sur KineStatDB -> QueryT ool).
+Le script avec la population contient 4 patients qui seront automatiquement anonymisés par le service d'anonymisation au premier lancement de l'app :
+
+- Alexandre LEROY (05-11-2000) - Inactif depuis 21 ans
+- Marc JANSSENS (12-06-1970) - Inactif depuis 25 ans
+- Clara Renard (25-01-1955) - Inactive depuis 30 ans
+- Manon Bertrand (11-11-1982) - Inactive depuis 21 ans
 
 ---
 
@@ -222,12 +228,12 @@ https://localhost:5001
 
 ## 👥 Équipe
 
-* Joanna Imjalli
-* Melvyn Paul
-* Noah Lassence
-* Ryan Wilmart
-* Sacha Meunier
-* Jean Elly Fanoux
+* Joanna Imjalli (https://gitlab.com/Joanna_im)
+* Melvyn Paul (https://gitlab.com/MelvynPaul)
+* Noah Lassence (https://gitlab.com/Noah2901)
+* Ryan Wilmart (https://gitlab.com/Ryanwii)
+* Sacha Meunier (https://gitlab.com/Sacha_Meunier)
+* Jean Elly Fanoux (https://gitlab.com/jfanoux)
 
 ---
 
