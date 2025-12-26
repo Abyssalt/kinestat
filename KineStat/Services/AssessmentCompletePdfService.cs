@@ -199,8 +199,18 @@ namespace KineStat.Services
             {
                 row.RelativeItem().Height(20).Background(Colors.Grey.Lighten2).Row(innerRow =>
                 {
-                    innerRow.ConstantItem((float)percentage * 4.5f).Background(barColor);
-                    innerRow.RelativeItem();
+                    var barPercentage = Math.Min((float)percentage, 100f);
+
+                    if (barPercentage >= 99.9f)
+                    {
+                        innerRow.RelativeItem().Background(barColor);
+                    }
+                    else
+                    {
+                        var barWidth = barPercentage / 100f;
+                        innerRow.RelativeItem(barWidth).Background(barColor);
+                        innerRow.RelativeItem(1f - barWidth);
+                    }
                 });
 
                 row.AutoItem().PaddingLeft(10).AlignMiddle()
