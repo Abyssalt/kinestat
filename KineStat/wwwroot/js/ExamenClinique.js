@@ -268,16 +268,17 @@ function createQuestionCard(question, uniqueId, category) {
         icon.setAttribute('data-bs-toggle', 'tooltip');
         icon.setAttribute('data-bs-placement', 'top');
 
-        let tooltipContent = `${question.sourceRv}\n`;
+        let tooltipContent = `${question.sourceRv}<br>`;
         if (question.rvPositive || question.rvNegative) {
-            tooltipContent += `\nRV+ : ${question.rvPositive || 'N/A'}  \nRV- : ${question.rvNegative || 'N/A'}`;
+            tooltipContent += `<small>RV+ : ${question.rvPositive || 'N/A'}<br>`;
+            tooltipContent += `RV- : ${question.rvNegative || 'N/A'}</small>`;
         }
 
-        icon.setAttribute('title', tooltipContent);
         questionText.appendChild(icon);
 
         new bootstrap.Tooltip(icon, {
-            html: false 
+            html: true,
+            title: tooltipContent 
         });
     }
 
