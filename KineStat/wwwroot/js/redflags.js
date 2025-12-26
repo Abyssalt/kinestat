@@ -43,7 +43,7 @@ function transformQuestionsToCompactFormat() {
         if (!questionText || !btnGroup) return;
 
         const mainContainer = document.createElement('div');
-        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3';
+        mainContainer.className = 'd-flex flex-column flex-lg-row align-items-center gap-3';  // ✅ Retire align-items-start
 
         const questionContainer = document.createElement('div');
         questionContainer.className = 'fw-medium flex-grow-1';
@@ -53,6 +53,7 @@ function transformQuestionsToCompactFormat() {
         const responseContainer = document.createElement('div');
         responseContainer.className = 'flex-shrink-0';
         responseContainer.style.minWidth = '300px';
+        responseContainer.style.alignSelf = 'center'; 
 
         btnGroup.classList.remove('w-100', 'd-grid', 'gap-2'); 
         btnGroup.classList.add('btn-group');
@@ -64,12 +65,19 @@ function transformQuestionsToCompactFormat() {
         const notesSection = document.createElement('div');
         notesSection.className = 'flex-shrink-0 d-flex align-items-center gap-2';
         notesSection.style.minWidth = '200px';
+        notesSection.style.alignSelf = 'center';
+
+        const btnWrapper = document.createElement('div');
+        btnWrapper.className = 'd-flex align-items-center';
+
+
 
         const toggleBtn = document.createElement('button');
         toggleBtn.type = 'button';
-        toggleBtn.className = 'btn btn-sm btn-outline-secondary'; 
+        toggleBtn.className = 'btn btn-sm btn-outline-secondary';
         toggleBtn.innerHTML = '<i class="bi bi-pencil"></i>';
         toggleBtn.title = 'Ajouter/Modifier une note';
+        toggleBtn.style.marginTop = '-12px';
 
         const textarea = collapseDiv ? collapseDiv.querySelector('textarea') : null;
         if (textarea) {
