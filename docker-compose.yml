@@ -1,0 +1,33 @@
+services:
+
+  db:
+    image: postgres:18-alpine
+    container_name: kinestat-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: KineStatDB
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d KineStatDB"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+  web:
+    build:
+      context: .
+      dockerfile: KineStat/Dockerfile
+    container_name: kinestat-web
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__KineDbContext: "Host=db;Port=5432;Database=KineStatDB;Username=postgres;Password=postgres"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
