@@ -30,6 +30,11 @@ builder.Services.AddHostedService<PatientAnonymizationBackgroundService>();
 
 var app = builder.Build();
 
+// Applique les migrations EF et crée les comptes initiaux si nécessaire.
+// Rend l'application utilisable immédiatement après un simple "docker compose up",
+// sans Visual Studio ni commande Update-Database.
+DbSeeder.MigrateAndSeed(app.Services);
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -38,7 +43,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
+{
 app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 app.UseRouting();
