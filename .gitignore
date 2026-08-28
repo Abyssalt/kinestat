@@ -14,3 +14,7 @@ obj/
 
 # VS Code
 .vscode/
+
+.env
+publish/
+*.publish.xml
