@@ -199,11 +199,15 @@ namespace KineStat.Services
             {
                 row.RelativeItem().Height(20).Background(Colors.Grey.Lighten2).Row(innerRow =>
                 {
-                    var barPercentage = Math.Min((float)percentage, 100f);
+                    var barPercentage = Math.Clamp((float)percentage, 0f, 100f);
 
                     if (barPercentage >= 99.9f)
                     {
                         innerRow.RelativeItem().Background(barColor);
+                    }
+                    else if (barPercentage <= 0.1f)
+                    {
+                        innerRow.RelativeItem();
                     }
                     else
                     {
