@@ -1,6 +1,6 @@
 # KineStat
 
-Application web destinée aux **kinésithérapeutes**, utile dans la réalisation de **bilans cliniques** et dans la **détection de Red Flags** (signaux d’alerte nécessitant une orientation médicale).
+Application web destinée aux **kinésithérapeutes**, utile dans la réalisation de **bilans cliniques** et dans la **détection de Red Flags** (signaux d'alerte nécessitant une orientation médicale).
 
 ---
 
@@ -13,8 +13,8 @@ MonAppWeb/
 ├── Models/            # Classes et entités métier
 ├── Views/             # Interface WEB (Razor / cshtml)
 ├── wwwroot/           # Fichiers statiques (CSS, JS, images)
-├── appsettings.json   # Configuration de l’application
-├── Program.cs         # Point d’entrée
+├── appsettings.json   # Configuration de l'application
+├── Program.cs         # Point d'entrée
 ```
 
 ---
@@ -73,167 +73,108 @@ Fixes #2310
 
 ---
 
-## ⚙️ Installation & Lancement
+## 🚀 Démarrage rapide (Docker)
 
-> ⚠️ Le projet doit être **récupéré via Git** avant toute installation. Les étapes ci-dessous décrivent le **processus complet depuis un poste vierge**.
+Aucune installation de .NET ni de PostgreSQL n'est nécessaire : **seul Docker est requis**. Tout le reste (SDK, base de données, migrations, données de démonstration) est géré automatiquement par les conteneurs.
 
-### 1️⃣ Prérequis
+### Prérequis selon votre système
 
-Avant de commencer, assurez-vous d’avoir installé :
+#### 🪟 Windows 10/11
 
-* **Git** (pour cloner le projet)
-* **.NET SDK** (version compatible avec ASP.NET Core)
-* **Entity Framework Core**
+* [Docker Desktop pour Windows](https://www.docker.com/products/docker-desktop/)
+* **WSL 2** activé (Docker Desktop le propose à l'installation ; sinon : `wsl --install` dans un PowerShell administrateur, puis redémarrer)
+* La **virtualisation** activée dans le BIOS/UEFI (Intel VT-x / AMD-V — activée par défaut sur la plupart des machines récentes)
+* Docker Desktop en mode **Linux containers** (c'est le mode par défaut ; vérifiable par clic droit sur l'icône Docker dans la barre des tâches)
 
-  * `Microsoft.EntityFrameworkCore`
-  * `Microsoft.EntityFrameworkCore.Tools`
-* **PostgreSQL 18** (serveur de base de données)
-* **pgAdmin** (outil graphique de gestion PostgreSQL)
-* **Visual Studio 22/26** 
-* **OpenSSL** (nécessaire pour la configuration SSL PostgreSQL)
+#### 🍎 macOS (Intel et Apple Silicon)
 
----
+* [Docker Desktop pour Mac](https://www.docker.com/products/docker-desktop/) — choisir la version correspondant à votre puce (Intel ou Apple Silicon)
+* Toutes les images du projet sont multi-architecture (amd64 + arm64) : aucun réglage supplémentaire n'est nécessaire, y compris sur M1/M2/M3/M4
 
-### 2️⃣ Récupération du projet (Git clone)
+#### 🐧 Linux
 
-Le projet doit être cloné depuis le dépôt Git.
+* **Docker Engine** et le **plugin Compose v2** :
 
 ```bash
-git clone <url-du-depot>
-cd KineStat
+  # Debian / Ubuntu
+  sudo apt install docker.io docker-compose-v2
+  sudo usermod -aG docker $USER   # puis se déconnecter/reconnecter
 ```
 
----
+  (ou suivre la [documentation officielle](https://docs.docker.com/engine/install/) pour votre distribution)
+* ⚠️ Ce guide utilise la commande `docker compose` (avec **espace**, Compose v2). L'ancien binaire `docker-compose` v1 (avec tiret) n'est pas supporté.
 
-### 3️⃣ Configuration de la base de données
+#### Dans tous les cas
 
-La gestion de la base de données est réalisée avec **Entity Framework Core**.
-Si vous ne disposez pas de PostGreSQL, vous devez l'installer. Lors de l'installation, il faut choisir comme mot de passe **root**
+* Le port **8080** de votre machine doit être libre (voir le dépannage ci-dessous sinon)
 
----
+### Lancement
 
 ### 4️⃣ Installation du projet
 
 Depuis le dossier racine du projet :
 
 ```bash
-dotnet restore
+git clone <url-du-depot>
+cd projetgroupe1-main
+docker compose up --build
 ```
 
-Cette commande installe toutes les dépendances nécessaires, y compris **Entity Framework Core**.
+Au premier lancement, l'application :
+1. construit l'image .NET,
+2. démarre PostgreSQL et attend qu'il soit prêt,
+3. applique automatiquement les migrations Entity Framework,
+4. charge les données et comptes de démonstration.
+
+> ⏱️ Le premier lancement prend **3 à 5 minutes** (téléchargement des images et compilation) — c'est normal, ne pas interrompre. Les lancements suivants prennent quelques secondes.
+
+L'application est ensuite disponible sur **http://localhost:8080**
+
+### Comptes de démonstration
+
+| Rôle  | Nom               | Email                    | Mot de passe    | Contenu                          |
+|-------|-------------------|--------------------------|-----------------|----------------------------------|
+| Kiné  | Etienne Skywalker | skywalker@kinestat.com   | K1n3$t@2901     | 16 patients de démonstration     |
+| Kiné  | Luc LeMaire       | lemaire@kinestat.com     | K1n3$t@t2612    | 4 patients                       |
+| Admin | Maxence Ramos     | ramos@kinestat.com       | @dm1n1str@t0r!  | Gestion des questions et comptes |
+
+> ℹ️ Au premier démarrage, le service RGPD anonymise automatiquement les patients
+> inactifs depuis plus de 20 ans — c'est le comportement attendu, pas un bug.
+
+### Commandes utiles
+
+```bash
+docker compose up -d        # lancer en arrière-plan
+docker compose logs -f web  # suivre les logs de l'application
+docker compose down         # arrêter (les données sont conservées)
+docker compose down -v      # arrêter ET supprimer la base de données
+```
+
+### En cas de problème
+
+| Symptôme | Solution |
+|----------|----------|
+| `bind: address already in use` sur le port 8080 | Un autre service occupe le port. Changez le mappage dans `docker-compose.yml` : `"8081:8080"`, puis ouvrez http://localhost:8081 |
+| Le build échoue immédiatement sous Windows | Vérifiez que Docker Desktop est en mode **Linux containers** (clic droit sur l'icône Docker → *Switch to Linux containers*) et que WSL 2 est actif (`wsl --status`) |
+| `docker compose` : commande inconnue (Linux) | Installez le plugin Compose v2 (`docker-compose-v2` ou `docker-compose-plugin` selon la distribution) |
+| `permission denied` sur le socket Docker (Linux) | Ajoutez votre utilisateur au groupe docker : `sudo usermod -aG docker $USER`, puis reconnectez-vous |
+| Repartir d'une base totalement vierge | `docker compose down -v` puis `docker compose up --build` |
 
 ---
 
-### 5️⃣ Configuration SSL
+## 👥 Équipe initiale
 
-#### SSL pour PostgreSQL
+* Joanna Imjalli
+* Melvyn Paul
+* Noah Lassence
+* Ryan Wilmart
+* Sacha Meunier
+* Jean Elly Fanoux
 
-Afin de sécuriser la connexion entre l’application et PostgreSQL :
+## 👥 Équipe docker
 
-1. **Ouvrir PowerShell en tant qu’administrateur**
-2. Aller dans le dossier `data` de PostgreSQL :
-
-```powershell
-cd "C:\Program Files\PostgreSQL\18\data"
-```
-
-3. **Générer la clé privée du serveur** :
-
-```powershell
-openssl genrsa -out server.key 2048
-```
-
-Si cette commande ne fonctionne pas, il se peut qu'il faut spécifier le chemin de l'installation d'`openssl`, comme ceci :  
-
-```powershell
-& "C:\Program Files\OpenSSL-Win64\bin\openssl.exe" genrsa -out server.key 2048
-```
-
-4. **Générer le certificat auto-signé** :
-
-```powershell
-openssl req -new -x509 -days 365 -key server.key -out server.crt -subj "/CN=localhost"
-```  
-
-Même chose que pour la commande précédente, si ça ne fonctionne pas, on peut utiliser la commande suivante :  
-
-```powershell
-& "C:\Program Files\OpenSSL-Win64\bin\openssl.exe" req -new -x509 -days 365 -key server.key -out server.crt -subj "/CN=localhost"
-```  
-
-5. **Sécuriser la clé privée** :
-
-```powershell
-icacls server.key /inheritance:r
-icacls server.key /grant:r "NT AUTHORITY\\NetworkService:R"
-```
-
-6. **Activer SSL dans PostgreSQL** (`postgresql.conf`) :
-
-```powershell
-Add-Content -Path postgresql.conf -Value "ssl = on"
-```
-
-7. **Redémarrer le service PostgreSQL** :
-
-   * `Windows + R` → `services.msc`
-   * Redémarrer le service **postgresql-x64-18** (ou équivalent)
-
----
-
-### 6️⃣ Migration et création de la base de données
-
-Le projet utilise **Entity Framework Core avec migrations**.
-
-**Via Visual Studio (Gestionnaire NuGet)** :
-
-1. Ouvrir **Outils → Gestionnaire de package NuGet → Console du gestionnaire de package**
-2. Exécuter :
-
-```powershell
-Update-Database
-```
-Cette commande :
-
-* applique les migrations
-* crée automatiquement les tables
-* met à jour la table `__EFMigrationsHistory`
-
-3. Pour remplir la BD, nous mettons à disposition 2 scripts SQL (populate et admin_only). Un des 2 contient uniquement un admin, et l'autre contient une fausse population.
-Vous pouvez copier un des scripts SQL fournis dans le dossier de remise du projet, et le coller dans pgAdmin afin de l'éxécuter (Clic droit sur KineStatDB -> QueryT ool).
-Le script avec la population contient 4 patients qui seront automatiquement anonymisés par le service d'anonymisation au premier lancement de l'app :
-
-- Alexandre LEROY (05-11-2000) - Inactif depuis 21 ans
-- Marc JANSSENS (12-06-1970) - Inactif depuis 25 ans
-- Clara Renard (25-01-1955) - Inactive depuis 30 ans
-- Manon Bertrand (11-11-1982) - Inactive depuis 21 ans
-
----
-
-### 7️⃣ Lancement de l’application
-
-Le lancement de l’application se fait **directement via Visual Studio**.
-
-1. Ouvrir le projet dans **Visual Studio**
-2. Vérifier que le profil de lancement sélectionné est **HTTPS**
-3. Cliquer sur le bouton **Run ▶️ (HTTPS)** en haut de l’IDE
-
-Application accessible à l’adresse :
-
-```
-https://localhost:5001
-```
-
----
-
-## 👥 Équipe
-
-* Joanna Imjalli (https://gitlab.com/Joanna_im)
-* Melvyn Paul (https://gitlab.com/MelvynPaul)
-* Noah Lassence (https://gitlab.com/Noah2901)
-* Ryan Wilmart (https://gitlab.com/Ryanwii)
-* Sacha Meunier (https://gitlab.com/Sacha_Meunier)
-* Jean Elly Fanoux (https://gitlab.com/jfanoux)
+* Marco Bogatu
+* Melvyn Paul
 
 ---
 
