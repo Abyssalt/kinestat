@@ -1,3 +1,6 @@
+# Credentials below (docker-compose.yml and appsettings.json) are
+# hardcoded in plain text for academic/demo purposes only. 
+# In case of deployment, I would have worked with an .env and dotnet user-secrets.
 services:
 
   db:
